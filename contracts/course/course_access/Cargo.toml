@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 soroban-sdk = "20.3.0"  # Cambiar según la versión actual usada
 
+
 [lib]
 crate-type = ["cdylib", "rlib"]
 
