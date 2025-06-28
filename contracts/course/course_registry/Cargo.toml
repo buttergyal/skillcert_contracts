@@ -3,11 +3,17 @@ name = "course_registry"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
-soroban-sdk = "20.3.0"  # Cambiar según la versión actual usada
+# [dependencies]
+# soroban-sdk = "20.3.0"  # Cambiar según la versión actual usada
 
 [lib]
 crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+soroban-sdk = { workspace = true }
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }
 
 [profile.release]
 opt-level = "z"        # Tamaño reducido
@@ -15,3 +21,10 @@ codegen-units = 1
 lto = true
 panic = "abort"
 strip = "symbols"
+
+
+
+
+
+
+
