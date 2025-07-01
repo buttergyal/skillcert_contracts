@@ -2,6 +2,7 @@
 
 
 #[contracttype]
+#[derive(Clone, Drop)]
 pub struct Course {
     pub id: String,
     pub title: String,
