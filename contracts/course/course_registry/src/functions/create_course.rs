@@ -1,18 +1,18 @@
 
 
-use soroban_sdk::{Env, Symbol, symbol_short, String, Address};
-use course_registry::schema::Course;
+use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
+use crate::schema::Course;
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 
 pub fn course_registry_create_course(env: Env, title: String, description: String) {
 
     // generate a course id
-    let timestamp = env.ledger().timestamp();
+    let timestamp:u64 = env.ledger().timestamp();
     let caller: Address = env.invoker();
-    let course_id = format!("{}-{}", title, timestamp);
+    let course_id:String = format!("{}-{}", title, timestamp);
 
-    let storage_key = (COURSE_KEY, course_id.clone());
+    let storage_key: (Symbol, String) = (COURSE_KEY, course_id.clone());
 
     if env.storage().persistent().has(&storage_key) {
         panic!("Course with this ID already exists");
