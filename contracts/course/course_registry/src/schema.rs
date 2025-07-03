@@ -1,8 +1,8 @@
 
 use soroban_sdk::{Address, String, contracttype};
 
-#[derive(Clone,)]
 #[contracttype]
+#[derive(Clone,)]
 pub struct Course {
     pub id: String,
     pub title: String,
@@ -12,9 +12,9 @@ pub struct Course {
 }
 
 
-#[derive(Clone,)]
-#[contracttype]
-pub  struct CourseId {
-    pub id: String,
-    pub count: u128,
-}
+// #[contracttype]
+// #[derive(Clone,)]
+// pub  struct CourseId {
+//     pub id: String,
+//     pub count: u128,
+// }

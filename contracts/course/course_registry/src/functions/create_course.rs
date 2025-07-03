@@ -1,23 +1,18 @@
 
 
 
-use soroban_sdk::{symbol_short, Address, Env, String, Symbol, U256};
-use crate::schema::{Course, CourseId};
+use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
+use crate::schema::{Course, };
 
 const COURSE_KEY: Symbol = symbol_short!("course");
-const COURSE_ID_KEY: Symbol = symbol_short!("course_id");
+const TITLE_KEY: Symbol = symbol_short!("title");
+const COURSE_ID: Symbol = symbol_short!("course");
 
 pub fn course_registry_create_course(env: Env, title: String, description: String) {
 
-    // generate a course id
-    // use the title to generate the id
-    let course_id: String = String::from_bytes(&env, &generate_course_id(env.clone()).to_be_bytes());
-    // let caller: Address = Address::from_string("strkey");
     let caller: Address = env.current_contract_address();
 
-    caller.require_auth();
-
-    let storage_key: (Symbol, String) = (COURSE_KEY, course_id.clone());
+    let storage_key: (Symbol, String) = (COURSE_KEY, title.clone());
 
     if env.storage().persistent().has(&storage_key) {
         panic!("Course with this ID already exists");
@@ -25,9 +20,9 @@ pub fn course_registry_create_course(env: Env, title: String, description: Strin
 
     // create a new course
     let new_course: Course = Course {
-        id: course_id.clone(),
-        title: title,
-        description: description,
+        id: title.clone(),
+        title,
+        description,
         creator: caller,
         published: false,
     };
@@ -36,20 +31,51 @@ pub fn course_registry_create_course(env: Env, title: String, description: Strin
     env.storage().persistent().set(&storage_key, &new_course);
 }
 
-fn generate_course_id(env: Env) -> u128 {
 
-    let optional_course_id: Option<CourseId> = env.storage().persistent().get(&COURSE_ID_KEY);
 
-    let mut course_id: CourseId = optional_course_id.unwrap_or_else(|| CourseId {
-        id: String::from_str(&env, "course_id"),
-        count: 0,
-    });
 
-    let current_id = course_id.count;
 
-    course_id.count += 1;
 
-    env.storage().persistent().set(&COURSE_ID_KEY, &course_id);
+#[cfg(test)]
+mod test {
+    use super::*;
+    use soroban_sdk::{log, Address, String, Env};
+    use crate::schema::{ Course};
+    use crate::CourseRegistry;
 
-    current_id
+    #[test]
+    fn test_add_module_success() {
+        let env = Env::default();
+
+        let contract_id: Address = env.register(CourseRegistry, {});
+        let title: String = String::from_str(&env, "title");
+        let description: String = String::from_str(&env, "A description");
+
+
+        // Act - Call the function within contract context
+        env.as_contract(&contract_id, || {
+            log!(&env, "Calling add_module function");
+            course_registry_create_course(
+                env.clone(),
+                title.clone(),
+                description.clone(),
+            )
+        });
+
+        // try get the course out
+        let storage_key: (Symbol, String) = (COURSE_KEY, title.clone());
+        let stored_course: Option<Course> = env
+            .as_contract(&contract_id, || {
+                env.storage().persistent().get(&storage_key)
+            });
+
+        let course = stored_course.expect("Course should be stored");
+
+        assert_eq!(course.title, title);
+        assert_eq!(course.description, description);
+        assert!(!course.published);
+    }
+    
+    
+    
 }
