@@ -147,4 +147,17 @@ mod test {
             course_registry_create_course(env.clone(), title.clone(), another_description.clone());
         })
     }
+    
+    #[test]
+    #[should_panic(expected = "Course error: Course Title cannot be empty")]
+    fn test_cannot_create_courses_with_empty_title() {
+        let env: Env = Env::default();
+        let contract_id: Address = env.register(CourseRegistry, {});
+        let title: String = String::from_str(&env, "");
+        let description: String = String::from_str(&env, "A description");
+        
+        env.as_contract(&contract_id, || {
+            course_registry_create_course(env.clone(), title.clone(), description.clone());
+        })
+    }
 }
