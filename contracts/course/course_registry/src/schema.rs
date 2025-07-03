@@ -12,9 +12,9 @@ pub struct Course {
 }
 
 
-// #[contracttype]
-// #[derive(Clone,)]
-// pub  struct CourseId {
-//     pub id: String,
-//     pub count: u128,
-// }
+#[contracttype]
+#[derive(Clone,)]
+pub  struct CourseId {
+    pub id: String,
+    pub count: u128,
+}

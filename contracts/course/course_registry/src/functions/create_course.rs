@@ -34,6 +34,14 @@ pub fn course_registry_create_course(env: Env, title: String, description: Strin
 
 
 
+fn generate_course_id(env: &Env) -> u128 {
+    let current_id: u128 = env.storage().persistent()
+        .get(&COURSE_ID)
+        .unwrap_or(0);
+    let new_id = current_id + 1;
+    env.storage().persistent().set(&COURSE_ID, &new_id);
+    new_id
+}
 
 
 #[cfg(test)]
@@ -42,6 +50,18 @@ mod test {
     use soroban_sdk::{log, Address, String, Env};
     use crate::schema::{ Course};
     use crate::CourseRegistry;
+    
+    #[test]
+    fn test_generate_course_id() {
+        let env = Env::default();
+
+        let contract_id: Address = env.register(CourseRegistry, {});
+        env.as_contract(&contract_id, || {
+            generate_course_id(&env);
+            let id: u128 = generate_course_id(&env);
+            assert_eq!(id, 2);
+        });
+    }
 
     #[test]
     fn test_add_module_success() {
