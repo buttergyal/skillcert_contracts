@@ -4,10 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-soroban-sdk = "20.3.0"  # Cambiar según la versión actual usada
+soroban-sdk = { workspace = true }
+
 
 [lib]
 crate-type = ["cdylib", "rlib"]
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }
 
 [profile.release]
 opt-level = "z"        # Tamaño reducido
