@@ -1,16 +1,12 @@
 [package]
 name = "course_registry"
-version = "0.1.0"
+version = "0.0.0"
 edition = "2021"
-
-[dependencies]
-soroban-sdk = { workspace = true }
-
-[dev-dependencies]
-soroban-sdk = { workspace = true, features = ["testutils"] }
+publish = false
 
 [lib]
-crate-type = ["cdylib", "rlib"]
+crate-type = ["cdylib"]
+doctest = false
 
 [profile.release]
 opt-level = "z"        # Tamaño reducido
@@ -18,3 +14,9 @@ codegen-units = 1
 lto = true
 panic = "abort"
 strip = "symbols"
+
+[dependencies]
+soroban-sdk = { workspace = true }
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }

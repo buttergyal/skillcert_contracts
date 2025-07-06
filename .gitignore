@@ -17,3 +17,6 @@ Thumbs.db
 
 # Soroban-specific
 *.wasm
+
+/test_snapshots/
+**/test_snapshots/
