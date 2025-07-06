@@ -1,10 +1,10 @@
 [workspace]
+resolver = "2"
 members = [
-    "contracts/course/course_registry",
-    # "contracts/course/course_access"
+  "contracts/course/course_registry",
+  "contracts/course/course_access"
 ]
 
-resolver = "2"
 [workspace.dependencies]
 soroban-sdk = "22"
 
