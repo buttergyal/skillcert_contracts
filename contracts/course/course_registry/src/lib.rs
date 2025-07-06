@@ -16,7 +16,7 @@ impl CourseRegistry {
         title: String,
         description: String,
     ) -> Course {
-        functions::create_course::course_registry_create_course(&env, title, description)
+        functions::create_course::course_registry_create_course(env, title, description)
     }
 
     pub fn get_course(env: Env, course_id: String) -> Course {
