@@ -1,4 +1,4 @@
-use alloc::string::ToString;
+
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 use crate::schema::{Course, };
 
@@ -6,7 +6,7 @@ const COURSE_KEY: Symbol = symbol_short!("course");
 const TITLE_KEY: Symbol = symbol_short!("title");
 const COURSE_ID: Symbol = symbol_short!("course");
 
-pub fn course_registry_create_course(env: Env, title: String, description: String) {
+pub fn course_registry_create_course(env: Env, title: String, description: String) -> Course {
 
     let caller: Address = env.current_contract_address();
     
@@ -45,6 +45,8 @@ pub fn course_registry_create_course(env: Env, title: String, description: Strin
     // save to the storage
     env.storage().persistent().set(&storage_key, &new_course);
     env.storage().persistent().set(&title_key, &true);
+
+    new_course
 }
 
 
