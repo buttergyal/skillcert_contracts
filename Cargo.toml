@@ -5,6 +5,10 @@ members = [
   "contracts/course/course_access"
 ]
 
+<<<<<<< HEAD
+resolver = "2"
+=======
+>>>>>>> origin/main
 [workspace.dependencies]
 soroban-sdk = "22"
 
@@ -21,4 +25,8 @@ lto = true
 # For more information about this profile see https://soroban.stellar.org/docs/basic-tutorials/logging#cargotoml-profile
 [profile.release-with-logs]
 inherits = "release"
+<<<<<<< HEAD
 debug-assertions = true
+=======
+debug-assertions = true
+>>>>>>> origin/main

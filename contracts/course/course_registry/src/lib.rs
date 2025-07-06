@@ -1,9 +1,12 @@
 pub mod schema;
 pub mod functions;
 
+#[cfg(test)]
+mod test;
+
 use soroban_sdk::{contract, contractimpl, Env, String};
 
-use crate::schema::Course;
+use crate::schema::{Course, CourseModule};
 
 #[contract]
 pub struct CourseRegistry;
@@ -21,6 +24,10 @@ impl CourseRegistry {
 
     pub fn get_course(env: Env, course_id: String) -> Course {
         functions::get_course::course_registry_get_course(&env, course_id)
+    }
+
+    pub fn remove_module(env: Env, module_id: String) -> Result<(), &'static str> {
+        functions::remove_module::course_registry_remove_module(&env, module_id)
     }
 }
 
