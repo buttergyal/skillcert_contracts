@@ -24,5 +24,8 @@ impl CourseAccessContract {
         course_access_has_access(env, course_id, user)
     }
 
-
+    /// Revoke access for a specific user from a course
+    pub fn revoke_access(env: Env, course_id: String, user: Address) -> bool {
+        course_access_revoke_access(env, course_id, user)
+    }
 }
