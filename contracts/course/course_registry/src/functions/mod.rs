@@ -1,3 +1,4 @@
-mod add_module;
-
-pub use add_module::course_registry_add_module;
+pub mod remove_module;
+pub mod add_module;
+pub mod get_course; 
+pub mod create_course;
