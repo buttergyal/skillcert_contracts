@@ -1,5 +1,6 @@
-use soroban_sdk::{Address, String, IntoVal, TryFromVal, Val, Env};
+use soroban_sdk::{Address, String, contracttype, IntoVal, TryFromVal, Val, Env};
 
+#[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Course {
     pub id: String,
@@ -41,4 +42,11 @@ impl TryFromVal<Env, Val> for Course {
             published,
         })
     }
+}
+
+#[contracttype]
+#[derive(Clone,)]
+pub  struct CourseId {
+    pub id: String,
+    pub count: u128,
 }
