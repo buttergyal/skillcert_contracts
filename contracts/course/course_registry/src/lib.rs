@@ -29,6 +29,14 @@ impl CourseRegistry {
     pub fn remove_module(env: Env, module_id: String) -> Result<(), &'static str> {
         functions::remove_module::course_registry_remove_module(&env, module_id)
     }
+
+    pub fn add_module(
+        env: Env,
+        course_id: String,
+        module: CourseModule,
+    ) -> Result<(), &'static str> {
+        functions::add_module::course_registry_add_module(&env, course_id, module)
+    }
 }
 
 #[cfg(test)]
