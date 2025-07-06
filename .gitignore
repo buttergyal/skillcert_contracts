@@ -1,3 +1,19 @@
-target
+# Cargo
+/target/
+**/target/
+/Cargo.lock
 
-Cargo.lock
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Rust
+*.rs.bk
+*.log
+
+# Soroban-specific
+*.wasm
