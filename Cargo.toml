@@ -5,7 +5,6 @@ members = [
   "contracts/course/course_access"
 ]
 
-resolver = "2"
 
 [workspace.dependencies]
 soroban-sdk = "22"

@@ -33,9 +33,14 @@ impl CourseRegistry {
     pub fn add_module(
         env: Env,
         course_id: String,
-        module: CourseModule,
-    ) -> Result<(), &'static str> {
-        functions::add_module::course_registry_add_module(&env, course_id, module)
+        position: i32,
+        title: String,
+    ) -> CourseModule {
+        functions::add_module::course_registry_add_module(env, course_id, position, title)
+    }
+
+    pub fn delete_course(env: Env, course_id: String) -> Result<(), &'static str> {
+        functions::delete_course::course_registry_delete_course(&env, course_id)
     }
 }
 
