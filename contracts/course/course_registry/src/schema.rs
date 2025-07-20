@@ -2,7 +2,7 @@
 use soroban_sdk::{Address, String, contracttype, IntoVal, TryFromVal, Val, Env};
 
 
-#[contract  type]
+#[contracttype]
 #[derive(Clone, Debug, PartialEq)]
 pub struct CourseModule {
     pub id: String,
