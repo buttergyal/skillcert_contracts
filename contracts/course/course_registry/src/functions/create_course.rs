@@ -26,7 +26,6 @@ pub fn course_registry_create_course(env: Env, title: String, description: Strin
     let id: u128 = generate_course_id(&env);
     let converted_id: String = String::from_str(&env, id.to_string().as_str());
     
-
     let storage_key: (Symbol, String) = (COURSE_KEY, converted_id.clone());
 
     if env.storage().persistent().has(&storage_key) {
@@ -35,7 +34,7 @@ pub fn course_registry_create_course(env: Env, title: String, description: Strin
 
     // create a new course
     let new_course: Course = Course {
-        id: converted_id.clone()    ,
+        id: converted_id.clone(),
         title,
         description,
         creator: caller,
@@ -50,9 +49,7 @@ pub fn course_registry_create_course(env: Env, title: String, description: Strin
 }
 
 
-
-
-fn generate_course_id(env: &Env) -> u128 {
+pub fn generate_course_id(env: &Env) -> u128 {
     let current_id: u128 = env.storage().persistent()
         .get(&COURSE_ID)
         .unwrap_or(0);
@@ -100,7 +97,6 @@ mod test {
             assert_eq!(course.id, String::from_str(&env, "1"));
             assert!(!course.published);
         });
-        
     }   
     
     #[test]
