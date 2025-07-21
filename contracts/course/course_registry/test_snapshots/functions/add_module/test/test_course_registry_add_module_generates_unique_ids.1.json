@@ -56,46 +56,21 @@
                 },
                 "durability": "persistent",
                 "val": {
-                  "map": [
+                  "vec": [
                     {
-                      "key": {
-                        "symbol": "creator"
-                      },
-                      "val": {
-                        "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
-                      }
+                      "string": "course_123"
                     },
                     {
-                      "key": {
-                        "symbol": "description"
-                      },
-                      "val": {
-                        "string": "Test Description"
-                      }
+                      "string": "Test Course"
                     },
                     {
-                      "key": {
-                        "symbol": "id"
-                      },
-                      "val": {
-                        "string": "course_123"
-                      }
+                      "string": "Test Description"
                     },
                     {
-                      "key": {
-                        "symbol": "published"
-                      },
-                      "val": {
-                        "bool": true
-                      }
+                      "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
                     },
                     {
-                      "key": {
-                        "symbol": "title"
-                      },
-                      "val": {
-                        "string": "Test Course"
-                      }
+                      "bool": true
                     }
                   ]
                 }
@@ -142,46 +117,21 @@
                 },
                 "durability": "persistent",
                 "val": {
-                  "map": [
+                  "vec": [
                     {
-                      "key": {
-                        "symbol": "creator"
-                      },
-                      "val": {
-                        "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
-                      }
+                      "string": "course_123"
                     },
                     {
-                      "key": {
-                        "symbol": "description"
-                      },
-                      "val": {
-                        "string": "Test Description"
-                      }
+                      "string": "Test Course"
                     },
                     {
-                      "key": {
-                        "symbol": "id"
-                      },
-                      "val": {
-                        "string": "course_123"
-                      }
+                      "string": "Test Description"
                     },
                     {
-                      "key": {
-                        "symbol": "published"
-                      },
-                      "val": {
-                        "bool": true
-                      }
+                      "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
                     },
                     {
-                      "key": {
-                        "symbol": "title"
-                      },
-                      "val": {
-                        "string": "Test Course"
-                      }
+                      "bool": true
                     }
                   ]
                 }
@@ -258,7 +208,7 @@
                         "symbol": "position"
                       },
                       "val": {
-                        "i32": 1
+                        "u32": 1
                       }
                     },
                     {
@@ -344,7 +294,7 @@
                         "symbol": "position"
                       },
                       "val": {
-                        "i32": 2
+                        "u32": 2
                       }
                     },
                     {

@@ -6,7 +6,7 @@ mod test;
 
 use soroban_sdk::{contract, Env, String};
 
-use crate::schema::{Course};
+use crate::schema::{Course, CourseModule};
 
 #[contract]
 pub struct CourseRegistry;
@@ -28,6 +28,10 @@ impl CourseRegistry {
 
     pub fn remove_module(env: Env, module_id: String) -> std::result::Result<(), &'static str> {
         functions::remove_module::course_registry_remove_module(&env, module_id)
+    }
+
+    pub fn list_modules(env: Env, module_id: String) -> CourseModule {
+        functions::list_modules::course_registry_list_modules(&env, module_id)
     }
 
     pub fn add_module(

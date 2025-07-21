@@ -5,9 +5,9 @@ pub fn course_registry_remove_module(env: &Env, module_id: String) -> Result<(),
     if module_id.len() == 0 {
         return Err("Module ID cannot be empty");
     }
-    let modules_storage = env.storage().persistent();
+    let modules_storage: soroban_sdk::storage::Persistent = env.storage().persistent();
     // Construct the specific DataKey for this module
-    let module_key = DataKey::Module(module_id.clone());
+    let module_key: DataKey = DataKey::Module(module_id.clone());
 
     // Try to get the module data to verify it exists and is a valid CourseModule
     let module: Option<CourseModule> = modules_storage.get(&module_key);

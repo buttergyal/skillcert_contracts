@@ -22,7 +22,6 @@ pub fn course_registry_add_module(env: Env, course_id: String, position: u32, ti
             ledger_seq
         ));
     
-
     // Create new module
     let module: CourseModule = CourseModule {
         id: module_id.clone(),
