@@ -2,7 +2,7 @@
 use soroban_sdk::{Address, String, contracttype, IntoVal, TryFromVal, Val, Env};
 
 
-#[contract  type]
+#[contracttype]
 #[derive(Clone, Debug, PartialEq)]
 pub struct CourseModule {
     pub id: String,
@@ -19,7 +19,6 @@ pub enum DataKey {
     Courses, // If courses are stored as a single map
 }
 
-// #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Course {
     pub id: String,
@@ -64,8 +63,8 @@ impl TryFromVal<Env, Val> for Course {
 }
 
 #[contracttype]
-#[derive(Clone,)]
-pub  struct CourseId {
+#[derive(Clone)]
+pub struct CourseId {
     pub id: String,
     pub count: u128,
 }

@@ -1,10 +1,9 @@
-<<<<<<< HEAD
 use soroban_sdk::{
     testutils::{Address as _}, Address, Env, String
 };
 
 use crate::{
-    course_registry_remove_module,
+    functions::remove_module::course_registry_remove_module,
     schema::{CourseModule, DataKey},
 };
 
@@ -136,7 +135,7 @@ fn test_remove_module_storage_isolation() {
         assert!(storage.has(&other_key)); // Other data should still exist
     });
 }
-=======
+
 #[cfg(test)]
 mod tests {
     use soroban_sdk::{Address, Env, String, Symbol, testutils::Address as _};
@@ -240,4 +239,3 @@ mod tests {
         assert_eq!(retrieved_course.published, course.published);
     }
 }
->>>>>>> origin/main
