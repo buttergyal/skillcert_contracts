@@ -140,6 +140,7 @@ fn test_remove_module_storage_isolation() {
 mod tests {
     use soroban_sdk::{Address, Env, String, Symbol, testutils::Address as _};
     use crate::schema::Course;
+    use crate::CourseRegistry;
     use crate::functions::get_course::course_registry_get_course;
 
     #[test]
@@ -162,7 +163,7 @@ mod tests {
         };
         
         // Set up contract environment
-        let contract_id = env.register_contract(None, crate::CourseRegistry);
+        let contract_id = env.register(CourseRegistry, {});
         
         // Store the course in the contract's storage
         let key = Symbol::new(&env, "course");
@@ -190,7 +191,7 @@ mod tests {
         let non_existent_course_id = String::from_str(&env, "non_existent_course");
         
         // Set up contract environment
-        let contract_id = env.register_contract(None, crate::CourseRegistry);
+        let contract_id = env.register(CourseRegistry, {});
         
         // This should panic with "Course not found"
         env.as_contract(&contract_id, || {
@@ -218,7 +219,7 @@ mod tests {
         };
         
         // Set up contract environment
-        let contract_id = env.register_contract(None, crate::CourseRegistry);
+        let contract_id = env.register(CourseRegistry, {});
         
         // Store the course in the contract's storage
         let key = Symbol::new(&env, "course");
