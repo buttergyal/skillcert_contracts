@@ -14,4 +14,17 @@ pub struct CourseAccess {
 pub enum DataKey {
     /// Key for storing course access: (course_id, user) -> CourseAccess
     CourseAccess(String, Address),
+    /// Key for storing user profile: user -> UserProfile
+    UserProfile(Address),
+}
+
+/// Represents a user's profile information
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[contracttype]
+pub struct UserProfile {
+    pub name: String,
+    pub email: String,
+    pub profession: Option<String>,
+    pub goals: Option<String>,
+    pub country: String,
 }

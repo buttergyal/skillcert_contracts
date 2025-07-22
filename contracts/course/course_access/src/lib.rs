@@ -28,4 +28,17 @@ impl CourseAccessContract {
     pub fn revoke_access(env: Env, course_id: String, user: Address) -> bool {
         course_access_revoke_access(env, course_id, user)
     }
+
+    /// Save or update a user's profile on-chain
+    pub fn save_profile(
+        env: Env,
+        name: String,
+        email: String,
+        profession: Option<String>,
+        goals: Option<String>,
+        country: String,
+    ) {
+        let user = env.invoker();
+        save_profile(env, name, email, profession, goals, country, user);
+    }
 }
