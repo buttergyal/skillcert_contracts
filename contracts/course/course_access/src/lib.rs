@@ -3,7 +3,7 @@ mod functions;
 
 use soroban_sdk::{contract, contractimpl, Env, Address, String};
 
-pub use schema::*;
+pub use schema::UserCourses;
 pub use functions::*;
 
 
@@ -15,7 +15,7 @@ impl CourseAccessContract {
     /// Grant access to a specific user for a given course
   
     pub fn grant_access(env: Env, course_id: String, user: Address) {
-        course_access_grant_access(env, course_id, user);
+        course_access_grant_access(env, course_id, user)
     }
 
     /// Check if a user has access to a specific course
@@ -29,7 +29,7 @@ impl CourseAccessContract {
         course_access_revoke_access(env, course_id, user)
     }
 
-    pub fn list_user_courses(env: Env, course_id: String, user: Address) -> CourseAccess {
-        course_access_list_user_courses(env, course_id, user)
+    pub fn list_user_courses(env: Env, user: Address) -> UserCourses {
+        course_access_list_user_courses(env, user)
     }
 }

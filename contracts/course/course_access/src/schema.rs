@@ -1,4 +1,4 @@
-use soroban_sdk::{contracttype, Address, String};
+use soroban_sdk::{contracttype, Address, String, Vec};
 
 /// Represents access permission for a user to a specific course
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -6,6 +6,13 @@ use soroban_sdk::{contracttype, Address, String};
 pub struct CourseAccess {
     pub course_id: String,
     pub user: Address,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[contracttype]
+pub struct UserCourses {
+    pub user: Address,
+    pub courses: Vec<String>,
 }
 
 /// Storage key types for the course access contract
