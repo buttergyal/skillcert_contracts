@@ -62,6 +62,10 @@ mod test {
             description: String::from_str(&env, "Test Description"),
             creator: Address::generate(&env),
             published: true,
+            price: 1000,
+            category: None,
+            language: None,
+            thumbnail_url: None,
         };
         
         // Set up initial course data and perform test within contract context
@@ -127,6 +131,10 @@ mod test {
             description: String::from_str(&env, "Test Description"),
             creator: Address::generate(&env),
             published: true,
+            price: 1000,
+            category: None,
+            language: None,
+            thumbnail_url: None,
         };
         
         // Set up initial course data and perform test within contract context
@@ -181,6 +189,10 @@ mod test {
             description: String::from_str(&env, "Test Description"),
             creator: Address::generate(&env),
             published: true,
+            price: 1000,
+            category: None,
+            language: None,
+            thumbnail_url: None,
         };
         
         // Set up initial course data and perform test within contract context

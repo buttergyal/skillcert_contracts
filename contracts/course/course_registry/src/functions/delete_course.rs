@@ -1,4 +1,4 @@
-use soroban_sdk::{Env, String, Symbol, symbol_short, Vec};
+use soroban_sdk::{Env, String, Symbol, symbol_short};
 use crate::schema::{Course, CourseModule};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
@@ -35,31 +35,22 @@ pub fn course_registry_delete_course(env: &Env, course_id: String) -> Result<(),
 }
 
 fn delete_course_modules(env: &Env, course_id: &String) {
-    let mut modules_to_delete: Vec<String> = Vec::new(env);
-
-    let mut counter = 0u32;
-    loop {
+    // For now, we'll implement a simple approach
+    // In a real implementation, you might want to maintain an index of modules per course
+    // This is a simplified version that checks a reasonable range of potential module IDs
+    for counter in 0..100u32 {
         let potential_module_id = String::from_str(env, &format!("module_{}_{}_0", course_id.to_string(), counter));
         let module_key = (MODULE_KEY, potential_module_id.clone());
 
         if env.storage().persistent().has(&module_key) {
-            if let Some(module): Option<CourseModule> = env.storage().persistent().get(&module_key) {
+            let module_opt: Option<CourseModule> = env.storage().persistent().get(&module_key);
+            if let Some(module) = module_opt {
                 if module.course_id == *course_id {
-                    modules_to_delete.push_back(potential_module_id);
+                    env.storage().persistent().remove(&module_key);
+                    env.events().publish((potential_module_id,), "module_deleted");
                 }
             }
         }
-
-        counter += 1;
-        if counter > 1000 {
-            break;
-        }
-    }
-
-    for module_id in modules_to_delete.iter() {
-        let module_key = (MODULE_KEY, module_id.clone());
-        env.storage().persistent().remove(&module_key);
-        env.events().publish((module_id.clone(),), "module_deleted");
     }
 }
 
@@ -76,6 +67,10 @@ mod tests {
             title: String::from_str(env, "Test Course"),
             description: String::from_str(env, "Test Description"),
             creator: Address::generate(env),
+            price: 1000,
+            category: None,
+            language: None,
+            thumbnail_url: None,
             published: false,
         }
     }

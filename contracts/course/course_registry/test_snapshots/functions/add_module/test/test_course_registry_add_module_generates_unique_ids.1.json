@@ -56,21 +56,75 @@
                 },
                 "durability": "persistent",
                 "val": {
-                  "vec": [
+                  "map": [
                     {
-                      "string": "course_123"
+                      "key": {
+                        "symbol": "category"
+                      },
+                      "val": "void"
                     },
                     {
-                      "string": "Test Course"
+                      "key": {
+                        "symbol": "creator"
+                      },
+                      "val": {
+                        "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
+                      }
                     },
                     {
-                      "string": "Test Description"
+                      "key": {
+                        "symbol": "description"
+                      },
+                      "val": {
+                        "string": "Test Description"
+                      }
                     },
                     {
-                      "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
+                      "key": {
+                        "symbol": "id"
+                      },
+                      "val": {
+                        "string": "course_123"
+                      }
                     },
                     {
-                      "bool": true
+                      "key": {
+                        "symbol": "language"
+                      },
+                      "val": "void"
+                    },
+                    {
+                      "key": {
+                        "symbol": "price"
+                      },
+                      "val": {
+                        "u128": {
+                          "hi": 0,
+                          "lo": 1000
+                        }
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "published"
+                      },
+                      "val": {
+                        "bool": true
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "thumbnail_url"
+                      },
+                      "val": "void"
+                    },
+                    {
+                      "key": {
+                        "symbol": "title"
+                      },
+                      "val": {
+                        "string": "Test Course"
+                      }
                     }
                   ]
                 }
@@ -117,21 +171,75 @@
                 },
                 "durability": "persistent",
                 "val": {
-                  "vec": [
+                  "map": [
                     {
-                      "string": "course_123"
+                      "key": {
+                        "symbol": "category"
+                      },
+                      "val": "void"
                     },
                     {
-                      "string": "Test Course"
+                      "key": {
+                        "symbol": "creator"
+                      },
+                      "val": {
+                        "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
+                      }
                     },
                     {
-                      "string": "Test Description"
+                      "key": {
+                        "symbol": "description"
+                      },
+                      "val": {
+                        "string": "Test Description"
+                      }
                     },
                     {
-                      "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
+                      "key": {
+                        "symbol": "id"
+                      },
+                      "val": {
+                        "string": "course_123"
+                      }
                     },
                     {
-                      "bool": true
+                      "key": {
+                        "symbol": "language"
+                      },
+                      "val": "void"
+                    },
+                    {
+                      "key": {
+                        "symbol": "price"
+                      },
+                      "val": {
+                        "u128": {
+                          "hi": 0,
+                          "lo": 1000
+                        }
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "published"
+                      },
+                      "val": {
+                        "bool": true
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "thumbnail_url"
+                      },
+                      "val": "void"
+                    },
+                    {
+                      "key": {
+                        "symbol": "title"
+                      },
+                      "val": {
+                        "string": "Test Course"
+                      }
                     }
                   ]
                 }

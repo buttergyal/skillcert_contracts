@@ -158,6 +158,10 @@ mod tests {
             title: title.clone(),
             description: description.clone(),
             creator: creator.clone(),
+            price: 1000,
+            category: None,
+            language: None,
+            thumbnail_url: None,
             published,
         };
         
@@ -214,6 +218,10 @@ mod tests {
             title: title.clone(),
             description: description.clone(),
             creator: creator.clone(),
+            price: 2000,
+            category: Some(String::from_str(&env, "Advanced")),
+            language: Some(String::from_str(&env, "English")),
+            thumbnail_url: None,
             published,
         };
         
