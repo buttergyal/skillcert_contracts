@@ -3,9 +3,8 @@ mod functions;
 
 use soroban_sdk::{contract, contractimpl, Env, Address, String};
 
-pub use schema::UserCourses;
+pub use schema::{UserCourses, CourseUsers};
 pub use functions::*;
-
 
 #[contract]
 pub struct CourseAccessContract;
@@ -31,5 +30,9 @@ impl CourseAccessContract {
 
     pub fn list_user_courses(env: Env, user: Address) -> UserCourses {
         course_access_list_user_courses(env, user)
+    }
+
+    pub fn list_course_access(env: Env, course_id: String) -> CourseUsers {
+        course_access_list_course_access(env, course_id)
     }
 }

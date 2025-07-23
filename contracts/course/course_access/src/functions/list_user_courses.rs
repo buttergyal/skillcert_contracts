@@ -8,15 +8,11 @@ const USER_KEY: Symbol = symbol_short!("user");
 pub fn course_access_list_user_courses(env: Env, user: Address) -> UserCourses {
     let username: String = user.to_string();
     let key: (Symbol, String) = (USER_KEY, username.clone());
-
-    if !env.storage().persistent().has(&key) { 
-        panic!("Course error: Course Title already exists");
-    }
     
     let courses: UserCourses = env
         .storage()
         .persistent()
-        .get(&(key)).expect("qwerty");
+        .get(&(key)).expect("User Courses Not Found");
     
     courses
 }

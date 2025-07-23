@@ -22,3 +22,10 @@ pub enum DataKey {
     /// Key for storing course access: (course_id, user) -> CourseAccess
     CourseAccess(String, Address),
 }
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[contracttype]
+pub struct CourseUsers {
+    pub course: String,
+    pub users: Vec<Address>,
+}
