@@ -4,16 +4,14 @@ pub mod functions;
 #[cfg(test)]
 mod test;
 
-use soroban_sdk::{contract, Env, String};
-
+use soroban_sdk::{contract, contractimpl, Env, String, Address, Vec};
 use crate::schema::{Course, CourseModule};
 
 #[contract]
 pub struct CourseRegistry;
 
-
+#[contractimpl]
 impl CourseRegistry {
-
     pub fn create_course(
         env: Env,
         title: String,
@@ -26,12 +24,13 @@ impl CourseRegistry {
         functions::get_course::course_registry_get_course(&env, course_id)
     }
 
-    pub fn remove_module(env: Env, module_id: String) -> std::result::Result<(), &'static str> {
-        functions::remove_module::course_registry_remove_module(&env, module_id)
+    pub fn get_courses_by_instructor(env: Env, instructor: Address) -> Vec<Course> {
+        functions::get_courses_by_instructor::course_registry_get_courses_by_instructor(&env, instructor)
     }
 
-    pub fn list_modules(env: Env, module_id: String) -> CourseModule {
-        functions::list_modules::course_registry_list_modules(&env, module_id)
+    pub fn remove_module(env: Env, module_id: String) -> () {
+        functions::remove_module::course_registry_remove_module(&env, module_id)
+            .unwrap_or_else(|e| panic!("{}", e))
     }
 
     pub fn add_module(
@@ -39,7 +38,12 @@ impl CourseRegistry {
         course_id: String,
         position: u32,
         title: String,
-    ) {
-        functions::add_module::course_registry_add_module(env, course_id, position, title);
+    ) -> CourseModule {
+        functions::add_module::course_registry_add_module(env, course_id, position, title)
+    }
+
+    pub fn delete_course(env: Env, course_id: String) -> () {
+        functions::delete_course::course_registry_delete_course(&env, course_id)
+            .unwrap_or_else(|e| panic!("{}", e))
     }
 }
