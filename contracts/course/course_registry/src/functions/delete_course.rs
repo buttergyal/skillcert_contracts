@@ -26,9 +26,7 @@ pub fn course_registry_delete_course(env: &Env, course_id: String) -> Result<(),
 
     let title_key = (TITLE_KEY, String::from_str(env, course.title.to_string().to_lowercase().as_str()));
     env.storage().persistent().remove(&title_key);
-
     env.storage().persistent().remove(&course_storage_key);
-
     env.events().publish((course_id,), "course_deleted");
 
     Ok(())
@@ -39,27 +37,26 @@ fn delete_course_modules(env: &Env, course_id: &String) {
 
     let mut counter = 0u32;
     loop {
-        let potential_module_id = String::from_str(env, &format!("module_{}_{}_0", course_id.to_string(), counter));
-        let module_key = (MODULE_KEY, potential_module_id.clone());
-
-        if env.storage().persistent().has(&module_key) {
-            if let Some(module): Option<CourseModule> = env.storage().persistent().get(&module_key) {
+        let module_id = format!("module_{}_{}_0", course_id.to_string(), counter);
+        let key = (MODULE_KEY, String::from_str(env, &module_id));
+        if env.storage().persistent().has(&key) {
+            if let Some(module) = env.storage().persistent().get::<_, CourseModule>(&key) {
                 if module.course_id == *course_id {
-                    modules_to_delete.push_back(potential_module_id);
+                    modules_to_delete.push_back(String::from_str(env, &module_id));
                 }
             }
+        } else {
+            break;
         }
-
         counter += 1;
         if counter > 1000 {
             break;
         }
     }
 
-    for module_id in modules_to_delete.iter() {
-        let module_key = (MODULE_KEY, module_id.clone());
-        env.storage().persistent().remove(&module_key);
-        env.events().publish((module_id.clone(),), "module_deleted");
+    for id in modules_to_delete.iter() {
+        env.storage().persistent().remove(&(MODULE_KEY, id.clone()));
+        env.events().publish((id.clone(),), "module_deleted");
     }
 }
 
@@ -70,9 +67,9 @@ mod tests {
     use crate::schema::{Course, CourseModule};
     use crate::CourseRegistry;
 
-    fn create_test_course(env: &Env, course_id: &str) -> Course {
+    fn create_test_course(env: &Env, id: &str) -> Course {
         Course {
-            id: String::from_str(env, course_id),
+            id: String::from_str(env, id),
             title: String::from_str(env, "Test Course"),
             description: String::from_str(env, "Test Description"),
             creator: Address::generate(env),
@@ -84,14 +81,12 @@ mod tests {
     fn test_delete_course_success() {
         let env = Env::default();
         let contract_id = env.register(CourseRegistry, {});
-        let course_id = String::from_str(&env, "test_course_123");
-        let course = create_test_course(&env, "test_course_123");
+        let course_id = String::from_str(&env, "course_1");
+        let course = create_test_course(&env, "course_1");
 
         env.as_contract(&contract_id, || {
-            let storage_key = (COURSE_KEY, course_id.clone());
-            let title_key = (TITLE_KEY, String::from_str(&env, "test course"));
-            env.storage().persistent().set(&storage_key, &course);
-            env.storage().persistent().set(&title_key, &true);
+            env.storage().persistent().set(&(COURSE_KEY, course_id.clone()), &course);
+            env.storage().persistent().set(&(TITLE_KEY, String::from_str(&env, "test course")), &true);
         });
 
         let result = env.as_contract(&contract_id, || {
@@ -101,10 +96,8 @@ mod tests {
         assert!(result.is_ok());
 
         env.as_contract(&contract_id, || {
-            let storage_key = (COURSE_KEY, course_id.clone());
-            let title_key = (TITLE_KEY, String::from_str(&env, "test course"));
-            assert!(!env.storage().persistent().has(&storage_key));
-            assert!(!env.storage().persistent().has(&title_key));
+            assert!(!env.storage().persistent().has(&(COURSE_KEY, course_id.clone())));
+            assert!(!env.storage().persistent().has(&(TITLE_KEY, String::from_str(&env, "test course"))));
         });
     }
 
@@ -112,25 +105,21 @@ mod tests {
     fn test_delete_course_with_modules() {
         let env = Env::default();
         let contract_id = env.register(CourseRegistry, {});
-        let course_id = String::from_str(&env, "123");
-        let course = create_test_course(&env, "123");
+        let course_id = String::from_str(&env, "abc");
+        let course = create_test_course(&env, "abc");
 
-        let module1 = CourseModule {
-            id: String::from_str(&env, "module_123_0_0"),
+        let module = CourseModule {
+            id: String::from_str(&env, "module_abc_0_0"),
             course_id: course_id.clone(),
             position: 0,
-            title: String::from_str(&env, "Module 1"),
+            title: String::from_str(&env, "Intro"),
             created_at: 0,
         };
 
         env.as_contract(&contract_id, || {
-            let course_key = (COURSE_KEY, course_id.clone());
-            let title_key = (TITLE_KEY, String::from_str(&env, "test course"));
-            let module1_key = (MODULE_KEY, module1.id.clone());
-
-            env.storage().persistent().set(&course_key, &course);
-            env.storage().persistent().set(&title_key, &true);
-            env.storage().persistent().set(&module1_key, &module1);
+            env.storage().persistent().set(&(COURSE_KEY, course_id.clone()), &course);
+            env.storage().persistent().set(&(TITLE_KEY, String::from_str(&env, "test course")), &true);
+            env.storage().persistent().set(&(MODULE_KEY, module.id.clone()), &module);
         });
 
         let result = env.as_contract(&contract_id, || {
@@ -140,11 +129,8 @@ mod tests {
         assert!(result.is_ok());
 
         env.as_contract(&contract_id, || {
-            let course_key = (COURSE_KEY, course_id.clone());
-            let module1_key = (MODULE_KEY, module1.id.clone());
-
-            assert!(!env.storage().persistent().has(&course_key));
-            assert!(!env.storage().persistent().has(&module1_key));
+            assert!(!env.storage().persistent().has(&(COURSE_KEY, course_id.clone())));
+            assert!(!env.storage().persistent().has(&(MODULE_KEY, module.id.clone())));
         });
     }
 
@@ -152,13 +138,12 @@ mod tests {
     fn test_delete_course_not_found() {
         let env = Env::default();
         let contract_id = env.register(CourseRegistry, {});
-        let course_id = String::from_str(&env, "nonexistent");
+        let course_id = String::from_str(&env, "not_found");
 
         let result = env.as_contract(&contract_id, || {
             course_registry_delete_course(&env, course_id)
         });
 
-        assert!(result.is_err());
         assert_eq!(result.unwrap_err(), "Course not found");
     }
 
@@ -172,35 +157,33 @@ mod tests {
             course_registry_delete_course(&env, course_id)
         });
 
-        assert!(result.is_err());
         assert_eq!(result.unwrap_err(), "Course ID cannot be empty");
     }
 
     #[test]
-    fn test_delete_course_preserves_other_courses() {
+    fn test_delete_course_preserves_others() {
         let env = Env::default();
         let contract_id = env.register(CourseRegistry, {});
 
-        let course1_id = String::from_str(&env, "1");
-        let course2_id = String::from_str(&env, "2");
-        let course1 = create_test_course(&env, "1");
-        let course2 = create_test_course(&env, "2");
+        let id1 = String::from_str(&env, "keep");
+        let id2 = String::from_str(&env, "remove");
+
+        let c1 = create_test_course(&env, "keep");
+        let c2 = create_test_course(&env, "remove");
 
         env.as_contract(&contract_id, || {
-            env.storage().persistent().set(&(COURSE_KEY, course1_id.clone()), &course1);
-            env.storage().persistent().set(&(COURSE_KEY, course2_id.clone()), &course2);
+            env.storage().persistent().set(&(COURSE_KEY, id1.clone()), &c1);
+            env.storage().persistent().set(&(COURSE_KEY, id2.clone()), &c2);
             env.storage().persistent().set(&(TITLE_KEY, String::from_str(&env, "test course")), &true);
         });
 
-        let result = env.as_contract(&contract_id, || {
-            course_registry_delete_course(&env, course1_id.clone())
+        env.as_contract(&contract_id, || {
+            course_registry_delete_course(&env, id2.clone()).unwrap();
         });
 
-        assert!(result.is_ok());
-
         env.as_contract(&contract_id, || {
-            assert!(!env.storage().persistent().has(&(COURSE_KEY, course1_id)));
-            assert!(env.storage().persistent().has(&(COURSE_KEY, course2_id)));
+            assert!(!env.storage().persistent().has(&(COURSE_KEY, id2.clone())));
+            assert!(env.storage().persistent().has(&(COURSE_KEY, id1.clone())));
         });
     }
 }
