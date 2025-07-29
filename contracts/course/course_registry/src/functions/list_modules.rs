@@ -1,7 +1,5 @@
-use soroban_sdk::{symbol_short, Env, String, Symbol};
+use soroban_sdk::{Env, String, Symbol};
 use crate::schema::{CourseModule};
-
-const MODULE_KEY: Symbol = symbol_short!("module");
 
 pub fn course_registry_list_modules(env: &Env, course_id: String) -> CourseModule {    
     if course_id.len() == 0 {
@@ -23,8 +21,10 @@ pub fn course_registry_list_modules(env: &Env, course_id: String) -> CourseModul
 #[cfg(test)]
 mod test {
     use super::*;
-    use soroban_sdk::{testutils::Ledger, Env, String, Address};
+    use soroban_sdk::{testutils::Ledger, Env, String, Address, symbol_short};
     use crate::CourseRegistry;
+
+    const MODULE_KEY: Symbol = symbol_short!("module");
 
     #[test]
     fn test_course_registry_add_module_storage_key_format() {
