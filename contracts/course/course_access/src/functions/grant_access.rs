@@ -5,7 +5,7 @@ use crate::schema::{CourseAccess, DataKey};
 
 pub fn course_access_grant_access(env: Env, course_id: String, user: Address) {
     // Create the storage key for this course and user combination
-    let key = DataKey::CourseAccess(course_id.clone(), user.clone());
+    let key: DataKey = DataKey::CourseAccess(course_id.clone(), user.clone());
     
     // Check if access already exists to prevent duplicates
     if env.storage().persistent().has(&key) {
@@ -13,7 +13,7 @@ pub fn course_access_grant_access(env: Env, course_id: String, user: Address) {
     }
     
     // Create the course access entry
-    let course_access = CourseAccess {
+    let course_access: CourseAccess = CourseAccess {
         course_id: course_id.clone(),
         user: user.clone(),
     };
@@ -24,5 +24,3 @@ pub fn course_access_grant_access(env: Env, course_id: String, user: Address) {
     // Extend the TTL for the storage entry to ensure it persists
     env.storage().persistent().extend_ttl(&key, 100, 1000);
 }
-
-
