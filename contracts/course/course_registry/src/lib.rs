@@ -46,4 +46,8 @@ impl CourseRegistry {
         functions::delete_course::course_registry_delete_course(&env, course_id)
             .unwrap_or_else(|e| panic!("{}", e))
     }
+
+    pub fn hello_world(_env: Env) -> String {
+        String::from_str(&_env, "Hello from Web3 👋")
+    }
 }
