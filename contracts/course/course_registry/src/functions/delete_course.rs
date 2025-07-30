@@ -33,7 +33,7 @@ pub fn course_registry_delete_course(env: &Env, course_id: String) -> Result<(),
 }
 
 fn delete_course_modules(env: &Env, course_id: &String) {
-    let mut modules_to_delete: Vec<String> = Vec::new(env);
+    let mut modules_to_delete: Vec<String> = Vec::new();
 
     let mut counter = 0u32;
     loop {
@@ -42,7 +42,7 @@ fn delete_course_modules(env: &Env, course_id: &String) {
         if env.storage().persistent().has(&key) {
             if let Some(module) = env.storage().persistent().get::<_, CourseModule>(&key) {
                 if module.course_id == *course_id {
-                    modules_to_delete.push_back(String::from_str(env, &module_id));
+                    modules_to_delete.push(String::from_str(env, &module_id));
                 }
             }
         } else {
