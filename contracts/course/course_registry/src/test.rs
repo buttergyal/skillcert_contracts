@@ -1,5 +1,5 @@
 use soroban_sdk::{
-    testutils::{Address as _}, Address, Env, String, Symbol, Vec, symbol_short
+    testutils::{Address as _}, Address, Env, String, Symbol, symbol_short
 };
 
 use crate::{
@@ -37,6 +37,10 @@ fn create_sample_course(env: &Env, id: u128, creator: Address) -> Course {
         description: String::from_str(env, "Test Description"),
         creator,
         published: true,
+        price: 1000,
+        category: Some(String::from_str(env, "Programming")),
+        language: Some(String::from_str(env, "English")),
+        thumbnail_url: None,
     }
 }
 
@@ -148,13 +152,18 @@ fn test_get_course_success() {
     let description = String::from_str(&env, "A test course description");
     let creator = Address::generate(&env);
     let published = true;
+    let price = 23;
 
     let course = Course {
         id: course_id.clone(),
         title: title.clone(),
         description: description.clone(),
+        price: price,
         creator: creator.clone(),
         published,
+        category: None,
+        language: None,
+        thumbnail_url: None,
     };
 
     let contract_id = env.register_contract(None, crate::CourseRegistry);
@@ -213,6 +222,10 @@ fn test_get_courses_by_instructor_found() {
         description: String::from_str(&env, "Intro to Rust"),
         creator: instructor.clone(),
         published: true,
+        price: 1500,
+        category: Some(String::from_str(&env, "Programming")),
+        language: Some(String::from_str(&env, "English")),
+        thumbnail_url: None,
     };
 
     let key = (symbol_short!("course"), course_id);

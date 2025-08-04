@@ -16,8 +16,12 @@ impl CourseRegistry {
         env: Env,
         title: String,
         description: String,
+        price: u128,
+        category: Option<String>,
+        language: Option<String>,
+        thumbnail_url: Option<String>,
     ) -> Course {
-        functions::create_course::course_registry_create_course(env, title, description)
+        functions::create_course::course_registry_create_course(env, title, description, price, category, language, thumbnail_url)
     }
 
     pub fn get_course(env: Env, course_id: String) -> Course {
