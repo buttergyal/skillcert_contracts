@@ -54,4 +54,9 @@ impl CourseRegistry {
     pub fn hello_world(_env: Env) -> String {
         String::from_str(&_env, "Hello from Web3 👋")
     }
+
+    pub fn remove_prerequisite(env: Env, course_id: String, prerequisite_course_id: String) {
+    functions::remove_prerequisite::course_registry_remove_prerequisite(env, course_id, prerequisite_course_id)
+}
+
 }
