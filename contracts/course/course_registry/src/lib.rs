@@ -1,11 +1,11 @@
-pub mod schema;
 pub mod functions;
+pub mod schema;
 
 #[cfg(test)]
 mod test;
 
-use soroban_sdk::{contract, contractimpl, Env, String, Address, Vec};
 use crate::schema::{Course, CourseModule};
+use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
 
 #[contract]
 pub struct CourseRegistry;
@@ -21,7 +21,15 @@ impl CourseRegistry {
         language: Option<String>,
         thumbnail_url: Option<String>,
     ) -> Course {
-        functions::create_course::course_registry_create_course(env, title, description, price, category, language, thumbnail_url)
+        functions::create_course::course_registry_create_course(
+            env,
+            title,
+            description,
+            price,
+            category,
+            language,
+            thumbnail_url,
+        )
     }
 
     pub fn get_course(env: Env, course_id: String) -> Course {
@@ -29,7 +37,9 @@ impl CourseRegistry {
     }
 
     pub fn get_courses_by_instructor(env: Env, instructor: Address) -> Vec<Course> {
-        functions::get_courses_by_instructor::course_registry_get_courses_by_instructor(&env, instructor)
+        functions::get_courses_by_instructor::course_registry_get_courses_by_instructor(
+            &env, instructor,
+        )
     }
 
     pub fn remove_module(env: Env, module_id: String) -> () {
@@ -37,12 +47,7 @@ impl CourseRegistry {
             .unwrap_or_else(|e| panic!("{}", e))
     }
 
-    pub fn add_module(
-        env: Env,
-        course_id: String,
-        position: u32,
-        title: String,
-    ) -> CourseModule {
+    pub fn add_module(env: Env, course_id: String, position: u32, title: String) -> CourseModule {
         functions::add_module::course_registry_add_module(env, course_id, position, title)
     }
 
@@ -54,4 +59,12 @@ impl CourseRegistry {
     pub fn hello_world(_env: Env) -> String {
         String::from_str(&_env, "Hello from Web3 👋")
     }
+
+    pub fn add_goal(env: Env, course_id: String, content: String) -> CourseGoal {
+    functions::add_goal::course_registry_add_goal(env, course_id, content)
+}
+  
+      pub fn remove_prerequisite(env: Env, course_id: String, prerequisite_course_id: String) {
+    functions::remove_prerequisite::course_registry_remove_prerequisite(env, course_id, prerequisite_course_id)
+}
 }

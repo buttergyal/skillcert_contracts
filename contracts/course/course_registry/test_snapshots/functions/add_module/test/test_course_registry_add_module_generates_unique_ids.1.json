@@ -95,6 +95,14 @@
                     },
                     {
                       "key": {
+                        "symbol": "prerequisites"
+                      },
+                      "val": {
+                        "vec": []
+                      }
+                    },
+                    {
+                      "key": {
                         "symbol": "price"
                       },
                       "val": {
@@ -207,6 +215,14 @@
                         "symbol": "language"
                       },
                       "val": "void"
+                    },
+                    {
+                      "key": {
+                        "symbol": "prerequisites"
+                      },
+                      "val": {
+                        "vec": []
+                      }
                     },
                     {
                       "key": {

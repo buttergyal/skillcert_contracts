@@ -1,5 +1,5 @@
-use soroban_sdk::{Env, Address, String, Vec, symbol_short, Symbol};
 use crate::schema::Course;
+use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 

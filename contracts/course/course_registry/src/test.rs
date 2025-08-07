@@ -1,12 +1,12 @@
-use soroban_sdk::{
-    testutils::{Address as _}, Address, Env, String, Symbol, symbol_short
-};
+use crate::CourseRegistry;
+use soroban_sdk::{symbol_short, testutils::Address as _, Address, Env, String, Symbol, Vec};
 
 use crate::{
     functions::{
-        remove_module::course_registry_remove_module,
         get_course::course_registry_get_course,
         get_courses_by_instructor::course_registry_get_courses_by_instructor,
+        get_prerequisites_by_course::get_prerequisites_by_course_id,
+        remove_module::course_registry_remove_module,
     },
     schema::{Course, CourseModule, DataKey},
 };
@@ -41,6 +41,7 @@ fn create_sample_course(env: &Env, id: u128, creator: Address) -> Course {
         category: Some(String::from_str(env, "Programming")),
         language: Some(String::from_str(env, "English")),
         thumbnail_url: None,
+        prerequisites: Vec::new(&env),
     }
 }
 
@@ -164,18 +165,19 @@ fn test_get_course_success() {
         category: None,
         language: None,
         thumbnail_url: None,
+        prerequisites: Vec::new(&env),
     };
 
     let contract_id = env.register_contract(None, crate::CourseRegistry);
 
     let key = Symbol::new(&env, "course");
     env.as_contract(&contract_id, || {
-        env.storage().instance().set(&(key, course_id.clone()), &course);
+        env.storage()
+            .instance()
+            .set(&(key, course_id.clone()), &course);
     });
 
-    let retrieved = env.as_contract(&contract_id, || {
-        course_registry_get_course(&env, course_id)
-    });
+    let retrieved = env.as_contract(&contract_id, || course_registry_get_course(&env, course_id));
 
     assert_eq!(retrieved.id, course.id);
     assert_eq!(retrieved.title, course.title);
@@ -189,11 +191,10 @@ fn test_get_course_success() {
 fn test_get_course_not_found() {
     let env = Env::default();
     let contract_id = env.register_contract(None, crate::CourseRegistry);
+
     let fake_id = String::from_str(&env, "not_found");
 
-    env.as_contract(&contract_id, || {
-        course_registry_get_course(&env, fake_id)
-    });
+    env.as_contract(&contract_id, || course_registry_get_course(&env, fake_id));
 }
 
 #[test]
@@ -226,6 +227,7 @@ fn test_get_courses_by_instructor_found() {
         category: Some(String::from_str(&env, "Programming")),
         language: Some(String::from_str(&env, "English")),
         thumbnail_url: None,
+        prerequisites: Vec::new(&env),
     };
 
     let key = (symbol_short!("course"), course_id);
@@ -239,4 +241,33 @@ fn test_get_courses_by_instructor_found() {
 
     assert_eq!(results.len(), 1);
     assert_eq!(results.get(0).unwrap().id, course.id);
+}
+
+#[test]
+fn test_get_prerequisites_by_course_id() {
+    let env = Env::default();
+    let contract_id = env.register_contract(None, crate::CourseRegistry);
+    //let contract_id: Address = env.register(CourseRegistry, {});
+    let course_id = String::from_str(&env, "course_123");
+
+    let course = Course {
+        id: course_id.clone(),
+        title: String::from_str(&env, "Test Course"),
+        description: String::from_str(&env, "Test Description"),
+        creator: Address::generate(&env),
+        published: true,
+        price: 1000,
+        category: None,
+        language: Some(String::from_str(&env, "English")),
+        thumbnail_url: None,
+        prerequisites: Vec::new(&env),
+    };
+    let key = (symbol_short!("course"), course_id.clone());
+    env.as_contract(&contract_id, || {
+        env.storage().persistent().set(&key, &course);
+    });
+    let prerequisites = env.as_contract(&contract_id, || {
+        get_prerequisites_by_course_id(&env, course_id.clone())
+    });
+    assert!(prerequisites.is_empty());
 }
