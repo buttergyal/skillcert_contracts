@@ -1,14 +1,14 @@
-use soroban_sdk::{Env, Address, String, Vec, symbol_short, Symbol};
+use soroban_sdk::{Env, String, Vec, symbol_short, Symbol};
 use crate::schema::{Course, DataKey};
 
-const PREREQ_REMOVED_EVENT: Symbol = symbol_short!("prereq_removed");
+const PREREQ_REMOVED_EVENT: Symbol = symbol_short!("prereqrmv");
 
 pub fn course_registry_remove_prerequisite(
     env: Env,
     course_id: String,
     prerequisite_course_id: String,
 ) {
-    let invoker = env.invoker();
+    let invoker = env.current_contract_address();
 
     // Load course
     let course_key = (symbol_short!("course"), course_id.clone());
@@ -27,11 +27,11 @@ pub fn course_registry_remove_prerequisite(
         .unwrap_or(Vec::new(&env));
 
     // Find and remove the prerequisite
-    let index = prerequisites.iter().position(|id| id == &prerequisite_course_id);
+    let index = prerequisites.iter().position(|id| id.eq(&prerequisite_course_id));
 
     match index {
         Some(i) => {
-            prerequisites.remove(i);
+            prerequisites.remove(i as u32);
         },
         None => {
             panic!("Prerequisite not found in the list");
