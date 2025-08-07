@@ -1,7 +1,7 @@
-use soroban_sdk::{Env, Address, String, Vec, symbol_short, Symbol};
+use soroban_sdk::{Env, String, Vec, symbol_short, Symbol};
 use crate::schema::{Course, CourseGoal, DataKey};
 
-const GOAL_ADDED_EVENT: Symbol = symbol_short!("goal_added");
+const GOAL_ADDED_EVENT: Symbol = symbol_short!("goaladd");
 
 pub fn course_registry_add_goal(
     env: Env,
@@ -9,11 +9,11 @@ pub fn course_registry_add_goal(
     content: String,
 ) -> CourseGoal {
     // Validate input
-    if content.is_empty() || content.trim().is_empty() {
+    if content.is_empty() {
         panic!("Goal content cannot be empty");
     }
 
-    let invoker = env.invoker();
+    let invoker = env.current_contract_address();
 
     // Load course
     let storage_key = (symbol_short!("course"), course_id.clone());
