@@ -31,6 +31,13 @@ pub enum DataKey {
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]
 pub enum DataKey {
+    ...
+    CoursePrerequisites(String), // Key: course_id → Vec<String>
+}
+
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub enum DataKey {
     Module(String), // This would represent the ("module", module_id) key
     Courses,        // If courses are stored as a single map
 }
