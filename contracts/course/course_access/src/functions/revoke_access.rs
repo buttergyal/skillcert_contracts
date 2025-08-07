@@ -1,4 +1,4 @@
-use soroban_sdk::{Env, String, Address};
+use soroban_sdk::{Address, Env, String};
 
 pub fn course_access_revoke_access(env: Env, course_id: String, user: Address) -> bool {
     // Create storage key

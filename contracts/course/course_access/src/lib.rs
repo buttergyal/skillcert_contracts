@@ -1,10 +1,10 @@
-mod schema;
 mod functions;
+mod schema;
 
-use soroban_sdk::{contract, contractimpl, Env, Address, String};
+use soroban_sdk::{contract, contractimpl, Address, Env, String};
 
-pub use schema::{UserCourses, CourseUsers};
 pub use functions::*;
+pub use schema::{CourseUsers, UserCourses};
 
 #[contract]
 pub struct CourseAccessContract;
@@ -30,7 +30,7 @@ impl CourseAccessContract {
         goals: Option<String>,
         country: String,
     ) {
-        let user = env.invoker();
+        let user = env.current_contract_address();
         save_profile(env, name, email, profession, goals, country, user);
     }
 

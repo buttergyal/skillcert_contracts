@@ -1,6 +1,4 @@
-
-use soroban_sdk::{Address, String, contracttype};
-
+use soroban_sdk::{contracttype, Address, String, Vec};
 
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]
@@ -10,6 +8,24 @@ pub struct CourseModule {
     pub position: u32,
     pub title: String,
     pub created_at: u64,
+}
+
+
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct CourseGoal {
+    pub course_id: String,
+    pub content: String,
+    pub created_by: Address,
+    pub created_at: u64,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub enum DataKey {
+    Module(String),
+    Courses,
+    CourseGoal(String), 
 }
 
 #[contracttype]
@@ -23,7 +39,7 @@ pub enum DataKey {
 #[derive(Clone, Debug, PartialEq)]
 pub enum DataKey {
     Module(String), // This would represent the ("module", module_id) key
-    Courses, // If courses are stored as a single map
+    Courses,        // If courses are stored as a single map
 }
 
 #[contracttype]
@@ -38,12 +54,11 @@ pub struct Course {
     pub language: Option<String>,
     pub thumbnail_url: Option<String>,
     pub published: bool,
+    pub prerequisites: Vec<CourseId>,
 }
 
-
-
 #[contracttype]
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct CourseId {
     pub id: String,
     pub count: u128,

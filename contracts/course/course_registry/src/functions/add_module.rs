@@ -1,27 +1,36 @@
-use soroban_sdk::{Env, Symbol, symbol_short, String};
 pub use crate::schema::{Course, CourseModule};
+use soroban_sdk::{symbol_short, Env, String, Symbol};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const MODULE_KEY: Symbol = symbol_short!("module");
 
-pub fn course_registry_add_module(env: Env, course_id: String, position: u32, title: String) -> CourseModule {
+pub fn course_registry_add_module(
+    env: Env,
+    course_id: String,
+    position: u32,
+    title: String,
+) -> CourseModule {
     // Verify course exists
     let course_storage_key: (Symbol, String) = (COURSE_KEY, course_id.clone());
 
     // require!(env.storage().persistent().has(&course_storage_key), "Course with the specified ID does not exist");
-        
+
     if !env.storage().persistent().has(&course_storage_key) {
         panic!("Course with the specified ID does not exist");
     }
 
     let ledger_seq: u32 = env.ledger().sequence();
 
-    let module_id: String = String::from_str(&env, &format!("module_{}_{:?}_{:?}",
+    let module_id: String = String::from_str(
+        &env,
+        &format!(
+            "module_{}_{:?}_{:?}",
             course_id.to_string(),
             position,
             ledger_seq
-        ));
-    
+        ),
+    );
+
     // Create new module
     let module: CourseModule = CourseModule {
         id: module_id.clone(),
@@ -41,15 +50,18 @@ pub fn course_registry_add_module(env: Env, course_id: String, position: u32, ti
 #[cfg(test)]
 mod test {
     use super::*;
-    use soroban_sdk::{log, String};
-    use soroban_sdk::{testutils::{Address as _, Ledger as _}, Address, Env};
     use crate::CourseRegistry;
+    use soroban_sdk::{log, String, Vec};
+    use soroban_sdk::{
+        testutils::{Address as _, Ledger as _},
+        Address, Env,
+    };
 
     #[test]
     fn test_add_module_success() {
         let env: Env = Env::default();
         env.ledger().set_timestamp(100000);
-        
+
         let contract_id: Address = env.register(CourseRegistry, {});
         let course_id: String = String::from_str(&env, "course_123");
         let position: u32 = 1;
@@ -66,23 +78,21 @@ mod test {
             category: None,
             language: None,
             thumbnail_url: None,
+            prerequisites: Vec::new(&env),
         };
-        
+
         // Set up initial course data and perform test within contract context
         env.as_contract(&contract_id, || {
-            env.storage().persistent().set(&(COURSE_KEY, course_id.clone()), &course);
+            env.storage()
+                .persistent()
+                .set(&(COURSE_KEY, course_id.clone()), &course);
             log!(&env, "Stored course in contract storage");
         });
 
         // Act - Call the function within contract context
         let result: CourseModule = env.as_contract(&contract_id, || {
             log!(&env, "Calling add_module function");
-            course_registry_add_module(
-                env.clone(),
-                course_id.clone(),
-                position,
-                title.clone(),
-            )
+            course_registry_add_module(env.clone(), course_id.clone(), position, title.clone())
         });
 
         // Assert - Verify the returned module
@@ -103,12 +113,7 @@ mod test {
         let title: String = String::from_str(&env, "Test Module");
 
         env.as_contract(&contract_id, || {
-            course_registry_add_module(
-                env.clone(),
-                course_id,
-                position,
-                title,
-            );
+            course_registry_add_module(env.clone(), course_id, position, title);
         });
     }
 
@@ -116,7 +121,7 @@ mod test {
     fn test_course_registry_add_module_generates_unique_ids() {
         let env: Env = Env::default();
         env.ledger().set_timestamp(100000);
-        
+
         let contract_id: Address = env.register(CourseRegistry, {});
         let course_id: String = String::from_str(&env, "course_123");
         let course_id_second: String = String::from_str(&env, "course_234");
@@ -135,27 +140,26 @@ mod test {
             category: None,
             language: None,
             thumbnail_url: None,
+            prerequisites: Vec::new(&env),
         };
-        
+
         // Set up initial course data and perform test within contract context
         env.as_contract(&contract_id, || {
-            env.storage().persistent().set(&(COURSE_KEY, course_id.clone()), &course);
+            env.storage()
+                .persistent()
+                .set(&(COURSE_KEY, course_id.clone()), &course);
             log!(&env, "Stored course in contract storage");
         });
 
-
         env.as_contract(&contract_id, || {
-            env.storage().persistent().set(&(COURSE_KEY, course_id_second.clone()), &course);
+            env.storage()
+                .persistent()
+                .set(&(COURSE_KEY, course_id_second.clone()), &course);
             log!(&env, "Stored course in contract storage");
         });
         // Act - Call the function within contract context
         let result: CourseModule = env.as_contract(&contract_id, || {
-            course_registry_add_module(
-                env.clone(),
-                course_id.clone(),
-                position,
-                title.clone(),
-            )
+            course_registry_add_module(env.clone(), course_id.clone(), position, title.clone())
         });
 
         let result_second: CourseModule = env.as_contract(&contract_id, || {
@@ -169,14 +173,17 @@ mod test {
 
         // Assert - Verify the returned module
         assert_eq!(result.id, String::from_str(&env, "module_course_123_1_0"));
-        assert_eq!(result_second.id, String::from_str(&env, "module_course_234_2_0"));
+        assert_eq!(
+            result_second.id,
+            String::from_str(&env, "module_course_234_2_0")
+        );
     }
 
     #[test]
     fn test_course_registry_add_module_storage_key_format() {
         let env: Env = Env::default();
         env.ledger().set_timestamp(100000);
-        
+
         let contract_id: Address = env.register(CourseRegistry, {});
         let course_id: String = String::from_str(&env, "course_123");
         let position: u32 = 1;
@@ -193,22 +200,20 @@ mod test {
             category: None,
             language: None,
             thumbnail_url: None,
+            prerequisites: Vec::new(&env),
         };
-        
+
         // Set up initial course data and perform test within contract context
         env.as_contract(&contract_id, || {
-            env.storage().persistent().set(&(COURSE_KEY, course_id.clone()), &course);
+            env.storage()
+                .persistent()
+                .set(&(COURSE_KEY, course_id.clone()), &course);
             log!(&env, "Stored course in contract storage");
         });
 
         // Act - Call the function within contract context
         let result: CourseModule = env.as_contract(&contract_id, || {
-            course_registry_add_module(
-                env.clone(),
-                course_id.clone(),
-                position,
-                title.clone(),
-            )
+            course_registry_add_module(env.clone(), course_id.clone(), position, title.clone())
         });
 
         let expected_storage_key: (Symbol, String) = (MODULE_KEY, result.id.clone());
@@ -218,9 +223,12 @@ mod test {
         });
 
         env.as_contract(&contract_id, || {
-            let stored_module: CourseModule = env.storage().persistent().get(&expected_storage_key).unwrap();
+            let stored_module: CourseModule = env
+                .storage()
+                .persistent()
+                .get(&expected_storage_key)
+                .unwrap();
             assert_eq!(stored_module.id, result.id);
         });
     }
-
 }
