@@ -443,8 +443,7 @@ mod test {
             assert_eq!(course.title, title);
             assert_eq!(course.price, price);
             assert_eq!(course.category, category);
-assert_eq!(course.language, Some(String::from_str(&env, "en")));
-
+            assert_eq!(course.language, None);
             assert_eq!(course.thumbnail_url, None);
         })
     }
@@ -516,11 +515,6 @@ assert_eq!(course.language, Some(String::from_str(&env, "en")));
         })
     }
 
-        let language = match language {
-        Some(lang) => Some(lang),
-        None => Some(String::from_str(&env, "en")),
-    };
-    
     #[test]
     fn test_create_course_with_unicode_characters() {
         let env: Env = Env::default();
