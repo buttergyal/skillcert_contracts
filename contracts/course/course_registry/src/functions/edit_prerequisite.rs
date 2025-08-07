@@ -107,3 +107,269 @@ fn has_cycle(
     rec_stack.remove(current_course.clone());
     false
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::functions::create_course::course_registry_create_course;
+    use crate::CourseRegistry;
+    use soroban_sdk::{testutils::Events, Env, String};
+
+    fn create_test_course(env: &Env, title: &str) -> String {
+        let course = course_registry_create_course(
+            env.clone(),
+            String::from_str(env, title),
+            String::from_str(env, "Test description"),
+            1000,
+            None,
+            None,
+            None,
+        );
+        course.id
+    }
+
+    #[test]
+    fn test_edit_prerequisite_success() {
+        let env = Env::default();
+        let contract_id = env.register(CourseRegistry, ());
+
+        env.as_contract(&contract_id, || {
+            // Create test courses
+            let course1_id = create_test_course(&env, "Course 1");
+            let course2_id = create_test_course(&env, "Course 2");
+            let course3_id = create_test_course(&env, "Course 3");
+
+            // Create prerequisites vector
+            let mut prerequisites = Vec::new(&env);
+            prerequisites.push_back(course2_id.clone());
+            prerequisites.push_back(course3_id.clone());
+
+            // Edit prerequisites
+            course_registry_edit_prerequisite(env.clone(), course1_id.clone(), prerequisites.clone());
+
+            // Verify prerequisites were saved
+            let stored_prerequisites: Vec<String> = env.storage().persistent()
+                .get(&DataKey::CoursePrerequisites(course1_id.clone()))
+                .unwrap();
+
+            assert_eq!(stored_prerequisites.len(), 2);
+            assert_eq!(stored_prerequisites.get(0).unwrap(), course2_id);
+            assert_eq!(stored_prerequisites.get(1).unwrap(), course3_id);
+
+            // Verify event was emitted - just check that events were generated
+            let events = env.events().all();
+            assert!(!events.is_empty()); // Should have at least some events
+        });
+    }
+
+    #[test]
+    fn test_edit_prerequisite_replace_existing() {
+        let env = Env::default();
+        let contract_id = env.register(CourseRegistry, ());
+
+        env.as_contract(&contract_id, || {
+            // Create test courses
+            let course1_id = create_test_course(&env, "Course 1");
+            let course2_id = create_test_course(&env, "Course 2");
+            let course3_id = create_test_course(&env, "Course 3");
+            let course4_id = create_test_course(&env, "Course 4");
+
+            // Set initial prerequisites
+            let mut initial_prerequisites = Vec::new(&env);
+            initial_prerequisites.push_back(course2_id.clone());
+            course_registry_edit_prerequisite(env.clone(), course1_id.clone(), initial_prerequisites);
+
+            // Replace with new prerequisites
+            let mut new_prerequisites = Vec::new(&env);
+            new_prerequisites.push_back(course3_id.clone());
+            new_prerequisites.push_back(course4_id.clone());
+            course_registry_edit_prerequisite(env.clone(), course1_id.clone(), new_prerequisites.clone());
+
+            // Verify old prerequisites were replaced
+            let stored_prerequisites: Vec<String> = env.storage().persistent()
+                .get(&DataKey::CoursePrerequisites(course1_id.clone()))
+                .unwrap();
+
+            assert_eq!(stored_prerequisites.len(), 2);
+            assert_eq!(stored_prerequisites.get(0).unwrap(), course3_id);
+            assert_eq!(stored_prerequisites.get(1).unwrap(), course4_id);
+        });
+    }
+
+    #[test]
+    fn test_edit_prerequisite_empty_list() {
+        let env = Env::default();
+        let contract_id = env.register(CourseRegistry, ());
+
+        env.as_contract(&contract_id, || {
+            // Create test courses
+            let course1_id = create_test_course(&env, "Course 1");
+            let course2_id = create_test_course(&env, "Course 2");
+
+            // Set initial prerequisites
+            let mut initial_prerequisites = Vec::new(&env);
+            initial_prerequisites.push_back(course2_id.clone());
+            course_registry_edit_prerequisite(env.clone(), course1_id.clone(), initial_prerequisites);
+
+            // Clear prerequisites with empty list
+            let empty_prerequisites = Vec::new(&env);
+            course_registry_edit_prerequisite(env.clone(), course1_id.clone(), empty_prerequisites);
+
+            // Verify prerequisites were cleared
+            let stored_prerequisites: Vec<String> = env.storage().persistent()
+                .get(&DataKey::CoursePrerequisites(course1_id.clone()))
+                .unwrap();
+
+            assert_eq!(stored_prerequisites.len(), 0);
+        });
+    }
+
+    #[test]
+    #[should_panic(expected = "Course not found")]
+    fn test_edit_prerequisite_course_not_found() {
+        let env = Env::default();
+        let contract_id = env.register(CourseRegistry, ());
+
+        env.as_contract(&contract_id, || {
+            let prerequisites = Vec::new(&env);
+            course_registry_edit_prerequisite(
+                env.clone(), 
+                String::from_str(&env, "nonexistent"), 
+                prerequisites
+            );
+        });
+    }
+
+    #[test]
+    #[should_panic(expected = "Prerequisite course not found")]
+    fn test_edit_prerequisite_invalid_prerequisite() {
+        let env = Env::default();
+        let contract_id = env.register(CourseRegistry, ());
+
+        env.as_contract(&contract_id, || {
+            // Create test course
+            let course1_id = create_test_course(&env, "Course 1");
+
+            // Try to add nonexistent prerequisite
+            let mut prerequisites = Vec::new(&env);
+            prerequisites.push_back(String::from_str(&env, "nonexistent"));
+
+            course_registry_edit_prerequisite(env.clone(), course1_id, prerequisites);
+        });
+    }
+
+    #[test]
+    #[should_panic(expected = "Course cannot be its own prerequisite")]
+    fn test_edit_prerequisite_direct_circular_dependency() {
+        let env = Env::default();
+        let contract_id = env.register(CourseRegistry, ());
+
+        env.as_contract(&contract_id, || {
+            // Create test course
+            let course1_id = create_test_course(&env, "Course 1");
+
+            // Try to make course prerequisite of itself
+            let mut prerequisites = Vec::new(&env);
+            prerequisites.push_back(course1_id.clone());
+
+            course_registry_edit_prerequisite(env.clone(), course1_id, prerequisites);
+        });
+    }
+
+    #[test]
+    #[should_panic(expected = "Circular dependency detected")]
+    fn test_edit_prerequisite_indirect_circular_dependency() {
+        let env = Env::default();
+        let contract_id = env.register(CourseRegistry, ());
+
+        env.as_contract(&contract_id, || {
+            // Create test courses
+            let course1_id = create_test_course(&env, "Course 1");
+            let course2_id = create_test_course(&env, "Course 2");
+            let course3_id = create_test_course(&env, "Course 3");
+
+            // Set up chain: Course1 -> Course2 -> Course3
+            let mut prerequisites2 = Vec::new(&env);
+            prerequisites2.push_back(course3_id.clone());
+            course_registry_edit_prerequisite(env.clone(), course2_id.clone(), prerequisites2);
+
+            let mut prerequisites1 = Vec::new(&env);
+            prerequisites1.push_back(course2_id.clone());
+            course_registry_edit_prerequisite(env.clone(), course1_id.clone(), prerequisites1);
+
+            // Try to create cycle: Course3 -> Course1 (which would create Course1 -> Course2 -> Course3 -> Course1)
+            let mut prerequisites3 = Vec::new(&env);
+            prerequisites3.push_back(course1_id.clone());
+
+            course_registry_edit_prerequisite(env.clone(), course3_id, prerequisites3);
+        });
+    }
+
+    #[test]
+    fn test_edit_prerequisite_authorization() {
+        let env = Env::default();
+        
+        // Note: In the current implementation, we use env.current_contract_address() 
+        // which means the authorization check will always pass in tests.
+        // This test verifies the function works when authorization passes.
+        let contract_id = env.register(CourseRegistry, ());
+
+        env.as_contract(&contract_id, || {
+            let course1_id = create_test_course(&env, "Course 1");
+            let course2_id = create_test_course(&env, "Course 2");
+
+            let mut prerequisites = Vec::new(&env);
+            prerequisites.push_back(course2_id.clone());
+
+            // This should succeed since we're calling from the contract address
+            course_registry_edit_prerequisite(env.clone(), course1_id.clone(), prerequisites);
+
+            // Verify it worked
+            let stored_prerequisites: Vec<String> = env.storage().persistent()
+                .get(&DataKey::CoursePrerequisites(course1_id))
+                .unwrap();
+            assert_eq!(stored_prerequisites.len(), 1);
+        });
+    }
+
+    #[test]
+    fn test_edit_prerequisite_complex_chain() {
+        let env = Env::default();
+        let contract_id = env.register(CourseRegistry, ());
+
+        env.as_contract(&contract_id, || {
+            // Create a complex but valid prerequisite chain
+            // Course1 -> [Course2, Course3]
+            // Course2 -> [Course4]
+            // Course3 -> [Course5]
+            // No cycles
+            let course1_id = create_test_course(&env, "Course 1");
+            let course2_id = create_test_course(&env, "Course 2");
+            let course3_id = create_test_course(&env, "Course 3");
+            let course4_id = create_test_course(&env, "Course 4");
+            let course5_id = create_test_course(&env, "Course 5");
+
+            // Set Course2 -> Course4
+            let mut prerequisites2 = Vec::new(&env);
+            prerequisites2.push_back(course4_id.clone());
+            course_registry_edit_prerequisite(env.clone(), course2_id.clone(), prerequisites2);
+
+            // Set Course3 -> Course5
+            let mut prerequisites3 = Vec::new(&env);
+            prerequisites3.push_back(course5_id.clone());
+            course_registry_edit_prerequisite(env.clone(), course3_id.clone(), prerequisites3);
+
+            // Set Course1 -> [Course2, Course3] - should work
+            let mut prerequisites1 = Vec::new(&env);
+            prerequisites1.push_back(course2_id.clone());
+            prerequisites1.push_back(course3_id.clone());
+            course_registry_edit_prerequisite(env.clone(), course1_id.clone(), prerequisites1);
+
+            // Verify all prerequisites were set correctly
+            let stored_prerequisites: Vec<String> = env.storage().persistent()
+                .get(&DataKey::CoursePrerequisites(course1_id))
+                .unwrap();
+            assert_eq!(stored_prerequisites.len(), 2);
+        });
+    }
+}
