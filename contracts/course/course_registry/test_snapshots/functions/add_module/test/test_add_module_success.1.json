@@ -93,6 +93,14 @@
                     },
                     {
                       "key": {
+                        "symbol": "prerequisites"
+                      },
+                      "val": {
+                        "vec": []
+                      }
+                    },
+                    {
+                      "key": {
                         "symbol": "price"
                       },
                       "val": {
