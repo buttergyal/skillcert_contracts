@@ -10,6 +10,24 @@ pub struct CourseModule {
     pub created_at: u64,
 }
 
+
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct CourseGoal {
+    pub course_id: String,
+    pub content: String,
+    pub created_by: Address,
+    pub created_at: u64,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub enum DataKey {
+    Module(String),
+    Courses,
+    CourseGoal(String), 
+}
+
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]
 pub enum DataKey {
