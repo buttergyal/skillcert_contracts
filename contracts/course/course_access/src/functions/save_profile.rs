@@ -1,5 +1,5 @@
-use soroban_sdk::{Env, Address, String};
-use crate::schema::{UserProfile, DataKey};
+use crate::schema::{DataKey, UserProfile};
+use soroban_sdk::{Address, Env, String};
 
 pub fn save_profile(
     env: Env,
@@ -28,6 +28,8 @@ pub fn save_profile(
         goals,
         country,
     };
-    
-    env.storage().set(&DataKey::UserProfile(user), &profile);
+
+    env.storage()
+        .persistent()
+        .set(&DataKey::UserProfile(user), &profile);
 }

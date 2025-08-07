@@ -1,5 +1,5 @@
-use soroban_sdk::{Env, String, Symbol, symbol_short};
 use crate::schema::{Course, CourseModule};
+use soroban_sdk::{symbol_short, Env, String, Symbol, Vec};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const MODULE_KEY: Symbol = symbol_short!("module");
@@ -24,7 +24,10 @@ pub fn course_registry_delete_course(env: &Env, course_id: String) -> Result<(),
 
     delete_course_modules(env, &course_id);
 
-    let title_key = (TITLE_KEY, String::from_str(env, course.title.to_string().to_lowercase().as_str()));
+    let title_key = (
+        TITLE_KEY,
+        String::from_str(env, course.title.to_string().to_lowercase().as_str()),
+    );
     env.storage().persistent().remove(&title_key);
     env.storage().persistent().remove(&course_storage_key);
     env.events().publish((course_id,), "course_deleted");
@@ -33,7 +36,7 @@ pub fn course_registry_delete_course(env: &Env, course_id: String) -> Result<(),
 }
 
 fn delete_course_modules(env: &Env, course_id: &String) {
-    let mut modules_to_delete: Vec<String> = Vec::new();
+    let mut modules_to_delete: Vec<String> = Vec::new(&env);
 
     let mut counter = 0u32;
     loop {
@@ -42,7 +45,7 @@ fn delete_course_modules(env: &Env, course_id: &String) {
         if env.storage().persistent().has(&key) {
             if let Some(module) = env.storage().persistent().get::<_, CourseModule>(&key) {
                 if module.course_id == *course_id {
-                    modules_to_delete.push(String::from_str(env, &module_id));
+                    modules_to_delete.push_back(String::from_str(env, &module_id));
                 }
             }
         } else {
@@ -63,9 +66,9 @@ fn delete_course_modules(env: &Env, course_id: &String) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use soroban_sdk::{testutils::Address as _, Address, Env};
     use crate::schema::{Course, CourseModule};
     use crate::CourseRegistry;
+    use soroban_sdk::{testutils::Address as _, Address, Env};
 
     fn create_test_course(env: &Env, id: &str) -> Course {
         Course {
@@ -78,6 +81,7 @@ mod tests {
             language: None,
             thumbnail_url: None,
             published: false,
+            prerequisites: Vec::new(&env),
         }
     }
 
@@ -89,8 +93,12 @@ mod tests {
         let course = create_test_course(&env, "course_1");
 
         env.as_contract(&contract_id, || {
-            env.storage().persistent().set(&(COURSE_KEY, course_id.clone()), &course);
-            env.storage().persistent().set(&(TITLE_KEY, String::from_str(&env, "test course")), &true);
+            env.storage()
+                .persistent()
+                .set(&(COURSE_KEY, course_id.clone()), &course);
+            env.storage()
+                .persistent()
+                .set(&(TITLE_KEY, String::from_str(&env, "test course")), &true);
         });
 
         let result = env.as_contract(&contract_id, || {
@@ -100,8 +108,14 @@ mod tests {
         assert!(result.is_ok());
 
         env.as_contract(&contract_id, || {
-            assert!(!env.storage().persistent().has(&(COURSE_KEY, course_id.clone())));
-            assert!(!env.storage().persistent().has(&(TITLE_KEY, String::from_str(&env, "test course"))));
+            assert!(!env
+                .storage()
+                .persistent()
+                .has(&(COURSE_KEY, course_id.clone())));
+            assert!(!env
+                .storage()
+                .persistent()
+                .has(&(TITLE_KEY, String::from_str(&env, "test course"))));
         });
     }
 
@@ -121,9 +135,15 @@ mod tests {
         };
 
         env.as_contract(&contract_id, || {
-            env.storage().persistent().set(&(COURSE_KEY, course_id.clone()), &course);
-            env.storage().persistent().set(&(TITLE_KEY, String::from_str(&env, "test course")), &true);
-            env.storage().persistent().set(&(MODULE_KEY, module.id.clone()), &module);
+            env.storage()
+                .persistent()
+                .set(&(COURSE_KEY, course_id.clone()), &course);
+            env.storage()
+                .persistent()
+                .set(&(TITLE_KEY, String::from_str(&env, "test course")), &true);
+            env.storage()
+                .persistent()
+                .set(&(MODULE_KEY, module.id.clone()), &module);
         });
 
         let result = env.as_contract(&contract_id, || {
@@ -133,8 +153,14 @@ mod tests {
         assert!(result.is_ok());
 
         env.as_contract(&contract_id, || {
-            assert!(!env.storage().persistent().has(&(COURSE_KEY, course_id.clone())));
-            assert!(!env.storage().persistent().has(&(MODULE_KEY, module.id.clone())));
+            assert!(!env
+                .storage()
+                .persistent()
+                .has(&(COURSE_KEY, course_id.clone())));
+            assert!(!env
+                .storage()
+                .persistent()
+                .has(&(MODULE_KEY, module.id.clone())));
         });
     }
 
@@ -176,9 +202,15 @@ mod tests {
         let c2 = create_test_course(&env, "remove");
 
         env.as_contract(&contract_id, || {
-            env.storage().persistent().set(&(COURSE_KEY, id1.clone()), &c1);
-            env.storage().persistent().set(&(COURSE_KEY, id2.clone()), &c2);
-            env.storage().persistent().set(&(TITLE_KEY, String::from_str(&env, "test course")), &true);
+            env.storage()
+                .persistent()
+                .set(&(COURSE_KEY, id1.clone()), &c1);
+            env.storage()
+                .persistent()
+                .set(&(COURSE_KEY, id2.clone()), &c2);
+            env.storage()
+                .persistent()
+                .set(&(TITLE_KEY, String::from_str(&env, "test course")), &true);
         });
 
         env.as_contract(&contract_id, || {

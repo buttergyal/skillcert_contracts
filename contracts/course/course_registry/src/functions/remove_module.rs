@@ -1,5 +1,5 @@
-use soroban_sdk::{Env, String};
 use crate::schema::{CourseModule, DataKey};
+use soroban_sdk::{Env, String};
 
 pub fn course_registry_remove_module(env: &Env, module_id: String) -> Result<(), &'static str> {
     if module_id.len() == 0 {
