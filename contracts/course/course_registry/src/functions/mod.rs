@@ -9,3 +9,4 @@ pub mod get_prerequisites_by_course;
 pub mod list_modules;
 pub mod remove_module;
 pub mod remove_prerequisite;
+pub mod is_course_creator;
