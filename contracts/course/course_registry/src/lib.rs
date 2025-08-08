@@ -71,4 +71,9 @@ impl CourseRegistry {
     pub fn edit_prerequisite(env: Env, course_id: String, new_prerequisites: Vec<String>) {
         functions::edit_prerequisite::course_registry_edit_prerequisite(env, course_id, new_prerequisites)
     }
+
+    pub fn is_course_creator(env: &Env, course_id: String, user: Address) -> bool {
+        functions::is_course_creator::is_course_creator(env, course_id, user)
+    }
+
 }
