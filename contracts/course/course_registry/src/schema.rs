@@ -10,7 +10,6 @@ pub struct CourseModule {
     pub created_at: u64,
 }
 
-
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]
 pub struct CourseGoal {
@@ -42,6 +41,7 @@ pub struct Course {
     pub thumbnail_url: Option<String>,
     pub published: bool,
     pub prerequisites: Vec<CourseId>,
+    pub is_archived: bool,
 }
 
 #[contracttype]

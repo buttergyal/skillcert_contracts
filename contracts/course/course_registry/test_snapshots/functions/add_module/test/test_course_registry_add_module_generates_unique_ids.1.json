@@ -89,6 +89,14 @@
                     },
                     {
                       "key": {
+                        "symbol": "is_archived"
+                      },
+                      "val": {
+                        "bool": false
+                      }
+                    },
+                    {
+                      "key": {
                         "symbol": "language"
                       },
                       "val": "void"
@@ -208,6 +216,14 @@
                       },
                       "val": {
                         "string": "course_123"
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "is_archived"
+                      },
+                      "val": {
+                        "bool": false
                       }
                     },
                     {

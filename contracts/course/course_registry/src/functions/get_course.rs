@@ -9,9 +9,12 @@ pub fn course_registry_get_course(env: &Env, course_id: String) -> Course {
     // Get the course from storage
     let course: Course = env
         .storage()
-        .instance()
+        .persistent()
         .get(&(key, course_id.clone()))
         .expect("Course not found");
 
-    course
+    match course.is_archived {
+        true => panic!("Course is archived"),
+        false => course,
+    }
 }

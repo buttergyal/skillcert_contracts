@@ -17,7 +17,7 @@ pub fn course_registry_get_courses_by_instructor(env: &Env, instructor: Address)
 
         let course: Course = env.storage().persistent().get(&key).unwrap();
 
-        if course.creator == instructor {
+        if course.creator == instructor && !course.is_archived {
             results.push_back(course);
         }
 

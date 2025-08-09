@@ -89,6 +89,14 @@
                     },
                     {
                       "key": {
+                        "symbol": "is_archived"
+                      },
+                      "val": {
+                        "bool": false
+                      }
+                    },
+                    {
+                      "key": {
                         "symbol": "language"
                       },
                       "val": "void"

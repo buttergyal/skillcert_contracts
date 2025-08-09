@@ -82,6 +82,7 @@ mod tests {
             thumbnail_url: None,
             published: false,
             prerequisites: Vec::new(&env),
+            is_archived: false,
         }
     }
 

@@ -7,6 +7,7 @@ const COURSE_ID: Symbol = symbol_short!("course");
 
 pub fn course_registry_create_course(
     env: Env,
+    creator: Address,
     title: String,
     description: String,
     price: u128,
@@ -14,7 +15,7 @@ pub fn course_registry_create_course(
     language: Option<String>,
     thumbnail_url: Option<String>,
 ) -> Course {
-    let caller: Address = env.current_contract_address();
+    creator.require_auth();
 
     // ensure the title is not empty and not just whitespace
     let title_string = title.to_string();
@@ -53,13 +54,14 @@ pub fn course_registry_create_course(
         id: converted_id.clone(),
         title,
         description,
-        creator: caller,
+        creator,
         price,
         category,
         language,
         thumbnail_url,
         published: false,
         prerequisites: Vec::new(&env),
+        is_archived: false,
     };
 
     // save to the storage
@@ -80,14 +82,16 @@ pub fn generate_course_id(env: &Env) -> u128 {
 mod test {
     use super::*;
     use crate::schema::Course;
-    use crate::CourseRegistry;
-    use soroban_sdk::{Address, Env, String};
+    use crate::{CourseRegistry, CourseRegistryClient};
+    use soroban_sdk::testutils::Address as TestAddress;
 
     #[test]
     fn test_generate_course_id() {
         let env = Env::default();
+        env.mock_all_auths();
 
         let contract_id: Address = env.register(CourseRegistry, {});
+
         env.as_contract(&contract_id, || {
             generate_course_id(&env);
             let id: u128 = generate_course_id(&env);
@@ -98,6 +102,7 @@ mod test {
     #[test]
     fn test_add_module_success() {
         let env = Env::default();
+        env.mock_all_auths();
 
         let contract_id: Address = env.register(CourseRegistry, {});
         let title: String = String::from_str(&env, "title");
@@ -111,6 +116,7 @@ mod test {
         env.as_contract(&contract_id, || {
             course_registry_create_course(
                 env.clone(),
+                Address::generate(&env),
                 title.clone(),
                 description.clone(),
                 price,
@@ -136,6 +142,7 @@ mod test {
     #[test]
     fn test_add_module_success_multiple() {
         let env: Env = Env::default();
+        env.mock_all_auths();
 
         let contract_id: Address = env.register(CourseRegistry, {});
         let title: String = String::from_str(&env, "title");
@@ -149,6 +156,7 @@ mod test {
         env.as_contract(&contract_id, || {
             course_registry_create_course(
                 env.clone(),
+                Address::generate(&env),
                 title.clone(),
                 description.clone(),
                 price,
@@ -160,6 +168,7 @@ mod test {
             //create a second course
             course_registry_create_course(
                 env.clone(),
+                Address::generate(&env),
                 another_course_title.clone(),
                 another_course_description.clone(),
                 another_price,
@@ -185,6 +194,7 @@ mod test {
     #[should_panic(expected = "Course error: Course Title already exists")]
     fn test_cannot_create_courses_with_duplicate_title() {
         let env: Env = Env::default();
+        env.mock_all_auths();
         let contract_id: Address = env.register(CourseRegistry, {});
         let title: String = String::from_str(&env, "title");
         let description: String = String::from_str(&env, "A description");
@@ -194,6 +204,7 @@ mod test {
         env.as_contract(&contract_id, || {
             course_registry_create_course(
                 env.clone(),
+                Address::generate(&env),
                 title.clone(),
                 description.clone(),
                 price,
@@ -205,6 +216,7 @@ mod test {
             // create another course with the same title
             course_registry_create_course(
                 env.clone(),
+                Address::generate(&env),
                 title.clone(),
                 another_description.clone(),
                 price,
@@ -219,6 +231,7 @@ mod test {
     #[should_panic(expected = "Course error: Course Title cannot be empty")]
     fn test_cannot_create_courses_with_empty_title() {
         let env: Env = Env::default();
+        env.mock_all_auths();
         let contract_id: Address = env.register(CourseRegistry, {});
         let title: String = String::from_str(&env, "");
         let description: String = String::from_str(&env, "A description");
@@ -227,6 +240,7 @@ mod test {
         env.as_contract(&contract_id, || {
             course_registry_create_course(
                 env.clone(),
+                Address::generate(&env),
                 title.clone(),
                 description.clone(),
                 price,
@@ -241,6 +255,7 @@ mod test {
     #[should_panic(expected = "Course error: Price must be greater than 0")]
     fn test_cannot_create_courses_with_zero_price() {
         let env: Env = Env::default();
+        env.mock_all_auths();
         let contract_id: Address = env.register(CourseRegistry, {});
         let title: String = String::from_str(&env, "Valid Title");
         let description: String = String::from_str(&env, "A description");
@@ -249,6 +264,7 @@ mod test {
         env.as_contract(&contract_id, || {
             course_registry_create_course(
                 env.clone(),
+                Address::generate(&env),
                 title.clone(),
                 description.clone(),
                 price,
@@ -263,6 +279,7 @@ mod test {
     #[should_panic(expected = "Course error: Course Title cannot be empty")]
     fn test_cannot_create_courses_with_whitespace_only_title() {
         let env: Env = Env::default();
+        env.mock_all_auths();
         let contract_id: Address = env.register(CourseRegistry, {});
         let title: String = String::from_str(&env, "   ");
         let description: String = String::from_str(&env, "A description");
@@ -271,6 +288,7 @@ mod test {
         env.as_contract(&contract_id, || {
             course_registry_create_course(
                 env.clone(),
+                Address::generate(&env),
                 title.clone(),
                 description.clone(),
                 price,
@@ -285,6 +303,7 @@ mod test {
     #[should_panic(expected = "Course error: Course Title already exists")]
     fn test_duplicate_title_case_insensitive() {
         let env: Env = Env::default();
+        env.mock_all_auths();
         let contract_id: Address = env.register(CourseRegistry, {});
         let title1: String = String::from_str(&env, "Programming Basics");
         let title2: String = String::from_str(&env, "PROGRAMMING BASICS");
@@ -294,6 +313,7 @@ mod test {
         env.as_contract(&contract_id, || {
             course_registry_create_course(
                 env.clone(),
+                Address::generate(&env),
                 title1.clone(),
                 description.clone(),
                 price,
@@ -303,6 +323,7 @@ mod test {
             );
             course_registry_create_course(
                 env.clone(),
+                Address::generate(&env),
                 title2.clone(),
                 description.clone(),
                 price,
@@ -316,6 +337,7 @@ mod test {
     #[test]
     fn test_create_course_with_long_title() {
         let env: Env = Env::default();
+        env.mock_all_auths();
         let contract_id: Address = env.register(CourseRegistry, {});
         let long_title: String = String::from_str(&env, "This is a very long course title that contains many words and should still be valid for course creation as long as it is not empty");
         let description: String = String::from_str(&env, "A description");
@@ -324,6 +346,7 @@ mod test {
         env.as_contract(&contract_id, || {
             let course = course_registry_create_course(
                 env.clone(),
+                Address::generate(&env),
                 long_title.clone(),
                 description.clone(),
                 price,
@@ -340,6 +363,7 @@ mod test {
     #[test]
     fn test_create_course_with_special_characters() {
         let env: Env = Env::default();
+        env.mock_all_auths();
         let contract_id: Address = env.register(CourseRegistry, {});
         let title: String = String::from_str(&env, "C++ & JavaScript: Advanced Programming!");
         let description: String = String::from_str(
@@ -351,6 +375,7 @@ mod test {
         env.as_contract(&contract_id, || {
             let course = course_registry_create_course(
                 env.clone(),
+                Address::generate(&env),
                 title.clone(),
                 description.clone(),
                 price,
@@ -367,6 +392,7 @@ mod test {
     #[test]
     fn test_create_course_with_maximum_price() {
         let env: Env = Env::default();
+        env.mock_all_auths();
         let contract_id: Address = env.register(CourseRegistry, {});
         let title: String = String::from_str(&env, "Premium Course");
         let description: String = String::from_str(&env, "Most expensive course");
@@ -375,6 +401,7 @@ mod test {
         env.as_contract(&contract_id, || {
             let course = course_registry_create_course(
                 env.clone(),
+                Address::generate(&env),
                 title.clone(),
                 description.clone(),
                 max_price,
@@ -390,6 +417,7 @@ mod test {
     #[test]
     fn test_create_course_with_all_optional_fields() {
         let env: Env = Env::default();
+        env.mock_all_auths();
         let contract_id: Address = env.register(CourseRegistry, {});
         let title: String = String::from_str(&env, "Complete Course");
         let description: String = String::from_str(&env, "Course with all fields");
@@ -404,6 +432,7 @@ mod test {
         env.as_contract(&contract_id, || {
             let course = course_registry_create_course(
                 env.clone(),
+                Address::generate(&env),
                 title.clone(),
                 description.clone(),
                 price,
@@ -424,6 +453,7 @@ mod test {
     #[test]
     fn test_create_course_with_partial_optional_fields() {
         let env: Env = Env::default();
+        env.mock_all_auths();
         let contract_id: Address = env.register(CourseRegistry, {});
         let title: String = String::from_str(&env, "Partial Course");
         let description: String = String::from_str(&env, "Course with some optional fields");
@@ -433,6 +463,7 @@ mod test {
         env.as_contract(&contract_id, || {
             let course = course_registry_create_course(
                 env.clone(),
+                Address::generate(&env),
                 title.clone(),
                 description.clone(),
                 price,
@@ -451,6 +482,7 @@ mod test {
     #[test]
     fn test_create_course_empty_description() {
         let env: Env = Env::default();
+        env.mock_all_auths();
         let contract_id: Address = env.register(CourseRegistry, {});
         let title: String = String::from_str(&env, "Course with Empty Description");
         let description: String = String::from_str(&env, "");
@@ -459,6 +491,7 @@ mod test {
         env.as_contract(&contract_id, || {
             let course = course_registry_create_course(
                 env.clone(),
+                Address::generate(&env),
                 title.clone(),
                 description.clone(),
                 price,
@@ -475,12 +508,14 @@ mod test {
     #[test]
     fn test_create_multiple_courses_sequential_ids() {
         let env: Env = Env::default();
+        env.mock_all_auths();
         let contract_id: Address = env.register(CourseRegistry, {});
         let price: u128 = 1000;
 
         env.as_contract(&contract_id, || {
             let course1 = course_registry_create_course(
                 env.clone(),
+                Address::generate(&env),
                 String::from_str(&env, "Course One"),
                 String::from_str(&env, "First course"),
                 price,
@@ -491,6 +526,7 @@ mod test {
 
             let course2 = course_registry_create_course(
                 env.clone(),
+                Address::generate(&env),
                 String::from_str(&env, "Course Two"),
                 String::from_str(&env, "Second course"),
                 price,
@@ -501,6 +537,7 @@ mod test {
 
             let course3 = course_registry_create_course(
                 env.clone(),
+                Address::generate(&env),
                 String::from_str(&env, "Course Three"),
                 String::from_str(&env, "Third course"),
                 price,
@@ -518,6 +555,7 @@ mod test {
     #[test]
     fn test_create_course_with_unicode_characters() {
         let env: Env = Env::default();
+        env.mock_all_auths();
         let contract_id: Address = env.register(CourseRegistry, {});
         let title: String = String::from_str(&env, "Programación en Español 🚀");
         let description: String = String::from_str(
@@ -530,6 +568,7 @@ mod test {
         env.as_contract(&contract_id, || {
             let course = course_registry_create_course(
                 env.clone(),
+                Address::generate(&env),
                 title.clone(),
                 description.clone(),
                 price,

@@ -79,6 +79,7 @@ mod test {
             language: None,
             thumbnail_url: None,
             prerequisites: Vec::new(&env),
+            is_archived: false,
         };
 
         // Set up initial course data and perform test within contract context
@@ -141,6 +142,7 @@ mod test {
             language: None,
             thumbnail_url: None,
             prerequisites: Vec::new(&env),
+            is_archived: false,
         };
 
         // Set up initial course data and perform test within contract context
@@ -201,6 +203,7 @@ mod test {
             language: None,
             thumbnail_url: None,
             prerequisites: Vec::new(&env),
+            is_archived: false,
         };
 
         // Set up initial course data and perform test within contract context

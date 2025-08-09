@@ -1,9 +1,11 @@
 // contracts/course_registry/src/functions/edit_course.rs
-use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
 use crate::schema::Course;
+use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
-const TITLE_KEY: Symbol  = symbol_short!("title");
+const TITLE_KEY: Symbol = symbol_short!("title");
+
+const EDIT_COURSE_EVENT: Symbol = symbol_short!("editcours");
 
 pub fn course_registry_edit_course(
     env: Env,
@@ -30,7 +32,7 @@ pub fn course_registry_edit_course(
         .expect("Course error: Course not found");
 
     // --- Permission: only creator can edit ---
-    let caller: Address = env.invoker();
+    let caller: Address = env.current_contract_address();
     if caller != course.creator {
         panic!("Course error: Unauthorized edit");
     }
@@ -98,10 +100,8 @@ pub fn course_registry_edit_course(
     env.storage().persistent().set(&storage_key, &course);
 
     // --- Emit event ---
-    env.events().publish(
-        (symbol_short!("course_updated"),),
-        course_id.clone(),
-    );
+    env.events()
+        .publish((EDIT_COURSE_EVENT, course_id.clone()), course.clone());
 
     course
 }
