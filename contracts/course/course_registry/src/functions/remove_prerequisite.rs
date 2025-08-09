@@ -1,49 +1,271 @@
-use soroban_sdk::{Env, String, Vec, symbol_short, Symbol};
 use crate::schema::{Course, DataKey};
+use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
 
 const PREREQ_REMOVED_EVENT: Symbol = symbol_short!("prereqrmv");
 
 pub fn course_registry_remove_prerequisite(
     env: Env,
+    creator: Address,
     course_id: String,
     prerequisite_course_id: String,
 ) {
-    let invoker = env.current_contract_address();
+    creator.require_auth();
 
     // Load course
     let course_key = (symbol_short!("course"), course_id.clone());
-    let course: Course = env.storage().persistent()
+    let course: Course = env
+        .storage()
+        .persistent()
         .get(&course_key)
         .expect("Course not found");
 
     // Authorization: only creator can remove prerequisites
-    if course.creator != invoker {
+    if course.creator != creator {
         panic!("Only the course creator can remove prerequisites");
     }
 
     // Load current list of prerequisites
-    let mut prerequisites: Vec<String> = env.storage().persistent()
+    let mut prerequisites: Vec<String> = env
+        .storage()
+        .persistent()
         .get(&DataKey::CoursePrerequisites(course_id.clone()))
         .unwrap_or(Vec::new(&env));
 
     // Find and remove the prerequisite
-    let index = prerequisites.iter().position(|id| id.eq(&prerequisite_course_id));
+    let index = prerequisites
+        .iter()
+        .position(|id| id.eq(&prerequisite_course_id));
 
     match index {
         Some(i) => {
             prerequisites.remove(i as u32);
-        },
+        }
         None => {
             panic!("Prerequisite not found in the list");
         }
     }
 
     // Save updated prerequisites
-    env.storage().persistent().set(&DataKey::CoursePrerequisites(course_id.clone()), &prerequisites);
+    env.storage().persistent().set(
+        &DataKey::CoursePrerequisites(course_id.clone()),
+        &prerequisites,
+    );
 
     // Emit event
-    env.events().publish(
-        (PREREQ_REMOVED_EVENT, course_id),
-        prerequisite_course_id,
-    );
+    env.events()
+        .publish((PREREQ_REMOVED_EVENT, course_id), prerequisite_course_id);
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::schema::Course;
+    use crate::{CourseRegistry, CourseRegistryClient};
+    use soroban_sdk::{testutils::Address as _, Address, Env, String, Vec as SdkVec};
+
+    #[test]
+    fn test_remove_prerequisite_success() {
+        let env = Env::default();
+        env.mock_all_auths();
+
+        let contract_id = env.register(CourseRegistry, {});
+        let client = CourseRegistryClient::new(&env, &contract_id);
+
+        let creator: Address = Address::generate(&env);
+
+        let course1: Course = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 1"),
+            &String::from_str(&env, "Description 1"),
+            &1000_u128,
+            &None,
+            &None,
+            &None,
+        );
+
+        let course2: Course = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 2"),
+            &String::from_str(&env, "Description 2"),
+            &1000_u128,
+            &None,
+            &None,
+            &None,
+        );
+
+        let prerequisites = SdkVec::from_array(&env, [course2.id.clone()]);
+        client.edit_prerequisite(&creator, &course1.id, &prerequisites);
+
+        let stored_prerequisites: SdkVec<String> = env.as_contract(&contract_id, || {
+            env.storage()
+                .persistent()
+                .get(&DataKey::CoursePrerequisites(course1.id.clone()))
+                .unwrap_or(SdkVec::new(&env))
+        });
+        assert_eq!(stored_prerequisites.len(), 1);
+        assert_eq!(stored_prerequisites.get(0).unwrap(), course2.id);
+
+        client.remove_prerequisite(&creator, &course1.id, &course2.id);
+
+        let stored_prerequisites: SdkVec<String> = env.as_contract(&contract_id, || {
+            env.storage()
+                .persistent()
+                .get(&DataKey::CoursePrerequisites(course1.id.clone()))
+                .unwrap_or(SdkVec::new(&env))
+        });
+        assert_eq!(stored_prerequisites.len(), 0);
+    }
+
+    #[test]
+    #[should_panic(expected = "Only the course creator can remove prerequisites")]
+    fn test_remove_prerequisite_unauthorized() {
+        let env = Env::default();
+        env.mock_all_auths();
+
+        let contract_id = env.register(CourseRegistry, {});
+        let client = CourseRegistryClient::new(&env, &contract_id);
+
+        let creator: Address = Address::generate(&env);
+        let impostor: Address = Address::generate(&env);
+
+        let course1: Course = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 1"),
+            &String::from_str(&env, "Description 1"),
+            &1000_u128,
+            &None,
+            &None,
+            &None,
+        );
+
+        let course2: Course = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 2"),
+            &String::from_str(&env, "Description 2"),
+            &1000_u128,
+            &None,
+            &None,
+            &None,
+        );
+
+        let prerequisites = SdkVec::from_array(&env, [course2.id.clone()]);
+        client.edit_prerequisite(&creator, &course1.id, &prerequisites);
+
+        client.remove_prerequisite(&impostor, &course1.id, &course2.id);
+    }
+
+    #[test]
+    #[should_panic(expected = "Course not found")]
+    fn test_remove_prerequisite_course_not_found() {
+        let env = Env::default();
+        env.mock_all_auths();
+
+        let contract_id = env.register(CourseRegistry, {});
+        let client = CourseRegistryClient::new(&env, &contract_id);
+
+        let creator: Address = Address::generate(&env);
+        let fake_course_id = String::from_str(&env, "nonexistent_course");
+        let fake_prereq_id = String::from_str(&env, "nonexistent_prereq");
+
+        client.remove_prerequisite(&creator, &fake_course_id, &fake_prereq_id);
+    }
+
+    #[test]
+    #[should_panic(expected = "Prerequisite not found in the list")]
+    fn test_remove_prerequisite_not_in_list() {
+        let env = Env::default();
+        env.mock_all_auths();
+
+        let contract_id = env.register(CourseRegistry, {});
+        let client = CourseRegistryClient::new(&env, &contract_id);
+
+        let creator: Address = Address::generate(&env);
+
+        let course1: Course = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 1"),
+            &String::from_str(&env, "Description 1"),
+            &1000_u128,
+            &None,
+            &None,
+            &None,
+        );
+
+        let course2: Course = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 2"),
+            &String::from_str(&env, "Description 2"),
+            &1000_u128,
+            &None,
+            &None,
+            &None,
+        );
+
+        client.remove_prerequisite(&creator, &course1.id, &course2.id);
+    }
+
+    #[test]
+    fn test_remove_one_of_multiple_prerequisites() {
+        let env = Env::default();
+        env.mock_all_auths();
+
+        let contract_id = env.register(CourseRegistry, {});
+        let client = CourseRegistryClient::new(&env, &contract_id);
+
+        let creator: Address = Address::generate(&env);
+
+        let course1: Course = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 1"),
+            &String::from_str(&env, "Description 1"),
+            &1000_u128,
+            &None,
+            &None,
+            &None,
+        );
+
+        let course2: Course = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 2"),
+            &String::from_str(&env, "Description 2"),
+            &1000_u128,
+            &None,
+            &None,
+            &None,
+        );
+
+        let course3: Course = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 3"),
+            &String::from_str(&env, "Description 3"),
+            &1000_u128,
+            &None,
+            &None,
+            &None,
+        );
+
+        let prerequisites = SdkVec::from_array(&env, [course2.id.clone(), course3.id.clone()]);
+        client.edit_prerequisite(&creator, &course1.id, &prerequisites);
+
+        let stored_prerequisites: SdkVec<String> = env.as_contract(&contract_id, || {
+            env.storage()
+                .persistent()
+                .get(&DataKey::CoursePrerequisites(course1.id.clone()))
+                .unwrap_or(SdkVec::new(&env))
+        });
+        assert_eq!(stored_prerequisites.len(), 2);
+        assert_eq!(stored_prerequisites.get(0).unwrap(), course2.id);
+        assert_eq!(stored_prerequisites.get(1).unwrap(), course3.id);
+
+        client.remove_prerequisite(&creator, &course1.id, &course2.id);
+
+        let stored_prerequisites: SdkVec<String> = env.as_contract(&contract_id, || {
+            env.storage()
+                .persistent()
+                .get(&DataKey::CoursePrerequisites(course1.id.clone()))
+                .unwrap_or(SdkVec::new(&env))
+        });
+        assert_eq!(stored_prerequisites.len(), 1);
+        assert_eq!(stored_prerequisites.get(0).unwrap(), course3.id);
+    }
 }

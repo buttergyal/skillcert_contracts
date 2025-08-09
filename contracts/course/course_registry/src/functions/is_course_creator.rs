@@ -12,84 +12,61 @@ pub fn is_course_creator(env: &Env, course_id: String, user: Address) -> bool {
     false
 }
 
-
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::schema::Course;
     use crate::CourseRegistry;
+    use crate::{schema::Course, CourseRegistryClient};
     use soroban_sdk::{testutils::Address as _, Address, Env};
 
     #[test]
     fn test_is_cource_creator_success() {
         let env = Env::default();
+        env.mock_all_auths();
 
-        let contract_id: Address = env.register(CourseRegistry, {});
-        let title: String = String::from_str(&env, "title");
-        let description: String = String::from_str(&env, "A description");
-        let price: u128 = 1000;
-        let category: Option<String> = Some(String::from_str(&env, "Programming"));
-        let language: Option<String> = Some(String::from_str(&env, "English"));
-        let thumbnail_url: Option<String> =
-            Some(String::from_str(&env, "https://example.com/thumb.jpg"));
+        let contract_id = env.register(CourseRegistry, {});
+        let client = CourseRegistryClient::new(&env, &contract_id);
 
-        env.as_contract(&contract_id, || {
-            CourseRegistry::create_course(
-                env.clone(),
-                title.clone(),
-                description.clone(),
-                price,
-                category.clone(),
-                language.clone(),
-                thumbnail_url.clone(),
-            );
-            // Verify course storage
-            let storage_key: (Symbol, String) = (COURSE_KEY, String::from_str(&env, "1"));
-            let stored_course: Option<Course> = env.storage().persistent().get(&storage_key);
-            let course = stored_course.expect("Course should be stored");
-            let id: String = String::from_str(&env, "1");
-            let caller = env.current_contract_address();
-            let is_creator = CourseRegistry::is_course_creator(&env, id.clone(), caller.clone());
+        let creator: Address = Address::generate(&env);
 
-            assert_eq!(course.id, id);
-            assert!(is_creator);
-        });
+        let course: Course = client.create_course(
+            &creator,
+            &String::from_str(&env, "title"),
+            &String::from_str(&env, "description"),
+            &1000_u128,
+            &Some(String::from_str(&env, "category")),
+            &Some(String::from_str(&env, "language")),
+            &Some(String::from_str(&env, "thumbnail_url")),
+        );
+
+        let is_creator = client.is_course_creator(&course.id, &creator);
+
+        assert!(is_creator);
     }
 
     #[test]
     fn test_is_cource_creator_fail() {
         let env = Env::default();
+        env.mock_all_auths();
 
-        let contract_id: Address = env.register(CourseRegistry, {});
-        let title: String = String::from_str(&env, "title");
-        let description: String = String::from_str(&env, "A description");
-        let price: u128 = 1000;
-        let category: Option<String> = Some(String::from_str(&env, "Programming"));
-        let language: Option<String> = Some(String::from_str(&env, "English"));
-        let thumbnail_url: Option<String> =
-            Some(String::from_str(&env, "https://example.com/thumb.jpg"));
+        let contract_id = env.register(CourseRegistry, {});
+        let client = CourseRegistryClient::new(&env, &contract_id);
 
-        env.as_contract(&contract_id, || {
-            CourseRegistry::create_course(
-                env.clone(),
-                title.clone(),
-                description.clone(),
-                price,
-                category.clone(),
-                language.clone(),
-                thumbnail_url.clone(),
-            );
-            // Verify course storage
-            let storage_key: (Symbol, String) = (COURSE_KEY, String::from_str(&env, "1"));
-            let stored_course: Option<Course> = env.storage().persistent().get(&storage_key);
-            let course = stored_course.expect("Course should be stored");
-            let id: String = String::from_str(&env, "1");
-            let not_caller = Address::generate(&env);
+        let creator: Address = Address::generate(&env);
+        let impostor: Address = Address::generate(&env);
 
-            let is_creator = CourseRegistry::is_course_creator(&env, id.clone(), not_caller.clone());
+        let course: Course = client.create_course(
+            &creator,
+            &String::from_str(&env, "title"),
+            &String::from_str(&env, "description"),
+            &1000_u128,
+            &Some(String::from_str(&env, "category")),
+            &Some(String::from_str(&env, "language")),
+            &Some(String::from_str(&env, "thumbnail_url")),
+        );
 
-            assert_eq!(course.id, id);
-            assert!(!is_creator);
-        });
+        let is_creator = client.is_course_creator(&course.id.clone(), &Address::generate(&env));
+
+        assert!(!is_creator);
     }
 }
