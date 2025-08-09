@@ -50,3 +50,10 @@ pub struct CourseId {
     pub id: String,
     pub count: u128,
 }
+
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct Category {
+    pub name: String,
+    pub count: u128,
+}
