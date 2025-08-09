@@ -10,10 +10,10 @@ pub struct CourseModule {
     pub created_at: u64,
 }
 
-
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]
 pub struct CourseGoal {
+    pub goal_id: String,
     pub course_id: String,
     pub content: String,
     pub created_by: Address,
@@ -25,7 +25,8 @@ pub struct CourseGoal {
 pub enum DataKey {
     Module(String),
     Courses,
-    CourseGoal(String),
+    CourseGoalList(String),     // Optional: Keep a list of goal IDs per course
+    CourseGoal(String, String), // (course_id, goal_id)
     CoursePrerequisites(String),
 }
 
