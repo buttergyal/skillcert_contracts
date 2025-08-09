@@ -1,6 +1,6 @@
-use soroban_sdk::{Address, Env, Vec, String};
-use crate::schema::{LightProfile, UserRole, UserStatus, DataKey, AdminConfig};
+use crate::schema::{AdminConfig, DataKey, LightProfile, UserRole, UserStatus};
 use core::iter::Iterator;
+use soroban_sdk::{Address, Env, String, Vec};
 
 /// Security constants
 const MAX_PAGE_SIZE_ABSOLUTE: u32 = 1000;
@@ -8,7 +8,11 @@ const MAX_STRING_LENGTH: usize = 256;
 
 /// Checks whether the system is properly initialized
 fn is_system_initialized(env: &Env) -> bool {
-    if let Some(config) = env.storage().persistent().get::<DataKey, AdminConfig>(&DataKey::AdminConfig) {
+    if let Some(config) = env
+        .storage()
+        .persistent()
+        .get::<DataKey, AdminConfig>(&DataKey::AdminConfig)
+    {
         config.initialized
     } else {
         false
@@ -17,7 +21,9 @@ fn is_system_initialized(env: &Env) -> bool {
 
 /// Gets the admin configuration with defaults
 fn get_admin_config(env: &Env) -> AdminConfig {
-    env.storage().persistent().get::<DataKey, AdminConfig>(&DataKey::AdminConfig)
+    env.storage()
+        .persistent()
+        .get::<DataKey, AdminConfig>(&DataKey::AdminConfig)
         .unwrap_or_else(|| panic!("System not initialized"))
 }
 
@@ -29,14 +35,17 @@ fn is_admin(env: &Env, who: &Address) -> bool {
     }
 
     let config = get_admin_config(env);
-    
+
     // Check if caller is the super admin
     if &config.super_admin == who {
         return true;
     }
-    
+
     // Check if caller is in regular admin list
-    let admins: Option<Vec<Address>> = env.storage().persistent().get::<DataKey, Vec<Address>>(&DataKey::Admins);
+    let admins: Option<Vec<Address>> = env
+        .storage()
+        .persistent()
+        .get::<DataKey, Vec<Address>>(&DataKey::Admins);
     match admins {
         Some(list) => list.iter().any(|a| a == *who),
         None => false,
@@ -45,10 +54,10 @@ fn is_admin(env: &Env, who: &Address) -> bool {
 
 /// Checks if a profile matches the given filter criteria
 fn matches_filter(
-    profile: &LightProfile, 
-    role_filter: &Option<UserRole>, 
-    country_filter: &Option<String>, 
-    status_filter: &Option<UserStatus>
+    profile: &LightProfile,
+    role_filter: &Option<UserRole>,
+    country_filter: &Option<String>,
+    status_filter: &Option<UserStatus>,
 ) -> bool {
     // Check role filter
     if let Some(ref role) = role_filter {
@@ -56,29 +65,29 @@ fn matches_filter(
             return false;
         }
     }
-    
+
     // Check country filter
     if let Some(ref country) = country_filter {
         if &profile.country != country {
             return false;
         }
     }
-    
+
     // Check status filter
     if let Some(ref status) = status_filter {
         if &profile.status != status {
             return false;
         }
     }
-    
+
     true
 }
 
 /// Validates and sanitizes input parameters
 fn validate_input(
-    page_size: u32, 
+    page_size: u32,
     country_filter: &Option<String>,
-    config: &AdminConfig
+    config: &AdminConfig,
 ) -> Result<(), &'static str> {
     // Validate page_size
     let max_allowed = config.max_page_size.min(MAX_PAGE_SIZE_ABSOLUTE);
@@ -88,14 +97,14 @@ fn validate_input(
     if page_size > max_allowed {
         return Err("page_size exceeds maximum allowed limit");
     }
-    
+
     // Validate country filter string length
     if let Some(country) = country_filter {
         if country.len() > MAX_STRING_LENGTH as u32 {
             return Err("country filter string too long");
         }
     }
-    
+
     Ok(())
 }
 
@@ -116,13 +125,13 @@ fn validate_input(
 /// - DataKey::UserProfileLight(Address) -> LightProfile  // lightweight profile data
 /// - DataKey::Admins -> Vec<Address>      // list of admin addresses
 pub fn list_all_users(
-    env: Env, 
-    caller: Address, 
-    page: u32, 
-    page_size: u32, 
+    env: Env,
+    caller: Address,
+    page: u32,
+    page_size: u32,
     role_filter: Option<UserRole>,
     country_filter: Option<String>,
-    status_filter: Option<UserStatus>
+    status_filter: Option<UserStatus>,
 ) -> Vec<LightProfile> {
     // Require the caller to be authenticated
     caller.require_auth();
@@ -164,7 +173,7 @@ pub fn list_all_users(
 
     // First pass: collect all profiles that match the filter
     let mut filtered_profiles = Vec::new(&env);
-    
+
     for i in 0..users_index.len() {
         if let Some(addr) = users_index.get(i) {
             // Fetch lightweight profile for each address
@@ -189,13 +198,21 @@ pub fn list_all_users(
     // Compute pagination window safely for filtered results
     let start = {
         let s = (page as u64).saturating_mul(page_size as u64);
-        let s = if s > u32::MAX as u64 { u32::MAX } else { s as u32 };
+        let s = if s > u32::MAX as u64 {
+            u32::MAX
+        } else {
+            s as u32
+        };
         s.min(total_filtered)
     };
 
     let end = {
         let e = (start as u64).saturating_add(page_size as u64);
-        let e = if e > u32::MAX as u64 { u32::MAX } else { e as u32 };
+        let e = if e > u32::MAX as u64 {
+            u32::MAX
+        } else {
+            e as u32
+        };
         e.min(total_filtered)
     };
 
@@ -216,7 +233,7 @@ pub fn list_all_users(
 mod tests {
     use super::*;
     use soroban_sdk::{testutils::Address as _, Env, String};
-    
+
     #[test]
     fn test_matches_filter_no_filter() {
         let env = Env::default();
@@ -228,10 +245,10 @@ mod tests {
             status: UserStatus::Active,
             user_address: Address::generate(&env),
         };
-        
+
         assert!(matches_filter(&profile, &None, &None, &None));
     }
-    
+
     #[test]
     fn test_matches_filter_role_match() {
         let env = Env::default();
@@ -243,10 +260,15 @@ mod tests {
             status: UserStatus::Active,
             user_address: Address::generate(&env),
         };
-        
-        assert!(matches_filter(&profile, &Some(UserRole::Student), &None, &None));
+
+        assert!(matches_filter(
+            &profile,
+            &Some(UserRole::Student),
+            &None,
+            &None
+        ));
     }
-    
+
     #[test]
     fn test_matches_filter_role_no_match() {
         let env = Env::default();
@@ -258,10 +280,15 @@ mod tests {
             status: UserStatus::Active,
             user_address: Address::generate(&env),
         };
-        
-        assert!(!matches_filter(&profile, &Some(UserRole::Admin), &None, &None));
+
+        assert!(!matches_filter(
+            &profile,
+            &Some(UserRole::Admin),
+            &None,
+            &None
+        ));
     }
-    
+
     #[test]
     fn test_matches_filter_multiple_criteria() {
         let env = Env::default();
@@ -273,11 +300,11 @@ mod tests {
             status: UserStatus::Active,
             user_address: Address::generate(&env),
         };
-        
+
         assert!(matches_filter(
-            &profile, 
-            &Some(UserRole::Student), 
-            &Some(String::from_str(&env, "US")), 
+            &profile,
+            &Some(UserRole::Student),
+            &Some(String::from_str(&env, "US")),
             &Some(UserStatus::Active)
         ));
     }

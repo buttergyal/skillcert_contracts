@@ -4,7 +4,7 @@ pub mod schema;
 #[cfg(test)]
 mod test;
 
-use crate::schema::{Course, CourseModule, CourseGoal};
+use crate::schema::{Course, CourseGoal, CourseModule};
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
 
 #[contract]
@@ -61,19 +61,26 @@ impl CourseRegistry {
     }
 
     pub fn add_goal(env: Env, course_id: String, content: String) -> CourseGoal {
-    functions::add_goal::course_registry_add_goal(env, course_id, content)
-}
-  
+        functions::add_goal::course_registry_add_goal(env, course_id, content)
+    }
+
     pub fn remove_prerequisite(env: Env, course_id: String, prerequisite_course_id: String) {
-        functions::remove_prerequisite::course_registry_remove_prerequisite(env, course_id, prerequisite_course_id)
+        functions::remove_prerequisite::course_registry_remove_prerequisite(
+            env,
+            course_id,
+            prerequisite_course_id,
+        )
     }
 
     pub fn edit_prerequisite(env: Env, course_id: String, new_prerequisites: Vec<String>) {
-        functions::edit_prerequisite::course_registry_edit_prerequisite(env, course_id, new_prerequisites)
+        functions::edit_prerequisite::course_registry_edit_prerequisite(
+            env,
+            course_id,
+            new_prerequisites,
+        )
     }
 
     pub fn is_course_creator(env: &Env, course_id: String, user: Address) -> bool {
         functions::is_course_creator::is_course_creator(env, course_id, user)
     }
-
 }

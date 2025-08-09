@@ -1,4 +1,4 @@
-use soroban_sdk::{Address, String, contracttype};
+use soroban_sdk::{contracttype, Address, String};
 
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]
@@ -11,12 +11,11 @@ pub struct UserProfile {
     pub user: Address,
 }
 
-
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]
 pub enum UserRole {
     Student,
-    Instructor, 
+    Instructor,
     Admin,
 }
 
@@ -60,8 +59,8 @@ pub struct AdminConfig {
 pub enum DataKey {
     UserProfile(Address), // This represents the ("user_profile", user_address) key
     UserProfileLight(Address), // Lightweight profile storage
-    UsersIndex, // List of all registered user addresses
-    Admins, // List of admin addresses
-    UserRoles, // Role assignments
-    AdminConfig, // System configuration
-} 
+    UsersIndex,           // List of all registered user addresses
+    Admins,               // List of admin addresses
+    UserRoles,            // Role assignments
+    AdminConfig,          // System configuration
+}

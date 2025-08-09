@@ -10,7 +10,6 @@ pub struct CourseModule {
     pub created_at: u64,
 }
 
-
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]
 pub struct CourseGoal {

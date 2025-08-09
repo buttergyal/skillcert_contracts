@@ -1,5 +1,5 @@
-use soroban_sdk::{Env, String, Vec, symbol_short, Symbol, Map};
 use crate::schema::{Course, DataKey};
+use soroban_sdk::{symbol_short, Env, Map, String, Symbol, Vec};
 
 const PREREQ_UPDATED_EVENT: Symbol = symbol_short!("preqedit");
 
@@ -12,7 +12,9 @@ pub fn course_registry_edit_prerequisite(
 
     // Load course to verify it exists and check authorization
     let course_key = (symbol_short!("course"), course_id.clone());
-    let course: Course = env.storage().persistent()
+    let course: Course = env
+        .storage()
+        .persistent()
         .get(&course_key)
         .expect("Course not found");
 
@@ -33,7 +35,10 @@ pub fn course_registry_edit_prerequisite(
     validate_no_circular_dependency(&env, &course_id, &new_prerequisites);
 
     // Save updated prerequisites
-    env.storage().persistent().set(&DataKey::CoursePrerequisites(course_id.clone()), &new_prerequisites);
+    env.storage().persistent().set(
+        &DataKey::CoursePrerequisites(course_id.clone()),
+        &new_prerequisites,
+    );
 
     // Emit event
     env.events().publish(
@@ -42,11 +47,7 @@ pub fn course_registry_edit_prerequisite(
     );
 }
 
-fn validate_no_circular_dependency(
-    env: &Env,
-    course_id: &String,
-    new_prerequisites: &Vec<String>
-) {
+fn validate_no_circular_dependency(env: &Env, course_id: &String, new_prerequisites: &Vec<String>) {
     // Check if course_id appears in new_prerequisites (direct circular dependency)
     for prerequisite_id in new_prerequisites.iter() {
         if prerequisite_id.eq(course_id) {
@@ -57,9 +58,15 @@ fn validate_no_circular_dependency(
     // Check for indirect circular dependencies using DFS
     let mut visited = Map::new(env);
     let mut rec_stack = Map::new(env);
-    
+
     for prerequisite_id in new_prerequisites.iter() {
-        if has_cycle(env, &prerequisite_id, course_id, &mut visited, &mut rec_stack) {
+        if has_cycle(
+            env,
+            &prerequisite_id,
+            course_id,
+            &mut visited,
+            &mut rec_stack,
+        ) {
             panic!("Circular dependency detected");
         }
     }
@@ -70,7 +77,7 @@ fn has_cycle(
     current_course: &String,
     target_course: &String,
     visited: &mut Map<String, bool>,
-    rec_stack: &mut Map<String, bool>
+    rec_stack: &mut Map<String, bool>,
 ) -> bool {
     // If we've reached the target course, we found a cycle
     if current_course.eq(target_course) {
@@ -92,7 +99,9 @@ fn has_cycle(
     rec_stack.set(current_course.clone(), true);
 
     // Get prerequisites for current course
-    let prerequisites: Vec<String> = env.storage().persistent()
+    let prerequisites: Vec<String> = env
+        .storage()
+        .persistent()
         .get(&DataKey::CoursePrerequisites(current_course.clone()))
         .unwrap_or(Vec::new(env));
 
@@ -145,10 +154,16 @@ mod tests {
             prerequisites.push_back(course3_id.clone());
 
             // Edit prerequisites
-            course_registry_edit_prerequisite(env.clone(), course1_id.clone(), prerequisites.clone());
+            course_registry_edit_prerequisite(
+                env.clone(),
+                course1_id.clone(),
+                prerequisites.clone(),
+            );
 
             // Verify prerequisites were saved
-            let stored_prerequisites: Vec<String> = env.storage().persistent()
+            let stored_prerequisites: Vec<String> = env
+                .storage()
+                .persistent()
                 .get(&DataKey::CoursePrerequisites(course1_id.clone()))
                 .unwrap();
 
@@ -177,16 +192,26 @@ mod tests {
             // Set initial prerequisites
             let mut initial_prerequisites = Vec::new(&env);
             initial_prerequisites.push_back(course2_id.clone());
-            course_registry_edit_prerequisite(env.clone(), course1_id.clone(), initial_prerequisites);
+            course_registry_edit_prerequisite(
+                env.clone(),
+                course1_id.clone(),
+                initial_prerequisites,
+            );
 
             // Replace with new prerequisites
             let mut new_prerequisites = Vec::new(&env);
             new_prerequisites.push_back(course3_id.clone());
             new_prerequisites.push_back(course4_id.clone());
-            course_registry_edit_prerequisite(env.clone(), course1_id.clone(), new_prerequisites.clone());
+            course_registry_edit_prerequisite(
+                env.clone(),
+                course1_id.clone(),
+                new_prerequisites.clone(),
+            );
 
             // Verify old prerequisites were replaced
-            let stored_prerequisites: Vec<String> = env.storage().persistent()
+            let stored_prerequisites: Vec<String> = env
+                .storage()
+                .persistent()
                 .get(&DataKey::CoursePrerequisites(course1_id.clone()))
                 .unwrap();
 
@@ -209,14 +234,20 @@ mod tests {
             // Set initial prerequisites
             let mut initial_prerequisites = Vec::new(&env);
             initial_prerequisites.push_back(course2_id.clone());
-            course_registry_edit_prerequisite(env.clone(), course1_id.clone(), initial_prerequisites);
+            course_registry_edit_prerequisite(
+                env.clone(),
+                course1_id.clone(),
+                initial_prerequisites,
+            );
 
             // Clear prerequisites with empty list
             let empty_prerequisites = Vec::new(&env);
             course_registry_edit_prerequisite(env.clone(), course1_id.clone(), empty_prerequisites);
 
             // Verify prerequisites were cleared
-            let stored_prerequisites: Vec<String> = env.storage().persistent()
+            let stored_prerequisites: Vec<String> = env
+                .storage()
+                .persistent()
                 .get(&DataKey::CoursePrerequisites(course1_id.clone()))
                 .unwrap();
 
@@ -233,9 +264,9 @@ mod tests {
         env.as_contract(&contract_id, || {
             let prerequisites = Vec::new(&env);
             course_registry_edit_prerequisite(
-                env.clone(), 
-                String::from_str(&env, "nonexistent"), 
-                prerequisites
+                env.clone(),
+                String::from_str(&env, "nonexistent"),
+                prerequisites,
             );
         });
     }
@@ -308,8 +339,8 @@ mod tests {
     #[test]
     fn test_edit_prerequisite_authorization() {
         let env = Env::default();
-        
-        // Note: In the current implementation, we use env.current_contract_address() 
+
+        // Note: In the current implementation, we use env.current_contract_address()
         // which means the authorization check will always pass in tests.
         // This test verifies the function works when authorization passes.
         let contract_id = env.register(CourseRegistry, ());
@@ -325,7 +356,9 @@ mod tests {
             course_registry_edit_prerequisite(env.clone(), course1_id.clone(), prerequisites);
 
             // Verify it worked
-            let stored_prerequisites: Vec<String> = env.storage().persistent()
+            let stored_prerequisites: Vec<String> = env
+                .storage()
+                .persistent()
                 .get(&DataKey::CoursePrerequisites(course1_id))
                 .unwrap();
             assert_eq!(stored_prerequisites.len(), 1);
@@ -366,7 +399,9 @@ mod tests {
             course_registry_edit_prerequisite(env.clone(), course1_id.clone(), prerequisites1);
 
             // Verify all prerequisites were set correctly
-            let stored_prerequisites: Vec<String> = env.storage().persistent()
+            let stored_prerequisites: Vec<String> = env
+                .storage()
+                .persistent()
                 .get(&DataKey::CoursePrerequisites(course1_id))
                 .unwrap();
             assert_eq!(stored_prerequisites.len(), 2);

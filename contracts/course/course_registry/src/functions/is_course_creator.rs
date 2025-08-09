@@ -12,7 +12,6 @@ pub fn is_course_creator(env: &Env, course_id: String, user: Address) -> bool {
     false
 }
 
-
 #[cfg(test)]
 mod test {
     use super::*;
@@ -86,7 +85,8 @@ mod test {
             let id: String = String::from_str(&env, "1");
             let not_caller = Address::generate(&env);
 
-            let is_creator = CourseRegistry::is_course_creator(&env, id.clone(), not_caller.clone());
+            let is_creator =
+                CourseRegistry::is_course_creator(&env, id.clone(), not_caller.clone());
 
             assert_eq!(course.id, id);
             assert!(!is_creator);
