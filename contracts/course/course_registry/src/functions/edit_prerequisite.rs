@@ -128,20 +128,6 @@ mod tests {
         Address, Env, String,
     };
 
-    fn create_test_course(env: &Env, title: &str) -> String {
-        let course = course_registry_create_course(
-            env.clone(),
-            Address::generate(&env),
-            String::from_str(env, title),
-            String::from_str(env, "Test description"),
-            1000,
-            None,
-            None,
-            None,
-        );
-        course.id
-    }
-
     #[test]
     fn test_edit_prerequisite_success() {
         let env = Env::default();
@@ -183,14 +169,11 @@ mod tests {
         prerequisites.push_back(course2.id.clone());
         prerequisites.push_back(course3.id.clone());
 
-        // Edit prerequisites
         client.edit_prerequisite(&creator, &course1.id.clone(), &prerequisites.clone());
 
-        // Verify event was emitted - just check that events were generated
         let events = env.events().all();
-        assert!(!events.is_empty()); // Should have at least some events
+        assert!(!events.is_empty());
 
-        // Verify prerequisites were saved
         let stored_prerequisites: Vec<String> = env.as_contract(&contract_id, || {
             env.storage()
                 .persistent()
@@ -249,18 +232,15 @@ mod tests {
             &None,
         );
 
-        // Set initial prerequisites
         let mut initial_prerequisites = Vec::new(&env);
         initial_prerequisites.push_back(course2.id.clone());
         client.edit_prerequisite(&creator, &course1.id, &initial_prerequisites);
 
-        // Replace with new prerequisites
         let mut new_prerequisites = Vec::new(&env);
         new_prerequisites.push_back(course3.id.clone());
         new_prerequisites.push_back(course4.id.clone());
         client.edit_prerequisite(&creator, &course1.id, &new_prerequisites);
 
-        // Verify old prerequisites were replaced
         let stored_prerequisites: Vec<String> = env.as_contract(&contract_id, || {
             env.storage()
                 .persistent()
@@ -301,16 +281,13 @@ mod tests {
             &None,
         );
 
-        // Set initial prerequisites
         let mut initial_prerequisites = Vec::new(&env);
         initial_prerequisites.push_back(course2.id.clone());
         client.edit_prerequisite(&creator, &course1.id, &initial_prerequisites);
 
-        // Clear prerequisites with empty list
         let empty_prerequisites = Vec::new(&env);
         client.edit_prerequisite(&creator, &course1.id.clone(), &empty_prerequisites);
 
-        // Verify prerequisites were cleared
         let stored_prerequisites: Vec<String> = env.as_contract(&contract_id, || {
             env.storage()
                 .persistent()
@@ -357,7 +334,6 @@ mod tests {
             &None,
         );
 
-        // Try to add nonexistent prerequisite
         let mut prerequisites = Vec::new(&env);
         prerequisites.push_back(String::from_str(&env, "404"));
 
@@ -384,7 +360,6 @@ mod tests {
             &None,
         );
 
-        // Try to make course prerequisite of itself
         let mut prerequisites = Vec::new(&env);
         prerequisites.push_back(course1.id.clone());
 
@@ -429,7 +404,6 @@ mod tests {
             &None,
         );
 
-        // Set up chain: Course1 -> Course2 -> Course3
         let mut prerequisites2 = Vec::new(&env);
         prerequisites2.push_back(course3.id.clone());
         client.edit_prerequisite(&creator, &course2.id, &prerequisites2);
@@ -438,7 +412,6 @@ mod tests {
         prerequisites1.push_back(course2.id.clone());
         client.edit_prerequisite(&creator, &course1.id, &prerequisites1);
 
-        // Try to create cycle: Course3 -> Course1 (which would create Course1 -> Course2 -> Course3 -> Course1)
         let mut prerequisites3 = Vec::new(&env);
         prerequisites3.push_back(course1.id.clone());
         client.edit_prerequisite(&creator, &course3.id, &prerequisites3);
@@ -475,10 +448,8 @@ mod tests {
         let mut prerequisites = Vec::new(&env);
         prerequisites.push_back(course2.id.clone());
 
-        // This should succeed since we're calling from the contract address
         client.edit_prerequisite(&creator, &course1.id, &prerequisites);
 
-        // Verify it worked
         let stored_prerequisites: Vec<String> = env.as_contract(&contract_id, || {
             env.storage()
                 .persistent()
@@ -543,23 +514,19 @@ mod tests {
             &None,
         );
 
-        // Set Course2 -> Course4
         let mut prerequisites2 = Vec::new(&env);
         prerequisites2.push_back(course4.id.clone());
         client.edit_prerequisite(&creator, &course2.id, &prerequisites2);
 
-        // Set Course3 -> Course5
         let mut prerequisites3 = Vec::new(&env);
         prerequisites3.push_back(course5.id.clone());
         client.edit_prerequisite(&creator, &course3.id, &prerequisites3);
 
-        // Set Course1 -> [Course2, Course3] - should work
         let mut prerequisites1 = Vec::new(&env);
         prerequisites1.push_back(course2.id.clone());
         prerequisites1.push_back(course3.id.clone());
         client.edit_prerequisite(&creator, &course1.id, &prerequisites1);
 
-        // Verify all prerequisites were set correctly
         let stored_prerequisites: Vec<String> = env.as_contract(&contract_id, || {
             env.storage()
                 .persistent()

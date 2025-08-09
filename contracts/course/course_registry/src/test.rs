@@ -1,11 +1,9 @@
 use crate::{CourseRegistry, CourseRegistryClient};
-use soroban_sdk::{symbol_short, testutils::Address as _, Address, Env, String, Symbol, Vec};
+use soroban_sdk::{symbol_short, testutils::Address as _, Address, Env, String};
 
 use crate::{
     functions::get_prerequisites_by_course::get_prerequisites_by_course_id, schema::Course,
 };
-
-// 🔹 Tests
 
 #[test]
 fn test_remove_module_success() {

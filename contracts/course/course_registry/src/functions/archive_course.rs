@@ -18,6 +18,7 @@ pub fn course_registry_archive_course(env: &Env, creator: Address, course_id: St
         panic!("Only the creator can archive the course");
     }
 
+    assert!(!course.is_archived, "Course Already Archived");
     course.is_archived = true;
 
     env.storage().persistent().set(&key, &course);
@@ -31,7 +32,7 @@ pub fn course_registry_archive_course(env: &Env, creator: Address, course_id: St
 mod tests {
     use super::*;
     use crate::{CourseRegistry, CourseRegistryClient};
-    use soroban_sdk::{testutils::Address as TestAddress, Address, Env, Vec};
+    use soroban_sdk::{testutils::Address as TestAddress, testutils::Events, Address, Env};
 
     #[test]
     fn test_archive_course_success() {
@@ -42,7 +43,6 @@ mod tests {
         let client = CourseRegistryClient::new(&env, &contract_id);
 
         let creator: Address = Address::generate(&env);
-        let impostor: Address = Address::generate(&env);
 
         let new_course: Course = client.create_course(
             &creator,
@@ -53,7 +53,7 @@ mod tests {
             &Some(String::from_str(&env, "language")),
             &Some(String::from_str(&env, "thumbnail_url")),
         );
-        println!("GYAAAAAAAAAAT {:?}", new_course);
+
         assert_eq!(new_course, client.get_course(&new_course.id.clone()));
         assert_eq!(
             new_course.creator,
@@ -62,5 +62,98 @@ mod tests {
 
         let archived_new_course = client.archive_course(&creator, &new_course.id.clone());
         assert!(archived_new_course.is_archived);
+    }
+
+    #[test]
+    #[should_panic(expected = "Course not found")]
+    fn test_archive_nonexistent_course() {
+        let env = Env::default();
+        env.mock_all_auths();
+
+        let contract_id = env.register(CourseRegistry, {});
+        let client = CourseRegistryClient::new(&env, &contract_id);
+
+        let creator: Address = Address::generate(&env);
+        let fake_course_id = String::from_str(&env, "nonexistent_course");
+
+        client.archive_course(&creator, &fake_course_id);
+    }
+
+    #[test]
+    #[should_panic(expected = "Only the creator can archive the course")]
+    fn test_archive_course_by_non_creator() {
+        let env = Env::default();
+        env.mock_all_auths();
+
+        let contract_id = env.register(CourseRegistry, {});
+        let client = CourseRegistryClient::new(&env, &contract_id);
+
+        let creator: Address = Address::generate(&env);
+        let non_creator: Address = Address::generate(&env);
+
+        let new_course: Course = client.create_course(
+            &creator,
+            &String::from_str(&env, "title"),
+            &String::from_str(&env, "description"),
+            &1000_u128,
+            &Some(String::from_str(&env, "category")),
+            &Some(String::from_str(&env, "language")),
+            &Some(String::from_str(&env, "thumbnail_url")),
+        );
+
+        client.archive_course(&non_creator, &new_course.id);
+    }
+
+    #[test]
+    #[should_panic(expected = "Course Already Archived")]
+    fn test_archive_already_archived_course() {
+        let env = Env::default();
+        env.mock_all_auths();
+
+        let contract_id = env.register(CourseRegistry, {});
+        let client = CourseRegistryClient::new(&env, &contract_id);
+
+        let creator: Address = Address::generate(&env);
+
+        let new_course: Course = client.create_course(
+            &creator,
+            &String::from_str(&env, "title"),
+            &String::from_str(&env, "description"),
+            &1000_u128,
+            &Some(String::from_str(&env, "category")),
+            &Some(String::from_str(&env, "language")),
+            &Some(String::from_str(&env, "thumbnail_url")),
+        );
+
+        let archived_course = client.archive_course(&creator, &new_course.id);
+        assert!(archived_course.is_archived);
+
+        client.archive_course(&creator, &new_course.id);
+    }
+
+    #[test]
+    fn test_archive_course_event_published() {
+        let env = Env::default();
+        env.mock_all_auths();
+
+        let contract_id = env.register(CourseRegistry, {});
+        let client = CourseRegistryClient::new(&env, &contract_id);
+
+        let creator: Address = Address::generate(&env);
+
+        let new_course: Course = client.create_course(
+            &creator,
+            &String::from_str(&env, "title"),
+            &String::from_str(&env, "description"),
+            &1000_u128,
+            &Some(String::from_str(&env, "category")),
+            &Some(String::from_str(&env, "language")),
+            &Some(String::from_str(&env, "thumbnail_url")),
+        );
+
+        client.archive_course(&creator, &new_course.id);
+
+        let events = env.events().all();
+        assert!(!events.is_empty());
     }
 }

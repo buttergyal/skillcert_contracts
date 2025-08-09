@@ -53,8 +53,8 @@ impl CourseRegistry {
         functions::add_module::course_registry_add_module(env, course_id, position, title)
     }
 
-    pub fn delete_course(env: Env, course_id: String) -> () {
-        functions::delete_course::course_registry_delete_course(&env, course_id)
+    pub fn delete_course(env: Env, creator: Address, course_id: String) -> () {
+        functions::delete_course::course_registry_delete_course(&env, creator, course_id)
             .unwrap_or_else(|e| panic!("{}", e))
     }
 
@@ -62,13 +62,19 @@ impl CourseRegistry {
         String::from_str(&_env, "Hello from Web3 👋")
     }
 
-    pub fn add_goal(env: Env, course_id: String, content: String) -> CourseGoal {
-        functions::add_goal::course_registry_add_goal(env, course_id, content)
+    pub fn add_goal(env: Env, creator: Address, course_id: String, content: String) -> CourseGoal {
+        functions::add_goal::course_registry_add_goal(env, creator, course_id, content)
     }
 
-    pub fn remove_prerequisite(env: Env, course_id: String, prerequisite_course_id: String) {
+    pub fn remove_prerequisite(
+        env: Env,
+        creator: Address,
+        course_id: String,
+        prerequisite_course_id: String,
+    ) {
         functions::remove_prerequisite::course_registry_remove_prerequisite(
             env,
+            creator,
             course_id,
             prerequisite_course_id,
         )
@@ -90,6 +96,7 @@ impl CourseRegistry {
 
     pub fn edit_course(
         env: Env,
+        creator: Address,
         course_id: String,
 
         // Editable fields (use Option for "provided or not")
@@ -106,6 +113,7 @@ impl CourseRegistry {
     ) -> Course {
         functions::edit_course::course_registry_edit_course(
             env,
+            creator,
             course_id,
             new_title,
             new_description,
@@ -124,5 +132,4 @@ impl CourseRegistry {
     pub fn is_course_creator(env: &Env, course_id: String, user: Address) -> bool {
         functions::is_course_creator::is_course_creator(env, course_id, user)
     }
-
 }
