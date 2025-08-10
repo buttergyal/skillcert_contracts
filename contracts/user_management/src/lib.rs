@@ -31,4 +31,9 @@ impl UserManagement {
             user,
         )
     }
-} 
+
+    // Aquí agregamos la nueva función get_user_by_id
+    pub fn get_user_by_id(env: Env, requester: Address, user_id: Address) -> UserProfile {
+        functions::get_user_by_id::get_user_by_id(env, requester, user_id)
+    }
+}
