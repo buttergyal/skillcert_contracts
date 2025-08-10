@@ -6,7 +6,7 @@ use crate::{
         get_prerequisites_by_course::get_prerequisites_by_course_id,
         list_categories::course_registry_list_categories,
     },
-    schema::{Course},
+    schema::Course,
 };
 
 #[test]

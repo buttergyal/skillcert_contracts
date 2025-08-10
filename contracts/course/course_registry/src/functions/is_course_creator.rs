@@ -65,7 +65,7 @@ mod test {
             &Some(String::from_str(&env, "thumbnail_url")),
         );
 
-        let is_creator = client.is_course_creator(&course.id.clone(), &Address::generate(&env));
+        let is_creator = client.is_course_creator(&course.id, &impostor);
 
         assert!(!is_creator);
     }

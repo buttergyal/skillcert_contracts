@@ -10,7 +10,6 @@ pub fn course_registry_add_goal(
     content: String,
 ) -> CourseGoal {
     creator.require_auth();
-
     // Validate input
     if content.is_empty() {
         panic!("Goal content cannot be empty");
