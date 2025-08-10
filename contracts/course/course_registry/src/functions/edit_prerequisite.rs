@@ -169,26 +169,10 @@ mod tests {
         prerequisites.push_back(course2.id.clone());
         prerequisites.push_back(course3.id.clone());
 
-<<<<<<< HEAD
-            // Edit prerequisites
-            course_registry_edit_prerequisite(
-                env.clone(),
-                course1_id.clone(),
-                prerequisites.clone(),
-            );
-
-            // Verify prerequisites were saved
-            let stored_prerequisites: Vec<String> = env
-                .storage()
-                .persistent()
-                .get(&DataKey::CoursePrerequisites(course1_id.clone()))
-                .unwrap();
-=======
         client.edit_prerequisite(&creator, &course1.id.clone(), &prerequisites.clone());
 
         let events = env.events().all();
         assert!(!events.is_empty());
->>>>>>> origin/main
 
         let stored_prerequisites: Vec<String> = env.as_contract(&contract_id, || {
             env.storage()
@@ -248,37 +232,6 @@ mod tests {
             &None,
         );
 
-<<<<<<< HEAD
-            // Set initial prerequisites
-            let mut initial_prerequisites = Vec::new(&env);
-            initial_prerequisites.push_back(course2_id.clone());
-            course_registry_edit_prerequisite(
-                env.clone(),
-                course1_id.clone(),
-                initial_prerequisites,
-            );
-
-            // Replace with new prerequisites
-            let mut new_prerequisites = Vec::new(&env);
-            new_prerequisites.push_back(course3_id.clone());
-            new_prerequisites.push_back(course4_id.clone());
-            course_registry_edit_prerequisite(
-                env.clone(),
-                course1_id.clone(),
-                new_prerequisites.clone(),
-            );
-
-            // Verify old prerequisites were replaced
-            let stored_prerequisites: Vec<String> = env
-                .storage()
-                .persistent()
-                .get(&DataKey::CoursePrerequisites(course1_id.clone()))
-                .unwrap();
-
-            assert_eq!(stored_prerequisites.len(), 2);
-            assert_eq!(stored_prerequisites.get(0).unwrap(), course3_id);
-            assert_eq!(stored_prerequisites.get(1).unwrap(), course4_id);
-=======
         let mut initial_prerequisites = Vec::new(&env);
         initial_prerequisites.push_back(course2.id.clone());
         client.edit_prerequisite(&creator, &course1.id, &initial_prerequisites);
@@ -293,7 +246,6 @@ mod tests {
                 .persistent()
                 .get(&DataKey::CoursePrerequisites(course1.id.clone()))
                 .unwrap()
->>>>>>> origin/main
         });
 
         assert_eq!(stored_prerequisites.len(), 2);
@@ -329,40 +281,18 @@ mod tests {
             &None,
         );
 
-<<<<<<< HEAD
-            // Set initial prerequisites
-            let mut initial_prerequisites = Vec::new(&env);
-            initial_prerequisites.push_back(course2_id.clone());
-            course_registry_edit_prerequisite(
-                env.clone(),
-                course1_id.clone(),
-                initial_prerequisites,
-            );
-=======
         let mut initial_prerequisites = Vec::new(&env);
         initial_prerequisites.push_back(course2.id.clone());
         client.edit_prerequisite(&creator, &course1.id, &initial_prerequisites);
->>>>>>> origin/main
 
         let empty_prerequisites = Vec::new(&env);
         client.edit_prerequisite(&creator, &course1.id.clone(), &empty_prerequisites);
 
-<<<<<<< HEAD
-            // Verify prerequisites were cleared
-            let stored_prerequisites: Vec<String> = env
-                .storage()
-                .persistent()
-                .get(&DataKey::CoursePrerequisites(course1_id.clone()))
-                .unwrap();
-
-            assert_eq!(stored_prerequisites.len(), 0);
-=======
         let stored_prerequisites: Vec<String> = env.as_contract(&contract_id, || {
             env.storage()
                 .persistent()
                 .get(&DataKey::CoursePrerequisites(course1.id.clone()))
                 .unwrap()
->>>>>>> origin/main
         });
 
         assert_eq!(stored_prerequisites.len(), 0);
@@ -374,16 +304,6 @@ mod tests {
         let env = Env::default();
         env.mock_all_auths();
 
-<<<<<<< HEAD
-        env.as_contract(&contract_id, || {
-            let prerequisites = Vec::new(&env);
-            course_registry_edit_prerequisite(
-                env.clone(),
-                String::from_str(&env, "nonexistent"),
-                prerequisites,
-            );
-        });
-=======
         let contract_id = env.register(CourseRegistry, ());
         let client = CourseRegistryClient::new(&env, &contract_id);
 
@@ -392,7 +312,6 @@ mod tests {
             &String::from_str(&env, "404"),
             &Vec::new(&env),
         );
->>>>>>> origin/main
     }
 
     #[test]
@@ -501,15 +420,8 @@ mod tests {
     #[test]
     fn test_edit_prerequisite_authorization() {
         let env = Env::default();
-<<<<<<< HEAD
-
-        // Note: In the current implementation, we use env.current_contract_address()
-        // which means the authorization check will always pass in tests.
-        // This test verifies the function works when authorization passes.
-=======
         env.mock_all_auths();
 
->>>>>>> origin/main
         let contract_id = env.register(CourseRegistry, ());
         let client = CourseRegistryClient::new(&env, &contract_id);
 
@@ -538,21 +450,11 @@ mod tests {
 
         client.edit_prerequisite(&creator, &course1.id, &prerequisites);
 
-<<<<<<< HEAD
-            // Verify it worked
-            let stored_prerequisites: Vec<String> = env
-                .storage()
-                .persistent()
-                .get(&DataKey::CoursePrerequisites(course1_id))
-                .unwrap();
-            assert_eq!(stored_prerequisites.len(), 1);
-=======
         let stored_prerequisites: Vec<String> = env.as_contract(&contract_id, || {
             env.storage()
                 .persistent()
                 .get(&DataKey::CoursePrerequisites(course1.id))
                 .unwrap()
->>>>>>> origin/main
         });
         assert_eq!(stored_prerequisites.len(), 1);
     }
@@ -625,21 +527,11 @@ mod tests {
         prerequisites1.push_back(course3.id.clone());
         client.edit_prerequisite(&creator, &course1.id, &prerequisites1);
 
-<<<<<<< HEAD
-            // Verify all prerequisites were set correctly
-            let stored_prerequisites: Vec<String> = env
-                .storage()
-                .persistent()
-                .get(&DataKey::CoursePrerequisites(course1_id))
-                .unwrap();
-            assert_eq!(stored_prerequisites.len(), 2);
-=======
         let stored_prerequisites: Vec<String> = env.as_contract(&contract_id, || {
             env.storage()
                 .persistent()
                 .get(&DataKey::CoursePrerequisites(course1.id))
                 .unwrap()
->>>>>>> origin/main
         });
         assert_eq!(stored_prerequisites.len(), 2);
     }

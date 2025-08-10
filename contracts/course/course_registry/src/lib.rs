@@ -6,9 +6,18 @@ pub mod schema;
 #[cfg(test)]
 mod test;
 
-use crate::schema::{Course, CourseModule, CourseGoal};
+use crate::schema::{Course, CourseGoal, CourseModule};
+use core::{
+    clone::Clone,
+    cmp::PartialEq,
+    convert::{From, Into, TryInto},
+    default::Default,
+    iter::{ExactSizeIterator, Iterator},
+    option::{Option, Option::None, Option::Some},
+    panic,
+    result::{Result, Result::Err, Result::Ok},
+};
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
-use core::{clone::Clone, default::Default, option::{Option, Option::Some, Option::None}, result::{Result, Result::Ok, Result::Err}, convert::{Into, TryInto, From}, iter::{Iterator, ExactSizeIterator}, cmp::PartialEq, panic};
 
 #[contract]
 pub struct CourseRegistry;

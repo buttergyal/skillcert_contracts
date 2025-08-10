@@ -54,8 +54,6 @@ pub fn course_registry_remove_prerequisite(
     // Emit event
     env.events()
         .publish((PREREQ_REMOVED_EVENT, course_id), prerequisite_course_id);
-<<<<<<< HEAD
-=======
 }
 
 #[cfg(test)]
@@ -270,5 +268,4 @@ mod test {
         assert_eq!(stored_prerequisites.len(), 1);
         assert_eq!(stored_prerequisites.get(0).unwrap(), course3.id);
     }
->>>>>>> origin/main
 }

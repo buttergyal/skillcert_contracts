@@ -135,7 +135,6 @@ fn add_to_users_index(env: Env, user: Address) {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use crate::schema::{DataKey, UserProfile};
     use crate::{UserManagement, UserManagementClient};
     use soroban_sdk::{testutils::Address as _, Address, Env, String};
@@ -218,7 +217,7 @@ mod test {
     #[should_panic(expected = "Invalid input")]
     fn test_save_profile_with_empty_name() {
         let env = Env::default();
-        let contract_id: Address = env.register(UserManagement, {});
+        let _contract_id: Address = env.register(UserManagement, {});
         let user: Address = Address::generate(&env);
 
         let name: String = String::from_str(&env, "");
@@ -237,7 +236,7 @@ mod test {
     #[should_panic(expected = "Invalid input")]
     fn test_save_profile_with_empty_email() {
         let env = Env::default();
-        let contract_id: Address = env.register(UserManagement, {});
+        let _contract_id: Address = env.register(UserManagement, {});
         let user: Address = Address::generate(&env);
 
         let name: String = String::from_str(&env, "Test User");
@@ -256,7 +255,7 @@ mod test {
     #[should_panic(expected = "Invalid input")]
     fn test_save_profile_with_empty_country() {
         let env = Env::default();
-        let contract_id: Address = env.register(UserManagement, {});
+        let _contract_id: Address = env.register(UserManagement, {});
         let user: Address = Address::generate(&env);
 
         let name: String = String::from_str(&env, "Test User");
