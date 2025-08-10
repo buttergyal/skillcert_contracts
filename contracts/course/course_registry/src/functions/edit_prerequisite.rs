@@ -1,14 +1,15 @@
 use crate::schema::{Course, DataKey};
-use soroban_sdk::{symbol_short, Env, Map, String, Symbol, Vec};
+use soroban_sdk::{symbol_short, Address, Env, Map, String, Symbol, Vec};
 
 const PREREQ_UPDATED_EVENT: Symbol = symbol_short!("preqedit");
 
 pub fn course_registry_edit_prerequisite(
     env: Env,
+    creator: Address,
     course_id: String,
     new_prerequisites: Vec<String>,
 ) {
-    let invoker = env.current_contract_address();
+    creator.require_auth();
 
     // Load course to verify it exists and check authorization
     let course_key = (symbol_short!("course"), course_id.clone());
@@ -19,7 +20,7 @@ pub fn course_registry_edit_prerequisite(
         .expect("Course not found");
 
     // Authorization: only creator can edit prerequisites
-    if course.creator != invoker {
+    if course.creator != creator {
         panic!("Only the course creator can edit prerequisites");
     }
 
@@ -120,39 +121,55 @@ fn has_cycle(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::functions::create_course::course_registry_create_course;
     use crate::CourseRegistry;
-    use soroban_sdk::{testutils::Events, Env, String};
-
-    fn create_test_course(env: &Env, title: &str) -> String {
-        let course = course_registry_create_course(
-            env.clone(),
-            String::from_str(env, title),
-            String::from_str(env, "Test description"),
-            1000,
-            None,
-            None,
-            None,
-        );
-        course.id
-    }
+    use crate::{functions::create_course::course_registry_create_course, CourseRegistryClient};
+    use soroban_sdk::{
+        testutils::{Address as TestAddress, Events},
+        Address, Env, String,
+    };
 
     #[test]
     fn test_edit_prerequisite_success() {
         let env = Env::default();
+        env.mock_all_auths();
+
         let contract_id = env.register(CourseRegistry, ());
+        let client = CourseRegistryClient::new(&env, &contract_id);
 
-        env.as_contract(&contract_id, || {
-            // Create test courses
-            let course1_id = create_test_course(&env, "Course 1");
-            let course2_id = create_test_course(&env, "Course 2");
-            let course3_id = create_test_course(&env, "Course 3");
+        let creator: Address = Address::generate(&env);
+        let course1 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 1"),
+            &String::from_str(&env, "description"),
+            &1000,
+            &None,
+            &None,
+            &None,
+        );
+        let course2 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 2"),
+            &String::from_str(&env, "description"),
+            &1000,
+            &None,
+            &None,
+            &None,
+        );
+        let course3 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 3"),
+            &String::from_str(&env, "description"),
+            &1000,
+            &None,
+            &None,
+            &None,
+        );
 
-            // Create prerequisites vector
-            let mut prerequisites = Vec::new(&env);
-            prerequisites.push_back(course2_id.clone());
-            prerequisites.push_back(course3_id.clone());
+        let mut prerequisites = Vec::new(&env);
+        prerequisites.push_back(course2.id.clone());
+        prerequisites.push_back(course3.id.clone());
 
+<<<<<<< HEAD
             // Edit prerequisites
             course_registry_edit_prerequisite(
                 env.clone(),
@@ -166,29 +183,72 @@ mod tests {
                 .persistent()
                 .get(&DataKey::CoursePrerequisites(course1_id.clone()))
                 .unwrap();
+=======
+        client.edit_prerequisite(&creator, &course1.id.clone(), &prerequisites.clone());
 
-            assert_eq!(stored_prerequisites.len(), 2);
-            assert_eq!(stored_prerequisites.get(0).unwrap(), course2_id);
-            assert_eq!(stored_prerequisites.get(1).unwrap(), course3_id);
+        let events = env.events().all();
+        assert!(!events.is_empty());
+>>>>>>> origin/main
 
-            // Verify event was emitted - just check that events were generated
-            let events = env.events().all();
-            assert!(!events.is_empty()); // Should have at least some events
+        let stored_prerequisites: Vec<String> = env.as_contract(&contract_id, || {
+            env.storage()
+                .persistent()
+                .get(&DataKey::CoursePrerequisites(course1.id.clone()))
+                .unwrap()
         });
+
+        assert_eq!(stored_prerequisites.len(), 2);
+        assert_eq!(stored_prerequisites.get(0).unwrap(), course2.id);
+        assert_eq!(stored_prerequisites.get(1).unwrap(), course3.id);
     }
 
     #[test]
     fn test_edit_prerequisite_replace_existing() {
         let env = Env::default();
+        env.mock_all_auths();
+
         let contract_id = env.register(CourseRegistry, ());
+        let client = CourseRegistryClient::new(&env, &contract_id);
 
-        env.as_contract(&contract_id, || {
-            // Create test courses
-            let course1_id = create_test_course(&env, "Course 1");
-            let course2_id = create_test_course(&env, "Course 2");
-            let course3_id = create_test_course(&env, "Course 3");
-            let course4_id = create_test_course(&env, "Course 4");
+        let creator: Address = Address::generate(&env);
+        let course1 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 1"),
+            &String::from_str(&env, "description"),
+            &1000,
+            &None,
+            &None,
+            &None,
+        );
+        let course2 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 2"),
+            &String::from_str(&env, "description"),
+            &1000,
+            &None,
+            &None,
+            &None,
+        );
+        let course3 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 3"),
+            &String::from_str(&env, "description"),
+            &1000,
+            &None,
+            &None,
+            &None,
+        );
+        let course4 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 4"),
+            &String::from_str(&env, "description"),
+            &1000,
+            &None,
+            &None,
+            &None,
+        );
 
+<<<<<<< HEAD
             // Set initial prerequisites
             let mut initial_prerequisites = Vec::new(&env);
             initial_prerequisites.push_back(course2_id.clone());
@@ -218,19 +278,58 @@ mod tests {
             assert_eq!(stored_prerequisites.len(), 2);
             assert_eq!(stored_prerequisites.get(0).unwrap(), course3_id);
             assert_eq!(stored_prerequisites.get(1).unwrap(), course4_id);
+=======
+        let mut initial_prerequisites = Vec::new(&env);
+        initial_prerequisites.push_back(course2.id.clone());
+        client.edit_prerequisite(&creator, &course1.id, &initial_prerequisites);
+
+        let mut new_prerequisites = Vec::new(&env);
+        new_prerequisites.push_back(course3.id.clone());
+        new_prerequisites.push_back(course4.id.clone());
+        client.edit_prerequisite(&creator, &course1.id, &new_prerequisites);
+
+        let stored_prerequisites: Vec<String> = env.as_contract(&contract_id, || {
+            env.storage()
+                .persistent()
+                .get(&DataKey::CoursePrerequisites(course1.id.clone()))
+                .unwrap()
+>>>>>>> origin/main
         });
+
+        assert_eq!(stored_prerequisites.len(), 2);
+        assert_eq!(stored_prerequisites.get(0).unwrap(), course3.id);
+        assert_eq!(stored_prerequisites.get(1).unwrap(), course4.id);
     }
 
     #[test]
     fn test_edit_prerequisite_empty_list() {
         let env = Env::default();
+        env.mock_all_auths();
+
         let contract_id = env.register(CourseRegistry, ());
+        let client = CourseRegistryClient::new(&env, &contract_id);
 
-        env.as_contract(&contract_id, || {
-            // Create test courses
-            let course1_id = create_test_course(&env, "Course 1");
-            let course2_id = create_test_course(&env, "Course 2");
+        let creator: Address = Address::generate(&env);
+        let course1 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 1"),
+            &String::from_str(&env, "description"),
+            &1000,
+            &None,
+            &None,
+            &None,
+        );
+        let course2 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 2"),
+            &String::from_str(&env, "description"),
+            &1000,
+            &None,
+            &None,
+            &None,
+        );
 
+<<<<<<< HEAD
             // Set initial prerequisites
             let mut initial_prerequisites = Vec::new(&env);
             initial_prerequisites.push_back(course2_id.clone());
@@ -239,11 +338,16 @@ mod tests {
                 course1_id.clone(),
                 initial_prerequisites,
             );
+=======
+        let mut initial_prerequisites = Vec::new(&env);
+        initial_prerequisites.push_back(course2.id.clone());
+        client.edit_prerequisite(&creator, &course1.id, &initial_prerequisites);
+>>>>>>> origin/main
 
-            // Clear prerequisites with empty list
-            let empty_prerequisites = Vec::new(&env);
-            course_registry_edit_prerequisite(env.clone(), course1_id.clone(), empty_prerequisites);
+        let empty_prerequisites = Vec::new(&env);
+        client.edit_prerequisite(&creator, &course1.id.clone(), &empty_prerequisites);
 
+<<<<<<< HEAD
             // Verify prerequisites were cleared
             let stored_prerequisites: Vec<String> = env
                 .storage()
@@ -252,15 +356,25 @@ mod tests {
                 .unwrap();
 
             assert_eq!(stored_prerequisites.len(), 0);
+=======
+        let stored_prerequisites: Vec<String> = env.as_contract(&contract_id, || {
+            env.storage()
+                .persistent()
+                .get(&DataKey::CoursePrerequisites(course1.id.clone()))
+                .unwrap()
+>>>>>>> origin/main
         });
+
+        assert_eq!(stored_prerequisites.len(), 0);
     }
 
     #[test]
     #[should_panic(expected = "Course not found")]
     fn test_edit_prerequisite_course_not_found() {
         let env = Env::default();
-        let contract_id = env.register(CourseRegistry, ());
+        env.mock_all_auths();
 
+<<<<<<< HEAD
         env.as_contract(&contract_id, || {
             let prerequisites = Vec::new(&env);
             course_registry_edit_prerequisite(
@@ -269,92 +383,162 @@ mod tests {
                 prerequisites,
             );
         });
+=======
+        let contract_id = env.register(CourseRegistry, ());
+        let client = CourseRegistryClient::new(&env, &contract_id);
+
+        client.edit_prerequisite(
+            &Address::generate(&env),
+            &String::from_str(&env, "404"),
+            &Vec::new(&env),
+        );
+>>>>>>> origin/main
     }
 
     #[test]
     #[should_panic(expected = "Prerequisite course not found")]
     fn test_edit_prerequisite_invalid_prerequisite() {
         let env = Env::default();
+        env.mock_all_auths();
+
         let contract_id = env.register(CourseRegistry, ());
+        let client = CourseRegistryClient::new(&env, &contract_id);
 
-        env.as_contract(&contract_id, || {
-            // Create test course
-            let course1_id = create_test_course(&env, "Course 1");
+        let creator: Address = Address::generate(&env);
+        let course1 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 1"),
+            &String::from_str(&env, "description"),
+            &1000,
+            &None,
+            &None,
+            &None,
+        );
 
-            // Try to add nonexistent prerequisite
-            let mut prerequisites = Vec::new(&env);
-            prerequisites.push_back(String::from_str(&env, "nonexistent"));
+        let mut prerequisites = Vec::new(&env);
+        prerequisites.push_back(String::from_str(&env, "404"));
 
-            course_registry_edit_prerequisite(env.clone(), course1_id, prerequisites);
-        });
+        client.edit_prerequisite(&creator, &course1.id, &prerequisites);
     }
 
     #[test]
     #[should_panic(expected = "Course cannot be its own prerequisite")]
     fn test_edit_prerequisite_direct_circular_dependency() {
         let env = Env::default();
+        env.mock_all_auths();
+
         let contract_id = env.register(CourseRegistry, ());
+        let client = CourseRegistryClient::new(&env, &contract_id);
 
-        env.as_contract(&contract_id, || {
-            // Create test course
-            let course1_id = create_test_course(&env, "Course 1");
+        let creator: Address = Address::generate(&env);
+        let course1 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 1"),
+            &String::from_str(&env, "description"),
+            &1000,
+            &None,
+            &None,
+            &None,
+        );
 
-            // Try to make course prerequisite of itself
-            let mut prerequisites = Vec::new(&env);
-            prerequisites.push_back(course1_id.clone());
+        let mut prerequisites = Vec::new(&env);
+        prerequisites.push_back(course1.id.clone());
 
-            course_registry_edit_prerequisite(env.clone(), course1_id, prerequisites);
-        });
+        client.edit_prerequisite(&creator, &course1.id, &prerequisites);
     }
 
     #[test]
     #[should_panic(expected = "Circular dependency detected")]
     fn test_edit_prerequisite_indirect_circular_dependency() {
         let env = Env::default();
+        env.mock_all_auths();
+
         let contract_id = env.register(CourseRegistry, ());
+        let client = CourseRegistryClient::new(&env, &contract_id);
 
-        env.as_contract(&contract_id, || {
-            // Create test courses
-            let course1_id = create_test_course(&env, "Course 1");
-            let course2_id = create_test_course(&env, "Course 2");
-            let course3_id = create_test_course(&env, "Course 3");
+        let creator: Address = Address::generate(&env);
+        let course1 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 1"),
+            &String::from_str(&env, "description"),
+            &1000,
+            &None,
+            &None,
+            &None,
+        );
+        let course2 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 2"),
+            &String::from_str(&env, "description"),
+            &1000,
+            &None,
+            &None,
+            &None,
+        );
+        let course3 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 3"),
+            &String::from_str(&env, "description"),
+            &1000,
+            &None,
+            &None,
+            &None,
+        );
 
-            // Set up chain: Course1 -> Course2 -> Course3
-            let mut prerequisites2 = Vec::new(&env);
-            prerequisites2.push_back(course3_id.clone());
-            course_registry_edit_prerequisite(env.clone(), course2_id.clone(), prerequisites2);
+        let mut prerequisites2 = Vec::new(&env);
+        prerequisites2.push_back(course3.id.clone());
+        client.edit_prerequisite(&creator, &course2.id, &prerequisites2);
 
-            let mut prerequisites1 = Vec::new(&env);
-            prerequisites1.push_back(course2_id.clone());
-            course_registry_edit_prerequisite(env.clone(), course1_id.clone(), prerequisites1);
+        let mut prerequisites1 = Vec::new(&env);
+        prerequisites1.push_back(course2.id.clone());
+        client.edit_prerequisite(&creator, &course1.id, &prerequisites1);
 
-            // Try to create cycle: Course3 -> Course1 (which would create Course1 -> Course2 -> Course3 -> Course1)
-            let mut prerequisites3 = Vec::new(&env);
-            prerequisites3.push_back(course1_id.clone());
-
-            course_registry_edit_prerequisite(env.clone(), course3_id, prerequisites3);
-        });
+        let mut prerequisites3 = Vec::new(&env);
+        prerequisites3.push_back(course1.id.clone());
+        client.edit_prerequisite(&creator, &course3.id, &prerequisites3);
     }
 
     #[test]
     fn test_edit_prerequisite_authorization() {
         let env = Env::default();
+<<<<<<< HEAD
 
         // Note: In the current implementation, we use env.current_contract_address()
         // which means the authorization check will always pass in tests.
         // This test verifies the function works when authorization passes.
+=======
+        env.mock_all_auths();
+
+>>>>>>> origin/main
         let contract_id = env.register(CourseRegistry, ());
+        let client = CourseRegistryClient::new(&env, &contract_id);
 
-        env.as_contract(&contract_id, || {
-            let course1_id = create_test_course(&env, "Course 1");
-            let course2_id = create_test_course(&env, "Course 2");
+        let creator: Address = Address::generate(&env);
+        let course1 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 1"),
+            &String::from_str(&env, "description"),
+            &1000,
+            &None,
+            &None,
+            &None,
+        );
+        let course2 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 2"),
+            &String::from_str(&env, "description"),
+            &1000,
+            &None,
+            &None,
+            &None,
+        );
 
-            let mut prerequisites = Vec::new(&env);
-            prerequisites.push_back(course2_id.clone());
+        let mut prerequisites = Vec::new(&env);
+        prerequisites.push_back(course2.id.clone());
 
-            // This should succeed since we're calling from the contract address
-            course_registry_edit_prerequisite(env.clone(), course1_id.clone(), prerequisites);
+        client.edit_prerequisite(&creator, &course1.id, &prerequisites);
 
+<<<<<<< HEAD
             // Verify it worked
             let stored_prerequisites: Vec<String> = env
                 .storage()
@@ -362,42 +546,86 @@ mod tests {
                 .get(&DataKey::CoursePrerequisites(course1_id))
                 .unwrap();
             assert_eq!(stored_prerequisites.len(), 1);
+=======
+        let stored_prerequisites: Vec<String> = env.as_contract(&contract_id, || {
+            env.storage()
+                .persistent()
+                .get(&DataKey::CoursePrerequisites(course1.id))
+                .unwrap()
+>>>>>>> origin/main
         });
+        assert_eq!(stored_prerequisites.len(), 1);
     }
 
     #[test]
     fn test_edit_prerequisite_complex_chain() {
         let env = Env::default();
+        env.mock_all_auths();
+
         let contract_id = env.register(CourseRegistry, ());
+        let client = CourseRegistryClient::new(&env, &contract_id);
 
-        env.as_contract(&contract_id, || {
-            // Create a complex but valid prerequisite chain
-            // Course1 -> [Course2, Course3]
-            // Course2 -> [Course4]
-            // Course3 -> [Course5]
-            // No cycles
-            let course1_id = create_test_course(&env, "Course 1");
-            let course2_id = create_test_course(&env, "Course 2");
-            let course3_id = create_test_course(&env, "Course 3");
-            let course4_id = create_test_course(&env, "Course 4");
-            let course5_id = create_test_course(&env, "Course 5");
+        let creator: Address = Address::generate(&env);
+        let course1 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 1"),
+            &String::from_str(&env, "description"),
+            &1000,
+            &None,
+            &None,
+            &None,
+        );
+        let course2 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 2"),
+            &String::from_str(&env, "description"),
+            &1000,
+            &None,
+            &None,
+            &None,
+        );
+        let course3 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 3"),
+            &String::from_str(&env, "description"),
+            &1000,
+            &None,
+            &None,
+            &None,
+        );
+        let course4 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 4"),
+            &String::from_str(&env, "description"),
+            &1000,
+            &None,
+            &None,
+            &None,
+        );
+        let course5 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 5"),
+            &String::from_str(&env, "description"),
+            &1000,
+            &None,
+            &None,
+            &None,
+        );
 
-            // Set Course2 -> Course4
-            let mut prerequisites2 = Vec::new(&env);
-            prerequisites2.push_back(course4_id.clone());
-            course_registry_edit_prerequisite(env.clone(), course2_id.clone(), prerequisites2);
+        let mut prerequisites2 = Vec::new(&env);
+        prerequisites2.push_back(course4.id.clone());
+        client.edit_prerequisite(&creator, &course2.id, &prerequisites2);
 
-            // Set Course3 -> Course5
-            let mut prerequisites3 = Vec::new(&env);
-            prerequisites3.push_back(course5_id.clone());
-            course_registry_edit_prerequisite(env.clone(), course3_id.clone(), prerequisites3);
+        let mut prerequisites3 = Vec::new(&env);
+        prerequisites3.push_back(course5.id.clone());
+        client.edit_prerequisite(&creator, &course3.id, &prerequisites3);
 
-            // Set Course1 -> [Course2, Course3] - should work
-            let mut prerequisites1 = Vec::new(&env);
-            prerequisites1.push_back(course2_id.clone());
-            prerequisites1.push_back(course3_id.clone());
-            course_registry_edit_prerequisite(env.clone(), course1_id.clone(), prerequisites1);
+        let mut prerequisites1 = Vec::new(&env);
+        prerequisites1.push_back(course2.id.clone());
+        prerequisites1.push_back(course3.id.clone());
+        client.edit_prerequisite(&creator, &course1.id, &prerequisites1);
 
+<<<<<<< HEAD
             // Verify all prerequisites were set correctly
             let stored_prerequisites: Vec<String> = env
                 .storage()
@@ -405,6 +633,14 @@ mod tests {
                 .get(&DataKey::CoursePrerequisites(course1_id))
                 .unwrap();
             assert_eq!(stored_prerequisites.len(), 2);
+=======
+        let stored_prerequisites: Vec<String> = env.as_contract(&contract_id, || {
+            env.storage()
+                .persistent()
+                .get(&DataKey::CoursePrerequisites(course1.id))
+                .unwrap()
+>>>>>>> origin/main
         });
+        assert_eq!(stored_prerequisites.len(), 2);
     }
 }
