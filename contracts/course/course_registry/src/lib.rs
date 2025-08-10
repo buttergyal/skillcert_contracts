@@ -1,5 +1,3 @@
-#![cfg_attr(target_arch = "wasm32", no_std)]
-
 pub mod functions;
 pub mod schema;
 
@@ -7,16 +5,6 @@ pub mod schema;
 mod test;
 
 use crate::schema::{Course, CourseGoal, CourseModule};
-use core::{
-    clone::Clone,
-    cmp::PartialEq,
-    convert::{From, Into, TryInto},
-    default::Default,
-    iter::{ExactSizeIterator, Iterator},
-    option::{Option, Option::None, Option::Some},
-    panic,
-    result::{Result, Result::Err, Result::Ok},
-};
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
 
 #[contract]
