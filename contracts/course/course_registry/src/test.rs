@@ -2,7 +2,11 @@ use crate::{CourseRegistry, CourseRegistryClient};
 use soroban_sdk::{symbol_short, testutils::Address as _, Address, Env, String};
 
 use crate::{
-    functions::get_prerequisites_by_course::get_prerequisites_by_course_id, schema::Course,
+    functions::{
+        get_prerequisites_by_course::get_prerequisites_by_course_id,
+        list_categories::course_registry_list_categories,
+    },
+    schema::{Course},
 };
 
 #[test]
@@ -220,4 +224,174 @@ fn test_get_prerequisites_by_course_id() {
         get_prerequisites_by_course_id(&env, course.id.clone())
     });
     assert!(prerequisites.is_empty());
+}
+
+#[test]
+fn test_list_categories_counts() {
+    let env = Env::default();
+    let contract_id = env.register(CourseRegistry, ());
+    let creator = Address::generate(&env);
+
+    env.as_contract(&contract_id, || {
+        // Create 3 courses: 2 in "Programming", 1 in "Data"
+        CourseRegistry::create_course(
+            env.clone(),
+            creator.clone(),
+            String::from_str(&env, "A"),
+            String::from_str(&env, "d"),
+            10,
+            Some(String::from_str(&env, "Programming")),
+            None,
+            None,
+        );
+        CourseRegistry::create_course(
+            env.clone(),
+            creator.clone(),
+            String::from_str(&env, "B"),
+            String::from_str(&env, "d"),
+            10,
+            Some(String::from_str(&env, "Data")),
+            None,
+            None,
+        );
+        CourseRegistry::create_course(
+            env.clone(),
+            creator.clone(),
+            String::from_str(&env, "C"),
+            String::from_str(&env, "d"),
+            10,
+            Some(String::from_str(&env, "Programming")),
+            None,
+            None,
+        );
+
+        // Call the function to list categories
+        let cats = course_registry_list_categories(&env);
+        assert_eq!(cats.len(), 2); // Should have 2 unique categories
+
+        // Verify counts without assuming order
+        let mut prog = 0u128;
+        let mut data = 0u128;
+        for c in cats.iter() {
+            let cname = c.name.clone();
+            if cname.to_string() == "Programming" {
+                prog = c.count;
+            }
+            if cname.to_string() == "Data" {
+                data = c.count;
+            }
+        }
+        assert_eq!(prog, 2);
+        assert_eq!(data, 1);
+    });
+}
+
+#[test]
+fn test_list_categories_empty() {
+    let env = Env::default();
+    let contract_id = env.register(CourseRegistry, ());
+    // No courses created, should return empty vector
+    let cats = env.as_contract(&contract_id, || course_registry_list_categories(&env));
+    assert_eq!(cats.len(), 0);
+}
+
+#[test]
+fn test_list_categories_ignores_none() {
+    let env = Env::default();
+    let contract_id = env.register(CourseRegistry, ());
+    let creator = Address::generate(&env);
+
+    env.as_contract(&contract_id, || {
+        // Course without category (None)
+        CourseRegistry::create_course(
+            env.clone(),
+            creator.clone(),
+            String::from_str(&env, "A"),
+            String::from_str(&env, "d"),
+            10,
+            None,
+            None,
+            None,
+        );
+        // Course with category (Some)
+        CourseRegistry::create_course(
+            env.clone(),
+            creator.clone(),
+            String::from_str(&env, "B"),
+            String::from_str(&env, "d"),
+            10,
+            Some(String::from_str(&env, "Programming")),
+            None,
+            None,
+        );
+
+        let cats = course_registry_list_categories(&env);
+        assert_eq!(cats.len(), 1); // Only "Programming" should be returned
+        let c = cats.get(0).unwrap();
+        assert_eq!(c.name, String::from_str(&env, "Programming"));
+        assert_eq!(c.count, 1);
+    });
+}
+
+#[test]
+fn test_list_categories_with_id_gaps() {
+    let env = Env::default();
+    let contract_id = env.register(CourseRegistry, ());
+    let creator = Address::generate(&env);
+
+    env.as_contract(&contract_id, || {
+        // Create course 1
+        CourseRegistry::create_course(
+            env.clone(),
+            creator.clone(),
+            String::from_str(&env, "Course 1"),
+            String::from_str(&env, "Desc"),
+            10,
+            Some(String::from_str(&env, "Programming")),
+            None,
+            None,
+        );
+        // Create course 2
+        CourseRegistry::create_course(
+            env.clone(),
+            creator.clone(),
+            String::from_str(&env, "Course 2"),
+            String::from_str(&env, "Desc"),
+            10,
+            Some(String::from_str(&env, "Data")),
+            None,
+            None,
+        );
+
+        // Manually delete course 2 to create an ID gap
+        let key = (symbol_short!("course"), String::from_str(&env, "2"));
+        env.storage().persistent().remove(&key);
+
+        // Create course 3 (this will still have ID 3)
+        CourseRegistry::create_course(
+            env.clone(),
+            creator.clone(),
+            String::from_str(&env, "Course 3"),
+            String::from_str(&env, "Desc"),
+            10,
+            Some(String::from_str(&env, "Programming")),
+            None,
+            None,
+        );
+
+        // Call the function - it should skip missing ID 2 but still count 1 and 3
+        let cats = course_registry_list_categories(&env);
+        let mut prog = 0u128;
+        let mut data = 0u128;
+        for c in cats.iter() {
+            if c.name.to_string() == "Programming" {
+                prog = c.count;
+            }
+            if c.name.to_string() == "Data" {
+                data = c.count;
+            }
+        }
+        assert_eq!(prog, 2); // Course 1 and Course 3
+        assert_eq!(data, 0); // Course 2 was deleted
+    });
 }
