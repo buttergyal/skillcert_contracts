@@ -33,6 +33,28 @@ impl UserManagement {
         functions::get_user_by_id::get_user_by_id(env, requester, user_id)
     }
 
+    /// Delete (deactivate) a user account
+    ///
+    /// Performs a soft delete by marking the user as inactive instead of permanent deletion.
+    /// Only admins or the user themselves can trigger deletion.
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `caller` - Address performing the deletion (must be admin or the user themselves)
+    /// * `user_id` - Address of the user to be deactivated
+    ///
+    /// # Panics
+    /// * If caller authentication fails
+    /// * If user doesn't exist
+    /// * If caller is neither admin nor the user themselves
+    /// * If user is already inactive
+    ///
+    /// # Events
+    /// Emits a user deactivation event upon successful deletion
+    pub fn delete_user(env: Env, caller: Address, user_id: Address) {
+        functions::delete_user::delete_user(env, caller, user_id)
+    }
+
     /// Lists all registered users with pagination and filtering (admin-only)
     ///
     /// # Arguments

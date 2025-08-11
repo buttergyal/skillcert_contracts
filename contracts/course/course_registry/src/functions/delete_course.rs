@@ -1,6 +1,6 @@
 use crate::schema::{Course, CourseModule};
 use soroban_sdk::{
-    symbol_short, testutils::Address as TestAddress, Address, Env, String, Symbol, Vec,
+    symbol_short, Address, Env, String, Symbol, Vec,
 };
 
 const COURSE_KEY: Symbol = symbol_short!("course");
