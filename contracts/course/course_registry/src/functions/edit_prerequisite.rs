@@ -122,7 +122,7 @@ fn has_cycle(
 mod tests {
     use super::*;
     use crate::CourseRegistry;
-    use crate::{functions::create_course::course_registry_create_course, CourseRegistryClient};
+    use crate::CourseRegistryClient;
     use soroban_sdk::{
         testutils::{Address as TestAddress, Events},
         Address, Env, String,
