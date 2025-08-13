@@ -1,6 +1,4 @@
-
-use soroban_sdk::{Address, String, contracttype, IntoVal, TryFromVal, Val, Env};
-
+use soroban_sdk::{contracttype, Address, String, Vec};
 
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]
@@ -14,57 +12,48 @@ pub struct CourseModule {
 
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]
-pub enum DataKey {
-    Module(String), // This would represent the ("module", module_id) key
-    Courses, // If courses are stored as a single map
+pub struct CourseGoal {
+    pub course_id: String,
+    pub content: String,
+    pub created_by: Address,
+    pub created_at: u64,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub enum DataKey {
+    Module(String),
+    Courses,
+    CourseGoal(String),
+    CoursePrerequisites(String),
+}
+
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Course {
     pub id: String,
     pub title: String,
     pub description: String,
     pub creator: Address,
+    pub price: u128,
+    pub category: Option<String>,
+    pub language: Option<String>,
+    pub thumbnail_url: Option<String>,
     pub published: bool,
-}
-
-impl IntoVal<Env, Val> for Course {
-    fn into_val(&self, env: &Env) -> Val {
-        (
-            self.id.clone(),
-            self.title.clone(),
-            self.description.clone(),
-            self.creator.clone(),
-            self.published,
-        )
-            .into_val(env)
-    }
-}
-
-impl TryFromVal<Env, Val> for Course {
-    type Error = soroban_sdk::ConversionError;
-
-    fn try_from_val(env: &Env, val: &Val) -> Result<Self, Self::Error> {
-        let (id, title, description, creator, published): (
-            String,
-            String,
-            String,
-            Address,
-            bool,
-        ) = TryFromVal::try_from_val(env, val)?;
-        Ok(Course {
-            id,
-            title,
-            description,
-            creator,
-            published,
-        })
-    }
+    pub prerequisites: Vec<CourseId>,
+    pub is_archived: bool,
 }
 
 #[contracttype]
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct CourseId {
     pub id: String,
+    pub count: u128,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct Category {
+    pub name: String,
     pub count: u128,
 }

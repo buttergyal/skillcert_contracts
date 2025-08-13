@@ -5,15 +5,47 @@
   },
   "auth": [
     [],
-    [],
-    [],
+    [
+      [
+        "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
+        {
+          "function": {
+            "contract_fn": {
+              "contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
+              "function_name": "create_course",
+              "args": [
+                {
+                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
+                },
+                {
+                  "string": "title"
+                },
+                {
+                  "string": "description"
+                },
+                {
+                  "u128": {
+                    "hi": 0,
+                    "lo": 1000
+                  }
+                },
+                "void",
+                "void",
+                "void"
+              ]
+            }
+          },
+          "sub_invocations": []
+        }
+      ]
+    ],
     [],
     []
   ],
   "ledger": {
     "protocol_version": 22,
     "sequence_number": 0,
-    "timestamp": 100000,
+    "timestamp": 0,
     "network_id": "0000000000000000000000000000000000000000000000000000000000000000",
     "base_reserve": 0,
     "min_persistent_entry_ttl": 4096,
@@ -25,14 +57,7 @@
           "contract_data": {
             "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
             "key": {
-              "vec": [
-                {
-                  "symbol": "course"
-                },
-                {
-                  "string": "course_123"
-                }
-              ]
+              "symbol": "course"
             },
             "durability": "persistent"
           }
@@ -45,34 +70,14 @@
                 "ext": "v0",
                 "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
                 "key": {
-                  "vec": [
-                    {
-                      "symbol": "course"
-                    },
-                    {
-                      "string": "course_123"
-                    }
-                  ]
+                  "symbol": "course"
                 },
                 "durability": "persistent",
                 "val": {
-                  "vec": [
-                    {
-                      "string": "course_123"
-                    },
-                    {
-                      "string": "Test Course"
-                    },
-                    {
-                      "string": "Test Description"
-                    },
-                    {
-                      "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
-                    },
-                    {
-                      "bool": true
-                    }
-                  ]
+                  "u128": {
+                    "hi": 0,
+                    "lo": 1
+                  }
                 }
               }
             },
@@ -91,7 +96,7 @@
                   "symbol": "course"
                 },
                 {
-                  "string": "course_234"
+                  "string": "1"
                 }
               ]
             },
@@ -111,27 +116,97 @@
                       "symbol": "course"
                     },
                     {
-                      "string": "course_234"
+                      "string": "1"
                     }
                   ]
                 },
                 "durability": "persistent",
                 "val": {
-                  "vec": [
+                  "map": [
                     {
-                      "string": "course_123"
+                      "key": {
+                        "symbol": "category"
+                      },
+                      "val": "void"
                     },
                     {
-                      "string": "Test Course"
+                      "key": {
+                        "symbol": "creator"
+                      },
+                      "val": {
+                        "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
+                      }
                     },
                     {
-                      "string": "Test Description"
+                      "key": {
+                        "symbol": "description"
+                      },
+                      "val": {
+                        "string": "description"
+                      }
                     },
                     {
-                      "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
+                      "key": {
+                        "symbol": "id"
+                      },
+                      "val": {
+                        "string": "1"
+                      }
                     },
                     {
-                      "bool": true
+                      "key": {
+                        "symbol": "is_archived"
+                      },
+                      "val": {
+                        "bool": false
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "language"
+                      },
+                      "val": "void"
+                    },
+                    {
+                      "key": {
+                        "symbol": "prerequisites"
+                      },
+                      "val": {
+                        "vec": []
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "price"
+                      },
+                      "val": {
+                        "u128": {
+                          "hi": 0,
+                          "lo": 1000
+                        }
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "published"
+                      },
+                      "val": {
+                        "bool": false
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "thumbnail_url"
+                      },
+                      "val": "void"
+                    },
+                    {
+                      "key": {
+                        "symbol": "title"
+                      },
+                      "val": {
+                        "string": "title"
+                      }
                     }
                   ]
                 }
@@ -152,7 +227,7 @@
                   "symbol": "module"
                 },
                 {
-                  "string": "module_course_123_1_0"
+                  "string": "module_1_1_0"
                 }
               ]
             },
@@ -172,7 +247,7 @@
                       "symbol": "module"
                     },
                     {
-                      "string": "module_course_123_1_0"
+                      "string": "module_1_1_0"
                     }
                   ]
                 },
@@ -184,7 +259,7 @@
                         "symbol": "course_id"
                       },
                       "val": {
-                        "string": "course_123"
+                        "string": "1"
                       }
                     },
                     {
@@ -192,7 +267,7 @@
                         "symbol": "created_at"
                       },
                       "val": {
-                        "u64": 100000
+                        "u64": 0
                       }
                     },
                     {
@@ -200,7 +275,7 @@
                         "symbol": "id"
                       },
                       "val": {
-                        "string": "module_course_123_1_0"
+                        "string": "module_1_1_0"
                       }
                     },
                     {
@@ -216,7 +291,7 @@
                         "symbol": "title"
                       },
                       "val": {
-                        "string": "Introduction Module"
+                        "string": "Module 1"
                       }
                     }
                   ]
@@ -238,7 +313,7 @@
                   "symbol": "module"
                 },
                 {
-                  "string": "module_course_234_2_0"
+                  "string": "module_1_2_0"
                 }
               ]
             },
@@ -258,7 +333,7 @@
                       "symbol": "module"
                     },
                     {
-                      "string": "module_course_234_2_0"
+                      "string": "module_1_2_0"
                     }
                   ]
                 },
@@ -270,7 +345,7 @@
                         "symbol": "course_id"
                       },
                       "val": {
-                        "string": "course_234"
+                        "string": "1"
                       }
                     },
                     {
@@ -278,7 +353,7 @@
                         "symbol": "created_at"
                       },
                       "val": {
-                        "u64": 100000
+                        "u64": 0
                       }
                     },
                     {
@@ -286,7 +361,7 @@
                         "symbol": "id"
                       },
                       "val": {
-                        "string": "module_course_234_2_0"
+                        "string": "module_1_2_0"
                       }
                     },
                     {
@@ -302,10 +377,55 @@
                         "symbol": "title"
                       },
                       "val": {
-                        "string": "Second Module"
+                        "string": "Module 2"
                       }
                     }
                   ]
+                }
+              }
+            },
+            "ext": "v0"
+          },
+          4095
+        ]
+      ],
+      [
+        {
+          "contract_data": {
+            "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
+            "key": {
+              "vec": [
+                {
+                  "symbol": "title"
+                },
+                {
+                  "string": "title"
+                }
+              ]
+            },
+            "durability": "persistent"
+          }
+        },
+        [
+          {
+            "last_modified_ledger_seq": 0,
+            "data": {
+              "contract_data": {
+                "ext": "v0",
+                "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
+                "key": {
+                  "vec": [
+                    {
+                      "symbol": "title"
+                    },
+                    {
+                      "string": "title"
+                    }
+                  ]
+                },
+                "durability": "persistent",
+                "val": {
+                  "bool": true
                 }
               }
             },
@@ -344,6 +464,39 @@
             "ext": "v0"
           },
           4095
+        ]
+      ],
+      [
+        {
+          "contract_data": {
+            "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
+            "key": {
+              "ledger_key_nonce": {
+                "nonce": 801925984706572462
+              }
+            },
+            "durability": "temporary"
+          }
+        },
+        [
+          {
+            "last_modified_ledger_seq": 0,
+            "data": {
+              "contract_data": {
+                "ext": "v0",
+                "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
+                "key": {
+                  "ledger_key_nonce": {
+                    "nonce": 801925984706572462
+                  }
+                },
+                "durability": "temporary",
+                "val": "void"
+              }
+            },
+            "ext": "v0"
+          },
+          6311999
         ]
       ],
       [
