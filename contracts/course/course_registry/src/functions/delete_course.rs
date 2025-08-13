@@ -81,6 +81,7 @@ mod tests {
     use crate::schema::Course;
     use crate::{CourseRegistry, CourseRegistryClient};
     use soroban_sdk::{Env, String};
+    use soroban_sdk::testutils::Address as _;
 
     #[test]
     #[should_panic(expected = "Unauthorized")]
