@@ -2,7 +2,8 @@
 resolver = "2"
 members = [
   "contracts/course/course_registry",
-  "contracts/course/course_access"
+  "contracts/course/course_access",
+  "contracts/user_profile"
 ]
 
 [workspace.dependencies]
