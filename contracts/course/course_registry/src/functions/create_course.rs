@@ -83,7 +83,7 @@ mod test {
     use super::*;
     use crate::schema::Course;
     use crate::{CourseRegistry, CourseRegistryClient};
-    use soroban_sdk::testutils::Address as TestAddress;
+    use soroban_sdk::testutils::Address as _;
 
     #[test]
     fn test_generate_course_id() {
