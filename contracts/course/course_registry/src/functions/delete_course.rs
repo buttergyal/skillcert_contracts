@@ -1,7 +1,6 @@
 use crate::schema::{Course, CourseModule};
 use soroban_sdk::{
     symbol_short, Address, Env, String, Symbol, Vec,
-    testutils::{Address as _},
 };
 
 const COURSE_KEY: Symbol = symbol_short!("course");
@@ -81,7 +80,7 @@ mod tests {
     use super::*;
     use crate::schema::Course;
     use crate::{CourseRegistry, CourseRegistryClient};
-    use soroban_sdk::{Env, String};
+    use soroban_sdk::{Env, String, Address, testutils::{Address as _},};
 
     #[test]
     #[should_panic(expected = "Unauthorized")]

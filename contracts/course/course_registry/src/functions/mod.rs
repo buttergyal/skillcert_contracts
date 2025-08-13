@@ -2,6 +2,7 @@ pub mod add_goal;
 pub mod add_module;
 pub mod archive_course;
 pub mod create_course;
+pub mod create_prerequisite;
 pub mod delete_course;
 pub mod edit_course;
 pub mod edit_prerequisite;
