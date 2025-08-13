@@ -59,7 +59,6 @@ pub fn course_registry_add_goal(
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use crate::schema::Course;
     use crate::{CourseRegistry, CourseRegistryClient};
     use soroban_sdk::{testutils::Address as _, Address, Env, String};
