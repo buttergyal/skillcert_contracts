@@ -58,12 +58,22 @@ impl CourseRegistry {
             .unwrap_or_else(|e| panic!("{}", e))
     }
 
-    pub fn hello_world(_env: Env) -> String {
-        String::from_str(&_env, "Hello from Web3 👋")
-    }
-
     pub fn add_goal(env: Env, creator: Address, course_id: String, content: String) -> CourseGoal {
         functions::add_goal::course_registry_add_goal(env, creator, course_id, content)
+    }
+
+    pub fn add_prerequisite(
+        env: Env,
+        creator: Address,
+        course_id: String,
+        prerequisite_course_ids: Vec<String>,
+    ) {
+        functions::create_prerequisite::course_registry_add_prerequisite(
+            env,
+            creator,
+            course_id,
+            prerequisite_course_ids,
+        )
     }
 
     pub fn remove_prerequisite(

@@ -83,6 +83,7 @@ mod tests {
     use soroban_sdk::{Env, String};
     use soroban_sdk::testutils::Address as _;
 
+
     #[test]
     #[should_panic(expected = "Unauthorized")]
     fn test_delete_course_unauthorized() {

@@ -58,6 +58,7 @@ pub struct AdminConfig {
 #[derive(Clone, Debug, PartialEq)]
 pub enum DataKey {
     UserProfile(Address), // This represents the ("user_profile", user_address) key
+    Admin(Address),       // Admin flag per address
     UserProfileLight(Address), // Lightweight profile storage
     UsersIndex,           // List of all registered user addresses
     Admins,               // List of admin addresses
