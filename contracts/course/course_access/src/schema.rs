@@ -42,3 +42,7 @@ pub struct CourseUsers {
     pub course: String,
     pub users: Vec<Address>,
 }
+
+// Global config keys
+pub const KEY_USER_MGMT_ADDR: &str = "user_mgmt_addr";
+pub const KEY_COURSE_REG_ADDR: &str = "course_registry_addr";

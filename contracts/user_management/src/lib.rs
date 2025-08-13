@@ -36,4 +36,9 @@ impl UserManagement {
     pub fn get_user_by_id(env: Env, requester: Address, user_id: Address) -> UserProfile {
         functions::get_user_by_id::get_user_by_id(env, requester, user_id)
     }
+
+    /// Public admin check for cross-contract calls
+    pub fn is_admin(env: Env, who: Address) -> bool {
+        functions::is_admin::is_admin(env, who)
+    }
 }

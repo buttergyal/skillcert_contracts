@@ -52,4 +52,5 @@ impl TryFromVal<Env, Val> for UserProfile {
 #[derive(Clone, Debug, PartialEq)]
 pub enum DataKey {
     UserProfile(Address), // This represents the ("user_profile", user_address) key
-} 
+    Admin(Address),       // Admin flag per address
+}

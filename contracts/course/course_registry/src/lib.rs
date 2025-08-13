@@ -75,5 +75,4 @@ impl CourseRegistry {
     pub fn is_course_creator(env: &Env, course_id: String, user: Address) -> bool {
         functions::is_course_creator::is_course_creator(env, course_id, user)
     }
-
 }
