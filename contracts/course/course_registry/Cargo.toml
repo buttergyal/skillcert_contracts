@@ -8,14 +8,6 @@ publish = false
 crate-type = ["cdylib"]
 doctest = false
 
-
-[profile.release]
-opt-level = "z"        # Tamaño reducido
-codegen-units = 1
-lto = true
-panic = "abort"
-strip = "symbols"
-
 [dependencies]
 soroban-sdk = { workspace = true }
 

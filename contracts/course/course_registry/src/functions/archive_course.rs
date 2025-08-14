@@ -32,7 +32,7 @@ pub fn course_registry_archive_course(env: &Env, creator: Address, course_id: St
 mod tests {
     use super::*;
     use crate::{CourseRegistry, CourseRegistryClient};
-    use soroban_sdk::{testutils::Address as TestAddress, testutils::Events, Address, Env};
+    use soroban_sdk::{testutils::Address as _, testutils::Events, Address, Env};
 
     #[test]
     fn test_archive_course_success() {

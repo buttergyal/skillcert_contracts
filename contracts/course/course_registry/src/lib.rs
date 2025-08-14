@@ -75,23 +75,22 @@ impl CourseRegistry {
         functions::edit_goal::course_registry_edit_goal(env, course_id, goal_id, new_content)
     }
 
-    pub fn remove_prerequisite(env: Env, course_id: String, prerequisite_course_id: String) {
-        functions::remove_prerequisite::course_registry_remove_prerequisite(
-            env,
-            course_id,
-            prerequisite_course_id,
-        )
-    }
-
-    pub fn edit_prerequisite(env: Env, course_id: String, new_prerequisites: Vec<String>) {
-        functions::edit_prerequisite::course_registry_edit_prerequisite(
-            env,
-            course_id,
-            new_prerequisites,
-        )
-      
     pub fn add_goal(env: Env, creator: Address, course_id: String, content: String) -> CourseGoal {
         functions::add_goal::course_registry_add_goal(env, creator, course_id, content)
+    }
+
+    pub fn add_prerequisite(
+        env: Env,
+        creator: Address,
+        course_id: String,
+        prerequisite_course_ids: Vec<String>,
+    ) {
+        functions::create_prerequisite::course_registry_add_prerequisite(
+            env,
+            creator,
+            course_id,
+            prerequisite_course_ids,
+        )
     }
 
     pub fn remove_prerequisite(

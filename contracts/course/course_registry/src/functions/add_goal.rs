@@ -11,7 +11,6 @@ pub fn course_registry_add_goal(
     content: String,
 ) -> CourseGoal {
     creator.require_auth();
-
     // Validate input
     if content.is_empty() {
         panic!("Goal content cannot be empty");
@@ -69,7 +68,6 @@ pub fn course_registry_add_goal(
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use crate::schema::Course;
     use crate::{CourseRegistry, CourseRegistryClient};
     use soroban_sdk::{testutils::Address as _, Address, Env, String};

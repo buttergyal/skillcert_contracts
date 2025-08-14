@@ -1,5 +1,5 @@
 use crate::schema::{Category, Course};
-use soroban_sdk::{symbol_short, Env, String, Symbol, Vec, Map};
+use soroban_sdk::{symbol_short, Env, Map, String, Symbol, Vec};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const COURSE_ID_COUNTER: Symbol = symbol_short!("course");
@@ -24,7 +24,11 @@ pub fn course_registry_list_categories(env: &Env) -> Vec<Category> {
     let mut categories_map: Map<String, u128> = Map::new(env);
 
     // Get the maximum course ID generated so far (0 if no courses exist yet)
-    let max_id: u128 = env.storage().persistent().get(&COURSE_ID_COUNTER).unwrap_or(0);
+    let max_id: u128 = env
+        .storage()
+        .persistent()
+        .get(&COURSE_ID_COUNTER)
+        .unwrap_or(0);
 
     // Iterate over all possible course IDs from 1 to max_id
     let mut id: u128 = 1;

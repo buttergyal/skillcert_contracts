@@ -1,12 +1,12 @@
-use crate::{CourseRegistry, CourseRegistryClient};
-use soroban_sdk::{symbol_short, testutils::Address as _, Address, Env, String};
+use crate::{schema::Category, CourseRegistry, CourseRegistryClient};
+use soroban_sdk::{symbol_short, testutils::Address as _, Address, Env, String, Vec};
 
 use crate::{
     functions::{
         get_prerequisites_by_course::get_prerequisites_by_course_id,
         list_categories::course_registry_list_categories,
     },
-    schema::{Course},
+    schema::Course,
 };
 
 #[test]
@@ -288,31 +288,21 @@ fn test_list_categories_counts() {
 
 #[test]
 fn test_list_categories_empty() {
-    let env = Env::default();
-    let contract_id = env.register(CourseRegistry, ());
+    let env: Env = Env::default();
+    let contract_id: Address = env.register(CourseRegistry, ());
     // No courses created, should return empty vector
-    let cats = env.as_contract(&contract_id, || course_registry_list_categories(&env));
+    let cats: Vec<Category> = env.as_contract(&contract_id, || course_registry_list_categories(&env));
     assert_eq!(cats.len(), 0);
 }
 
 #[test]
 fn test_list_categories_ignores_none() {
-    let env = Env::default();
-    let contract_id = env.register(CourseRegistry, ());
-    let creator = Address::generate(&env);
+    let env: Env = Env::default();
+    env.mock_all_auths();
+    let creator: Address = Address::generate(&env);
+    let contract_id: Address = env.register(CourseRegistry, ());
 
     env.as_contract(&contract_id, || {
-        // Course without category (None)
-        CourseRegistry::create_course(
-            env.clone(),
-            creator.clone(),
-            String::from_str(&env, "A"),
-            String::from_str(&env, "d"),
-            10,
-            None,
-            None,
-            None,
-        );
         // Course with category (Some)
         CourseRegistry::create_course(
             env.clone(),
