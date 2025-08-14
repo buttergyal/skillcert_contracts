@@ -1,3 +1,4 @@
+use crate::functions::utils;
 use crate::schema::{Course, CourseGoal, DataKey};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
 
@@ -28,31 +29,29 @@ pub fn course_registry_add_goal(
         panic!("Only the course creator can add goals");
     }
 
-    // Load or initialize goal list
-    let mut goals: Vec<CourseGoal> = env
-        .storage()
-        .persistent()
-        .get(&DataKey::CourseGoal(course_id.clone()))
-        .unwrap_or(Vec::new(&env));
+    // Generate a unique goal ID
+    let goal_id = utils::generate_unique_id(&env);
 
-    // Create new goal
+     // Create new goal
     let goal = CourseGoal {
         course_id: course_id.clone(),
+        goal_id: goal_id.clone(),
         content: content.clone(),
-        created_by: creator,
+        created_by: creator.clone(),
         created_at: env.ledger().timestamp(),
     };
 
-    goals.push_back(goal.clone());
-
-    // Save updated goal list
-    env.storage()
-        .persistent()
-        .set(&DataKey::CourseGoal(course_id.clone()), &goals);
+    // Save the new goal directly
+    env.storage().persistent().set(
+        &DataKey::CourseGoal(course_id.clone(), goal_id.clone()),
+        &goal,
+    );
 
     // Emit event
-    env.events()
-        .publish((GOAL_ADDED_EVENT, course_id.clone()), content.clone());
+    env.events().publish(
+        (GOAL_ADDED_EVENT, course_id.clone(), goal_id.clone()),
+        content.clone(),
+    );
 
     goal
 }

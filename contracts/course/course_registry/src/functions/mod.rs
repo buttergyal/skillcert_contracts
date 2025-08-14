@@ -4,6 +4,7 @@ pub mod archive_course;
 pub mod create_course;
 pub mod create_prerequisite;
 pub mod delete_course;
+pub mod edit_goal;
 pub mod edit_course;
 pub mod edit_prerequisite;
 pub mod get_course;
@@ -14,3 +15,5 @@ pub mod list_categories;
 pub mod list_modules;
 pub mod remove_module;
 pub mod remove_prerequisite;
+pub mod utils;
+

@@ -1,4 +1,5 @@
 use crate::schema::{Course, DataKey};
+
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
 
 const PREREQ_REMOVED_EVENT: Symbol = symbol_short!("prereqrmv");
@@ -54,6 +55,7 @@ pub fn course_registry_remove_prerequisite(
     // Emit event
     env.events()
         .publish((PREREQ_REMOVED_EVENT, course_id), prerequisite_course_id);
+
 }
 
 #[cfg(test)]

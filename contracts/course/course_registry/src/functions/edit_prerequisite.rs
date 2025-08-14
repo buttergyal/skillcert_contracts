@@ -236,6 +236,7 @@ mod tests {
         initial_prerequisites.push_back(course2.id.clone());
         client.edit_prerequisite(&creator, &course1.id, &initial_prerequisites);
 
+
         let mut new_prerequisites = Vec::new(&env);
         new_prerequisites.push_back(course3.id.clone());
         new_prerequisites.push_back(course4.id.clone());
@@ -257,6 +258,7 @@ mod tests {
     fn test_edit_prerequisite_empty_list() {
         let env = Env::default();
         env.mock_all_auths();
+
 
         let contract_id = env.register(CourseRegistry, ());
         let client = CourseRegistryClient::new(&env, &contract_id);
@@ -285,6 +287,7 @@ mod tests {
         initial_prerequisites.push_back(course2.id.clone());
         client.edit_prerequisite(&creator, &course1.id, &initial_prerequisites);
 
+
         let empty_prerequisites = Vec::new(&env);
         client.edit_prerequisite(&creator, &course1.id.clone(), &empty_prerequisites);
 
@@ -306,6 +309,7 @@ mod tests {
 
         let contract_id = env.register(CourseRegistry, ());
         let client = CourseRegistryClient::new(&env, &contract_id);
+
 
         client.edit_prerequisite(
             &Address::generate(&env),
@@ -420,6 +424,7 @@ mod tests {
     #[test]
     fn test_edit_prerequisite_authorization() {
         let env = Env::default();
+
         env.mock_all_auths();
 
         let contract_id = env.register(CourseRegistry, ());
@@ -449,6 +454,7 @@ mod tests {
         prerequisites.push_back(course2.id.clone());
 
         client.edit_prerequisite(&creator, &course1.id, &prerequisites);
+
 
         let stored_prerequisites: Vec<String> = env.as_contract(&contract_id, || {
             env.storage()
@@ -517,6 +523,7 @@ mod tests {
         let mut prerequisites2 = Vec::new(&env);
         prerequisites2.push_back(course4.id.clone());
         client.edit_prerequisite(&creator, &course2.id, &prerequisites2);
+
 
         let mut prerequisites3 = Vec::new(&env);
         prerequisites3.push_back(course5.id.clone());
