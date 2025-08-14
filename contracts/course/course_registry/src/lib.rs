@@ -62,17 +62,14 @@ impl CourseRegistry {
         String::from_str(&_env, "Hello from Web3 👋")
     }
 
-    pub fn add_goal(env: Env, course_id: String, content: String) -> CourseGoal {
-        functions::add_goal::course_registry_add_goal(env, course_id, content)
-    }
-
     pub fn edit_goal(
         env: Env,
+        creator: Address,
         course_id: String,
         goal_id: String,
         new_content: String,
     ) -> CourseGoal {
-        functions::edit_goal::course_registry_edit_goal(env, course_id, goal_id, new_content)
+        functions::edit_goal::course_registry_edit_goal(env, creator, course_id, goal_id, new_content)
     }
 
     pub fn add_goal(env: Env, creator: Address, course_id: String, content: String) -> CourseGoal {
