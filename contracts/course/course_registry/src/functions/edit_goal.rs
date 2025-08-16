@@ -60,7 +60,7 @@ pub fn course_registry_edit_goal(
 mod test {
     use crate::schema::Course;
     use crate::{CourseRegistry, CourseRegistryClient};
-    use soroban_sdk::{testutils::{Address as _, Events}, Address, Env, String, Vec};
+    use soroban_sdk::{testutils::Address as _, Address, Env, String};
 
     fn setup_course_and_goal(env: &Env, client: &CourseRegistryClient, creator: &Address) -> (Course, String) {
 
