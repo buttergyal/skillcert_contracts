@@ -1,4 +1,4 @@
-use crate::schema::Course;
+use crate::schema::{Course, EditCourseParams};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
@@ -10,18 +10,7 @@ pub fn course_registry_edit_course(
     env: Env,
     creator: Address,
     course_id: String,
-
-    // Editable fields (use Option for "provided or not")
-    new_title: Option<String>,
-    new_description: Option<String>,
-    new_price: Option<u128>,
-
-    // Double-Option lets caller clear the value: Some(None) -> clear, None -> no change
-    new_category: Option<Option<String>>,
-    new_language: Option<Option<String>>,
-    new_thumbnail_url: Option<Option<String>>,
-
-    new_published: Option<bool>,
+    params: EditCourseParams,
 ) -> Course {
     creator.require_auth();
 
@@ -39,7 +28,7 @@ pub fn course_registry_edit_course(
     }
 
     // --- Title update (validate + uniqueness) ---
-    if let Some(t) = new_title {
+    if let Some(t) = params.new_title {
         let t_str = t.to_string();
         let t_trim = t_str.trim();
         if t_trim.is_empty() {
@@ -69,12 +58,12 @@ pub fn course_registry_edit_course(
     }
 
     // --- Description ---
-    if let Some(d) = new_description {
+    if let Some(d) = params.new_description {
         course.description = d;
     }
 
     // --- Price (>0) ---
-    if let Some(p) = new_price {
+    if let Some(p) = params.new_price {
         if p == 0 {
             panic!("Course error: Price must be greater than 0");
         }
@@ -82,19 +71,29 @@ pub fn course_registry_edit_course(
     }
 
     // --- Optional fields: category / language / thumbnail ---
-    if let Some(cat) = new_category {
+    if let Some(cat) = params.new_category {
         course.category = cat; // Some(value) sets; None clears
     }
-    if let Some(lang) = new_language {
+    if let Some(lang) = params.new_language {
         course.language = lang;
     }
-    if let Some(url) = new_thumbnail_url {
+    if let Some(url) = params.new_thumbnail_url {
         course.thumbnail_url = url;
     }
 
     // --- Published flag ---
-    if let Some(p) = new_published {
+    if let Some(p) = params.new_published {
         course.published = p;
+    }
+
+    // --- Level field ---
+    if let Some(level) = params.new_level {
+        course.level = level; // Some(value) sets; None clears
+    }
+
+    // --- Duration hours field ---
+    if let Some(duration) = params.new_duration_hours {
+        course.duration_hours = duration; // Some(value) sets; None clears
     }
 
     // --- Persist updated course ---

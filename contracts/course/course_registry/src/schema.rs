@@ -80,3 +80,17 @@ pub struct CourseFilters {
     pub min_duration: Option<u32>,
     pub max_duration: Option<u32>,
 }
+
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct EditCourseParams {
+    pub new_title: Option<String>,
+    pub new_description: Option<String>,
+    pub new_price: Option<u128>,
+    pub new_category: Option<Option<String>>,
+    pub new_language: Option<Option<String>>,
+    pub new_thumbnail_url: Option<Option<String>>,
+    pub new_published: Option<bool>,
+    pub new_level: Option<Option<CourseLevel>>,
+    pub new_duration_hours: Option<Option<u32>>,
+}

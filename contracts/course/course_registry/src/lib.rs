@@ -4,7 +4,7 @@ pub mod schema;
 #[cfg(test)]
 mod test;
 
-use crate::schema::{Course, CourseFilters, CourseGoal, CourseLevel, CourseModule};
+use crate::schema::{Course, CourseFilters, CourseGoal, CourseLevel, CourseModule, EditCourseParams};
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
 
 #[contract]
@@ -21,6 +21,8 @@ impl CourseRegistry {
         category: Option<String>,
         language: Option<String>,
         thumbnail_url: Option<String>,
+        level: Option<CourseLevel>,
+        duration_hours: Option<u32>,
     ) -> Course {
         functions::create_course::course_registry_create_course(
             env,
@@ -31,6 +33,8 @@ impl CourseRegistry {
             category,
             language,
             thumbnail_url,
+            level,
+            duration_hours,
         )
     }
 
@@ -122,30 +126,13 @@ impl CourseRegistry {
         env: Env,
         creator: Address,
         course_id: String,
-
-        // Editable fields (use Option for "provided or not")
-        new_title: Option<String>,
-        new_description: Option<String>,
-        new_price: Option<u128>,
-
-        // Double-Option lets caller clear the value: Some(None) -> clear, None -> no change
-        new_category: Option<Option<String>>,
-        new_language: Option<Option<String>>,
-        new_thumbnail_url: Option<Option<String>>,
-
-        new_published: Option<bool>,
+        params: EditCourseParams,
     ) -> Course {
         functions::edit_course::course_registry_edit_course(
             env,
             creator,
             course_id,
-            new_title,
-            new_description,
-            new_price,
-            new_category,
-            new_language,
-            new_thumbnail_url,
-            new_published,
+            params,
         )
     }
 
