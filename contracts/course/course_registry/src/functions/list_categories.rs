@@ -1,5 +1,6 @@
 use crate::schema::{Category, Course};
 use soroban_sdk::{symbol_short, Env, Map, String, Symbol, Vec};
+use super::utils::{concat_strings, u32_to_string, trim, to_lowercase};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const COURSE_ID_COUNTER: Symbol = symbol_short!("course");
@@ -33,7 +34,7 @@ pub fn course_registry_list_categories(env: &Env) -> Vec<Category> {
     // Iterate over all possible course IDs from 1 to max_id
     let mut id: u128 = 1;
     while id <= max_id {
-        let course_id = String::from_str(env, &id.to_string());
+        let course_id = u32_to_string(env, id as u32);
         let key = (COURSE_KEY, course_id);
 
         // Check if a course with this ID exists
