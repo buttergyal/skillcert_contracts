@@ -104,6 +104,8 @@ mod tests {
             &Some(String::from_str(&env, "category")),
             &Some(String::from_str(&env, "language")),
             &Some(String::from_str(&env, "thumbnail_url")),
+            &None,
+            &None,
         );
 
         client.delete_course(&impostor, &new_course.id.clone());
@@ -129,6 +131,8 @@ mod tests {
             &500_u128,
             &Some(String::from_str(&env, "security")),
             &Some(String::from_str(&env, "english")),
+            &None,
+            &None,
             &None,
         );
 
@@ -156,6 +160,8 @@ mod tests {
             &Some(String::from_str(&env, "category")),
             &Some(String::from_str(&env, "language")),
             &Some(String::from_str(&env, "thumbnail_url")),
+            &None,
+            &None,
         );
 
         assert_eq!(new_course, client.get_course(&new_course.id.clone()));
@@ -192,6 +198,8 @@ mod tests {
             &Some(String::from_str(&env, "category")),
             &Some(String::from_str(&env, "language")),
             &Some(String::from_str(&env, "thumbnail_url")),
+            &None,
+            &None,
         );
 
         let module = client.add_module(&new_course.id, &0, &String::from_str(&env, "Module Title"));
@@ -253,6 +261,8 @@ mod tests {
             &Some(String::from_str(&env, "category1")),
             &Some(String::from_str(&env, "language1")),
             &Some(String::from_str(&env, "thumbnail_url1")),
+            &None,
+            &None,
         );
 
         let course2: Course = client.create_course(
@@ -263,6 +273,8 @@ mod tests {
             &Some(String::from_str(&env, "category2")),
             &Some(String::from_str(&env, "language2")),
             &Some(String::from_str(&env, "thumbnail_url2")),
+            &None,
+            &None,
         );
 
         client.delete_course(&creator, &course1.id.clone());

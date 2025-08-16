@@ -62,13 +62,9 @@ pub struct Category {
     pub count: u128,
 }
 
-#[contracttype]
-#[derive(Clone, Debug, PartialEq)]
-pub enum CourseLevel {
-    Beginner,
-    Intermediate,
-    Advanced,
-}
+// Course level as string to avoid Soroban enum serialization issues
+// Valid values: "Beginner", "Intermediate", "Advanced"
+pub type CourseLevel = String;
 
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]

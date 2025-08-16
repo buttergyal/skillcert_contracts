@@ -80,6 +80,8 @@ mod test {
             &Some(String::from_str(&env, "category")),
             &Some(String::from_str(&env, "language")),
             &Some(String::from_str(&env, "thumbnail_url")),
+            &None,
+            &None,
         );
 
         let goal_content = String::from_str(&env, "Learn the basics of Rust");
@@ -110,6 +112,8 @@ mod test {
             &Some(String::from_str(&env, "category")),
             &Some(String::from_str(&env, "language")),
             &Some(String::from_str(&env, "thumbnail_url")),
+            &None,
+            &None,
         );
 
         let goal_content = String::from_str(&env, "Learn the basics of Rust");
@@ -151,6 +155,8 @@ mod test {
             &Some(String::from_str(&env, "category")),
             &Some(String::from_str(&env, "language")),
             &Some(String::from_str(&env, "thumbnail_url")),
+            &None,
+            &None,
         );
 
         let goal_content = String::from_str(&env, "");
@@ -175,6 +181,8 @@ mod test {
             &Some(String::from_str(&env, "category")),
             &Some(String::from_str(&env, "language")),
             &Some(String::from_str(&env, "thumbnail_url")),
+            &None,
+            &None,
         );
 
         let goal_content1 = String::from_str(&env, "Learn the basics of Rust");

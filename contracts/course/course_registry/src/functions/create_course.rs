@@ -428,7 +428,7 @@ mod test {
             &env,
             "https://example.com/course-thumbnail.png",
         ));
-        let level: Option<CourseLevel> = Some(CourseLevel::Intermediate);
+        let level: Option<CourseLevel> = Some(String::from_str(&env, "Intermediate"));
         let duration_hours: Option<u32> = Some(40);
 
         let course = client.create_course(
@@ -470,6 +470,8 @@ mod test {
             &description,
             &price,
             &category,
+            &None,
+            &None,
             &None,
             &None,
         );
@@ -576,6 +578,8 @@ mod test {
             &price,
             &None,
             &language,
+            &None,
+            &None,
             &None,
         );
         assert_eq!(course.title, title);
