@@ -1,6 +1,6 @@
 use crate::functions::utils;
 use crate::schema::{Course, CourseGoal, DataKey};
-use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
+use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
 const GOAL_ADDED_EVENT: Symbol = symbol_short!("goaladd");
 
