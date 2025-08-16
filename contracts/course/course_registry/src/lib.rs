@@ -4,7 +4,7 @@ pub mod schema;
 #[cfg(test)]
 mod test;
 
-use crate::schema::{Course, CourseGoal, CourseModule};
+use crate::schema::{Course, CourseFilters, CourseGoal, CourseLevel, CourseModule};
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
 
 #[contract]
@@ -159,5 +159,19 @@ impl CourseRegistry {
 
     pub fn list_categories(env: Env) -> Vec<crate::schema::Category> {
         functions::list_categories::course_registry_list_categories(&env)
+    }
+
+    pub fn list_courses_with_filters(
+        env: Env,
+        filters: CourseFilters,
+        limit: Option<u32>,
+        offset: Option<u32>,
+    ) -> Vec<Course> {
+        functions::list_courses_with_filters::course_registry_list_courses_with_filters(
+            &env,
+            filters,
+            limit,
+            offset,
+        )
     }
 }
