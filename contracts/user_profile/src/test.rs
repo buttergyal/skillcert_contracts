@@ -1,19 +1,15 @@
 use soroban_sdk::{Address, Env, testutils::Address as _};
 use crate::{
     UserProfileContract,
-    functions::get_user_profile::{
-        user_profile_get_user_profile,
-        user_profile_get_user_profile_with_privacy
-    }
 };
 
 #[test]
 fn test_get_user_profile_function_exists() {
     let env = Env::default();
-    let contract_id = env.register_contract(None, UserProfileContract);
+    let _contract_id = env.register(UserProfileContract, {});
     
     // Create a test user address
-    let user_address = Address::generate(&env);
+    let _user_address = Address::generate(&env);
     
     // This test verifies that the function exists and can be called
     // In a real implementation, you would need to save a profile first
@@ -27,11 +23,11 @@ fn test_get_user_profile_function_exists() {
 #[test]
 fn test_get_user_profile_with_privacy_function_exists() {
     let env = Env::default();
-    let contract_id = env.register_contract(None, UserProfileContract);
+    let _contract_id = env.register(UserProfileContract, {});
     
     // Create test addresses
-    let user_address = Address::generate(&env);
-    let requester_address = Address::generate(&env);
+    let _user_address = Address::generate(&env);
+    let _requester_address = Address::generate(&env);
     
     // This test verifies that the function exists and can be called
     // In a real implementation, you would need to save a profile first
