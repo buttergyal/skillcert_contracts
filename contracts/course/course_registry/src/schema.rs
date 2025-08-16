@@ -44,6 +44,8 @@ pub struct Course {
     pub published: bool,
     pub prerequisites: Vec<CourseId>,
     pub is_archived: bool,
+    pub level: Option<CourseLevel>,
+    pub duration_hours: Option<u32>,
 }
 
 #[contracttype]
@@ -58,4 +60,23 @@ pub struct CourseId {
 pub struct Category {
     pub name: String,
     pub count: u128,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub enum CourseLevel {
+    Beginner,
+    Intermediate,
+    Advanced,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct CourseFilters {
+    pub min_price: Option<u128>,
+    pub max_price: Option<u128>,
+    pub category: Option<String>,
+    pub level: Option<CourseLevel>,
+    pub min_duration: Option<u32>,
+    pub max_duration: Option<u32>,
 }
