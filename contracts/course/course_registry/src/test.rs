@@ -226,158 +226,158 @@ fn test_get_prerequisites_by_course_id() {
     assert!(prerequisites.is_empty());
 }
 
-// #[test]
-// fn test_list_categories_counts() {
-//     let env = Env::default();
-//     env.mock_all_auths(); // ⭐ MOCK AUTH FUERA
+#[test]
+fn test_list_categories_counts() {
+    let env = Env::default();
+    env.mock_all_auths(); // ⭐ MOCK AUTH FUERA
     
-//     let contract_id = env.register(CourseRegistry, ());
-//     let client = CourseRegistryClient::new(&env, &contract_id);
-//     let creator = Address::generate(&env);
+    let contract_id = env.register(CourseRegistry, ());
+    let client = CourseRegistryClient::new(&env, &contract_id);
+    let creator = Address::generate(&env);
 
-//     // ⭐ USAR CLIENT EN LUGAR DE LLAMADAS DIRECTAS
-//     client.create_course(
-//         &creator,
-//         &String::from_str(&env, "A"),
-//         &String::from_str(&env, "d"),
-//         &10,
-//         &Some(String::from_str(&env, "Programming")),
-//         &None,
-//         &None,
-//     );
-//     client.create_course(
-//         &creator,
-//         &String::from_str(&env, "B"),
-//         &String::from_str(&env, "d"),
-//         &10,
-//         &Some(String::from_str(&env, "Data")),
-//         &None,
-//         &None,
-//     );
-//     client.create_course(
-//         &creator,
-//         &String::from_str(&env, "C"),
-//         &String::from_str(&env, "d"),
-//         &10,
-//         &Some(String::from_str(&env, "Programming")),
-//         &None,
-//         &None,
-//     );
+    // ⭐ USAR CLIENT EN LUGAR DE LLAMADAS DIRECTAS
+    client.create_course(
+        &creator,
+        &String::from_str(&env, "A"),
+        &String::from_str(&env, "d"),
+        &10,
+        &Some(String::from_str(&env, "Programming")),
+        &None,
+        &None,
+    );
+    client.create_course(
+        &creator,
+        &String::from_str(&env, "B"),
+        &String::from_str(&env, "d"),
+        &10,
+        &Some(String::from_str(&env, "Data")),
+        &None,
+        &None,
+    );
+    client.create_course(
+        &creator,
+        &String::from_str(&env, "C"),
+        &String::from_str(&env, "d"),
+        &10,
+        &Some(String::from_str(&env, "Programming")),
+        &None,
+        &None,
+    );
 
-//     // Call the function to list categories
-//     let cats = client.list_categories();
-//     assert_eq!(cats.len(), 2); // Should have 2 unique categories
+    // Call the function to list categories
+    let cats = client.list_categories();
+    assert_eq!(cats.len(), 2); // Should have 2 unique categories
 
-//     // Verify counts without assuming order
-//     let mut prog = 0u128;
-//     let mut data = 0u128;
-//     for c in cats.iter() {
-//         let cname = c.name.clone();
-//         if cname.to_string() == "Programming" {
-//             prog = c.count;
-//         }
-//         if cname.to_string() == "Data" {
-//             data = c.count;
-//         }
-//     }
-//     assert_eq!(prog, 2);
-//     assert_eq!(data, 1);
-// }
+    // Verify counts without assuming order
+    let mut prog = 0u128;
+    let mut data = 0u128;
+    for c in cats.iter() {
+        let cname = c.name.clone();
+        if cname == String::from_str(&env, "Programming") {
+            prog = c.count;
+        }
+        if cname ==  String::from_str(&env, "Data") {
+            data = c.count;
+        }
+    }
+    assert_eq!(prog, 2);
+    assert_eq!(data, 1);
+}
 
-// #[test]
-// fn test_list_categories_empty() {
-//     let env: Env = Env::default();
-//     let contract_id: Address = env.register(CourseRegistry, ());
-//     // No courses created, should return empty vector
-//     let cats: Vec<Category> = env.as_contract(&contract_id, || course_registry_list_categories(&env));
-//     assert_eq!(cats.len(), 0);
-// }
+#[test]
+fn test_list_categories_empty() {
+    let env: Env = Env::default();
+    let contract_id: Address = env.register(CourseRegistry, ());
+    // No courses created, should return empty vector
+    let cats: Vec<Category> = env.as_contract(&contract_id, || course_registry_list_categories(&env));
+    assert_eq!(cats.len(), 0);
+}
 
-// #[test]
-// fn test_list_categories_ignores_none() {
-//     let env: Env = Env::default();
-//     env.mock_all_auths(); // ⭐ MOCK AUTH FUERA
+#[test]
+fn test_list_categories_ignores_none() {
+    let env: Env = Env::default();
+    env.mock_all_auths(); // ⭐ MOCK AUTH FUERA
     
-//     let contract_id: Address = env.register(CourseRegistry, ());
-//     let client = CourseRegistryClient::new(&env, &contract_id);
-//     let creator: Address = Address::generate(&env);
+    let contract_id: Address = env.register(CourseRegistry, ());
+    let client = CourseRegistryClient::new(&env, &contract_id);
+    let creator: Address = Address::generate(&env);
 
-//     // ⭐ USAR CLIENT EN LUGAR DE LLAMADAS DIRECTAS
-//     client.create_course(
-//         &creator,
-//         &String::from_str(&env, "B"),
-//         &String::from_str(&env, "d"),
-//         &10,
-//         &Some(String::from_str(&env, "Programming")),
-//         &None,
-//         &None,
-//     );
+    // ⭐ USAR CLIENT EN LUGAR DE LLAMADAS DIRECTAS
+    client.create_course(
+        &creator,
+        &String::from_str(&env, "B"),
+        &String::from_str(&env, "d"),
+        &10,
+        &Some(String::from_str(&env, "Programming")),
+        &None,
+        &None,
+    );
 
-//     let cats = client.list_categories();
-//     assert_eq!(cats.len(), 1); // Only "Programming" should be returned
-//     let c = cats.get(0).unwrap();
-//     assert_eq!(c.name, String::from_str(&env, "Programming"));
-//     assert_eq!(c.count, 1);
-// }
+    let cats = client.list_categories();
+    assert_eq!(cats.len(), 1); // Only "Programming" should be returned
+    let c = cats.get(0).unwrap();
+    assert_eq!(c.name, String::from_str(&env, "Programming"));
+    assert_eq!(c.count, 1);
+}
 
-// #[test]
-// fn test_list_categories_with_id_gaps() {
-//     let env = Env::default();
-//     env.mock_all_auths(); // ⭐ MOCK AUTH FUERA
+#[test]
+fn test_list_categories_with_id_gaps() {
+    let env = Env::default();
+    env.mock_all_auths(); // ⭐ MOCK AUTH FUERA
     
-//     let contract_id = env.register(CourseRegistry, ());
-//     let client = CourseRegistryClient::new(&env, &contract_id);
-//     let creator = Address::generate(&env);
+    let contract_id = env.register(CourseRegistry, ());
+    let client = CourseRegistryClient::new(&env, &contract_id);
+    let creator = Address::generate(&env);
 
-//     // ⭐ USAR CLIENT EN LUGAR DE LLAMADAS DIRECTAS
-//     client.create_course(
-//         &creator,
-//         &String::from_str(&env, "Course 1"),
-//         &String::from_str(&env, "Desc"),
-//         &10,
-//         &Some(String::from_str(&env, "Programming")),
-//         &None,
-//         &None,
-//     );
-//     client.create_course(
-//         &creator,
-//         &String::from_str(&env, "Course 2"),
-//         &String::from_str(&env, "Desc"),
-//         &10,
-//         &Some(String::from_str(&env, "Data")),
-//         &None,
-//         &None,
-//     );
+    // ⭐ USAR CLIENT EN LUGAR DE LLAMADAS DIRECTAS
+    client.create_course(
+        &creator,
+        &String::from_str(&env, "Course 1"),
+        &String::from_str(&env, "Desc"),
+        &10,
+        &Some(String::from_str(&env, "Programming")),
+        &None,
+        &None,
+    );
+    client.create_course(
+        &creator,
+        &String::from_str(&env, "Course 2"),
+        &String::from_str(&env, "Desc"),
+        &10,
+        &Some(String::from_str(&env, "Data")),
+        &None,
+        &None,
+    );
 
-//     // Manually delete course 2 to create an ID gap
-//     env.as_contract(&contract_id, || {
-//         let key = (symbol_short!("course"), String::from_str(&env, "2"));
-//         env.storage().persistent().remove(&key);
-//     });
+    // Manually delete course 2 to create an ID gap
+    env.as_contract(&contract_id, || {
+        let key = (symbol_short!("course"), String::from_str(&env, "2"));
+        env.storage().persistent().remove(&key);
+    });
 
-//     // Create course 3 (this will still have ID 3)
-//     client.create_course(
-//         &creator,
-//         &String::from_str(&env, "Course 3"),
-//         &String::from_str(&env, "Desc"),
-//         &10,
-//         &Some(String::from_str(&env, "Programming")),
-//         &None,
-//         &None,
-//     );
+    // Create course 3 (this will still have ID 3)
+    client.create_course(
+        &creator,
+        &String::from_str(&env, "Course 3"),
+        &String::from_str(&env, "Desc"),
+        &10,
+        &Some(String::from_str(&env, "Programming")),
+        &None,
+        &None,
+    );
 
-//     // Call the function - it should skip missing ID 2 but still count 1 and 3
-//     let cats = client.list_categories();
-//     let mut prog = 0u128;
-//     let mut data = 0u128;
-//     for c in cats.iter() {
-//         if c.name.to_string() == "Programming" {
-//             prog = c.count;
-//         }
-//         if c.name.to_string() == "Data" {
-//             data = c.count;
-//         }
-//     }
-//     assert_eq!(prog, 2); // Course 1 and Course 3
-//     assert_eq!(data, 0); // Course 2 was deleted
-// }
+    // Call the function - it should skip missing ID 2 but still count 1 and 3
+    let cats = client.list_categories();
+    let mut prog = 0u128;
+    let mut data = 0u128;
+    for c in cats.iter() {
+        if c.name == String::from_str(&env, "Programming") {
+            prog = c.count;
+        }
+        if c.name == String::from_str(&env, "Data") {
+            data = c.count;
+        }
+    }
+    assert_eq!(prog, 2); // Course 1 and Course 3
+    assert_eq!(data, 0); // Course 2 was deleted
+}
