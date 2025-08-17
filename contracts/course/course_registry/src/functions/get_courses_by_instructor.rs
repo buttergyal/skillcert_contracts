@@ -8,10 +8,7 @@ pub fn course_registry_get_courses_by_instructor(env: &Env, instructor: Address)
     let mut results: Vec<Course> = Vec::new(env);
     let mut id: u128 = 1;
 
-    // let id_str = u32_to_string(env, id as u32);
-
     loop {
-        // let course_id = String::from_str(env, &id.to_string());
         let course_id = u32_to_string(env, id as u32);
         let key = (COURSE_KEY, course_id.clone());
 

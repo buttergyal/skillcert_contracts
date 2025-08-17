@@ -39,13 +39,7 @@ pub fn generate_unique_id(env: &Env) -> String {
 
 pub fn to_lowercase(env: &Env, s: &String) -> String {
     let len: u32 = s.len() as u32;
-
-
-    // let mut buffer = alloc::vec![0u8; len];
-    // s.copy_into_slice(&mut buffer);
-    // s.copy_into_slice(&mut buffer[..len]);
-
-    let mut buffer = [0u8; 1024]; // Fixed-size array; adjust size as needed
+    let mut buffer = [0u8; 1024]; 
     let slice = &mut buffer[..len as usize];
     s.copy_into_slice(slice);
     let mut result_bytes = Bytes::new(env);
@@ -61,17 +55,7 @@ pub fn to_lowercase(env: &Env, s: &String) -> String {
         }
     }
 
-    // let new_res_len = result_bytes.len();
-    // log!(&env, "new_res_len: {}", new_res_len);
-    // let mut result = alloc::vec![0u8; len];
-    // result_bytes.copy_into_slice(&mut result);
-    // result_bytes.copy_into_slice(&mut result[..len]);
-
-    // let len_new_slice: u32 = new_slice.len() as u32;
-    // log!(&env, "len_new_slice: {}", len_new_slice);
-
-
-    let mut result = [0u8; 1024]; // Fixed-size array; adjust size as needed
+    let mut result = [0u8; 1024]; 
     let new_slice = &mut result[..len as usize];
     result_bytes.copy_into_slice(new_slice);
     String::from_bytes(env, &new_slice)
@@ -98,11 +82,7 @@ pub fn u32_to_string(env: &Env, n: u32) -> String {
             bytes.push_back(digit.try_into().unwrap());
         }
 
-        // let mut output = alloc::vec![0u8; len];
-        // bytes.copy_into_slice(&mut output);
-        // String::from_bytes(env, &output)
-
-        let mut result = [0u8; 1024]; // Fixed-size array; adjust size as needed
+        let mut result = [0u8; 1024]; 
         let new_slice = &mut result[..len as usize];
         bytes.copy_into_slice(new_slice);
         String::from_bytes(env, &new_slice)
@@ -111,7 +91,7 @@ pub fn u32_to_string(env: &Env, n: u32) -> String {
 pub fn trim(env: &Env, s: &String) -> String {
     // Create a fixed-size buffer for the string's bytes
     let len = s.len() as usize;
-    let mut byte_array: [u8; 1024] = [0u8; 1024]; // Adjust size as needed
+    let mut byte_array: [u8; 1024] = [0u8; 1024]; 
     if len > byte_array.len() {
         panic!("String too long for fixed-size buffer");
     }
@@ -147,11 +127,7 @@ pub fn trim(env: &Env, s: &String) -> String {
     // Create a trimmed Bytes object
     let trimmed_bytes = bytes.slice(start as u32..end as u32);
 
-    // let mut output = alloc::vec![0u8; (end - start) as usize];
-    // trimmed_bytes.copy_into_slice(&mut output);
-    // String::from_bytes(env, &output)
-
-    let mut result = [0u8; 1024]; // Fixed-size array; adjust size as needed
+    let mut result = [0u8; 1024]; 
     let new_slice = &mut result[..(end - start) as usize];
     trimmed_bytes.copy_into_slice(new_slice);
     String::from_bytes(env, &new_slice)
@@ -164,22 +140,13 @@ pub fn concat_strings(env: &Env, strings: Vec<String>) -> String {
     for s in strings {
         let s_len = s.len() as usize;
         total_len += s_len;
-
-        // let mut buffer = alloc::vec![0u8; s_len];
-        // s.copy_into_slice(&mut buffer);  
-
-        let mut buffer = [0u8; 1024]; // Fixed-size array; adjust size as needed
+        let mut buffer = [0u8; 1024]; 
         let mut new_slice = &mut buffer[..s_len as usize];
         s.copy_into_slice(&mut new_slice);  
-
-
         result_byte.extend_from_slice(&new_slice);
     }
-    // let mut output = alloc::vec![0u8; total_len];
-    // result.copy_into_slice(&mut output);
-    // String::from_bytes(env, &output)
 
-    let mut result = [0u8; 1024]; // Fixed-size array; adjust size as needed
+    let mut result = [0u8; 1024]; 
     let new_slice = &mut result[..total_len as usize];
     result_byte.copy_into_slice(new_slice);
     String::from_bytes(env, &new_slice)

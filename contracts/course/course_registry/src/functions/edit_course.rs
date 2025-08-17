@@ -48,9 +48,6 @@ pub fn course_registry_edit_course(
         }
 
         // Only check/rotate title index if it's effectively changing (case-insensitive)
-        // let old_title_lc = course.title.to_string().to_lowercase();
-        // let new_title_lc = t_str.to_lowercase();
-
         let old_title_lc = to_lowercase(&env,&course.title);
         let new_title_lc = to_lowercase(&env, &t_str);
 
