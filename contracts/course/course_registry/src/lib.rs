@@ -160,4 +160,22 @@ impl CourseRegistry {
     pub fn list_categories(env: Env) -> Vec<crate::schema::Category> {
         functions::list_categories::course_registry_list_categories(&env)
     }
+
+    pub fn create_course_category(
+        env: Env,
+        caller: Address,
+        name: String,
+        description: Option<String>,
+    ) -> u128 {
+        functions::create_course_category::course_registry_create_course_category(
+            env,
+            caller,
+            name,
+            description,
+        )
+    }
+
+    pub fn get_course_category(env: Env, category_id: u128) -> Option<crate::schema::CourseCategory> {
+        functions::get_course_category::course_registry_get_course_category(&env, category_id)
+    }
 }

@@ -28,6 +28,9 @@ pub enum DataKey {
     CourseGoalList(String),     // Optional: Keep a list of goal IDs per course
     CourseGoal(String, String), // (course_id, goal_id)
     CoursePrerequisites(String),
+    CategorySeq,                // Sequence counter for category IDs
+    CourseCategory(u128),       // Course category by ID
+    Admins,                     // List of admin addresses
 }
 
 #[contracttype]
@@ -58,4 +61,12 @@ pub struct CourseId {
 pub struct Category {
     pub name: String,
     pub count: u128,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct CourseCategory {
+    pub id: u128,
+    pub name: String,
+    pub description: Option<String>,
 }
