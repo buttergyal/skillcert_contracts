@@ -43,8 +43,7 @@ another_address=$(stellar keys public-key another)
 
 echo "Another account public key: $another_address"
 
-
-
+# Course Registry
 echo "--------------------------------------------------------------------------------------------------------------------------------------"
 # Create first course
 echo "Creating first course..."
@@ -108,6 +107,22 @@ else
 fi
 
 echo "--------------------------------------------------------------------------------------------------------------------------------------"
+# Get course with course_id="1"
+echo "Fetching course with course_id=1..."
+get_course_output=$(stellar contract invoke \
+  --id "$course_registry_id" \
+  --source-account default \
+  --network local \
+  -- get_course \
+  --course_id '{"string": "1"}' )
+if [ $? -eq 0 ]; then
+  echo "Successfully fetched course with course_id=1."
+  echo "$get_course_output"
+else
+  echo "Error: Failed to fetch course with course_id=1. Ensure the course exists and is not archived."
+fi
+
+echo "--------------------------------------------------------------------------------------------------------------------------------------"
 # Get courses by instructor
 echo "Fetching courses by instructor..."
 get_courses_output=$(stellar contract invoke \
@@ -124,7 +139,7 @@ else
 fi
 
 
-
+# CourseA Access
 
 # Initialize CourseAccess contract
 echo "--------------------------------------------------------------------------------------------------------------------------------------"
@@ -185,7 +200,155 @@ else
   echo "Error: Failed to grant access for course_id=1. Ensure the course exists."
 fi
 
+echo "--------------------------------------------------------------------------------------------------------------------------------------"
+echo "Granting access to course_id=1..."
+grant_access_output=$(stellar contract invoke \
+  --id "$course_access_id" \
+  --source-account default \
+  --network local \
+  -- grant_access \
+  --course_id '{"string": "1"}' \
+  --user "$creator_address")
+if [ $? -eq 0 ]; then
+  echo "Access granted successfully for course_id=1."
+  echo "$grant_access_output"
+else
+  echo "Error: Failed to grant access for course_id=1. Ensure the course exists."
+fi
 
+echo "--------------------------------------------------------------------------------------------------------------------------------------"
+echo "Granting access to course_id=2..."
+grant_access_output=$(stellar contract invoke \
+  --id "$course_access_id" \
+  --source-account default \
+  --network local \
+  -- grant_access \
+  --course_id '{"string": "2"}' \
+  --user "$another_address")
+if [ $? -eq 0 ]; then
+  echo "Access granted successfully for course_id=2."
+  echo "$grant_access_output"
+else
+  echo "Error: Failed to grant access for course_id=2. Ensure the course exists."
+fi
+
+# List course access
+echo "--------------------------------------------------------------------------------------------------------------------------------------"
+echo "Listing access for course_id=1..."
+list_course_access_output=$(stellar contract invoke \
+  --id "$course_access_id" \
+  --source-account default \
+  --network local \
+  -- list_course_access \
+  --course_id '{"string": "1"}')
+if [ $? -eq 0 ]; then
+  echo "Successfully listed access for course_id=1."
+  echo "$list_course_access_output"
+else
+  echo "Error: Failed to list access for course_id=1."
+fi
+
+echo "--------------------------------------------------------------------------------------------------------------------------------------"
+echo "Listing access for course_id=2..."
+list_course_access_output=$(stellar contract invoke \
+  --id "$course_access_id" \
+  --source-account default \
+  --network local \
+  -- list_course_access \
+  --course_id '{"string": "2"}')
+if [ $? -eq 0 ]; then
+  echo "Successfully listed access for course_id=1."
+  echo "$list_course_access_output"
+else
+  echo "Error: Failed to list access for course_id=1."
+fi
+
+# List user courses
+echo "--------------------------------------------------------------------------------------------------------------------------------------"
+echo "Listing courses for user..."
+list_user_courses_output=$(stellar contract invoke \
+  --id "$course_access_id" \
+  --source-account default \
+  --network local \
+  -- list_user_courses \
+  --user "$another_address")
+if [ $? -eq 0 ]; then
+  echo "Successfully listed courses for user."
+  echo "$list_user_courses_output"
+else
+  echo "Error: Failed to list courses for user."
+fi
+
+# List user courses
+echo "--------------------------------------------------------------------------------------------------------------------------------------"
+echo "Listing courses for user creator..."
+list_user_courses_output=$(stellar contract invoke \
+  --id "$course_access_id" \
+  --source-account default \
+  --network local \
+  -- list_user_courses \
+  --user "$creator_address")
+if [ $? -eq 0 ]; then
+  echo "Successfully listed courses for user."
+  echo "$list_user_courses_output"
+else
+  echo "Error: Failed to list courses for user."
+fi
+
+# Revoke user courses
+echo "--------------------------------------------------------------------------------------------------------------------------------------"
+echo "Revoke access for user ..."
+list_user_courses_output=$(stellar contract invoke \
+  --id "$course_access_id" \
+  --source-account default \
+  --network local \
+  -- revoke_access \
+  --course_id '{"string": "2"}' \
+  --user "$another_address")
+if [ $? -eq 0 ]; then
+  echo "Successfully revoked course for user."
+  echo "$list_user_courses_output"
+else
+  echo "Error: Failed to list courses for user."
+fi
+
+
+
+# List course access
+echo "--------------------------------------------------------------------------------------------------------------------------------------"
+echo "Listing access for course_id=2 After Revoke..."
+list_course_access_output=$(stellar contract invoke \
+  --id "$course_access_id" \
+  --source-account default \
+  --network local \
+  -- list_course_access \
+  --course_id '{"string": "2"}')
+if [ $? -eq 0 ]; then
+  echo "Successfully listed access for course_id=2."
+  echo "$list_course_access_output"
+else
+  echo "Error: Failed to list access for course_id=2."
+fi
+
+# List user courses
+echo "--------------------------------------------------------------------------------------------------------------------------------------"
+echo "Listing courses for user..."
+list_user_courses_output=$(stellar contract invoke \
+  --id "$course_access_id" \
+  --source-account default \
+  --network local \
+  -- list_user_courses \
+  --user "$another_address")
+if [ $? -eq 0 ]; then
+  echo "Successfully listed courses for user."
+  echo "$list_user_courses_output"
+else
+  echo "Error: Failed to list courses for user."
+fi
+
+
+# UserManagement contract
+echo "--------------------------------------------------------------------------------------------------------------------------------------"
 echo "--------------------------------------------------------------------------------------------------------------------------------------"
 # Initialize UserManagement contract
 echo "Initializing UserManagement contract..."
