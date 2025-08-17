@@ -18,6 +18,8 @@ fi
 # Start Stellar container
 stellar container start
 
+sleep 30
+
 # Add Stellar local network
 stellar network add local \
   --rpc-url http://localhost:8000/soroban/rpc \
@@ -29,7 +31,6 @@ stellar keys generate default --network local || {
   echo "Identity 'default' already exists. Proceeding..."
 }
 
-sleep 20
 stellar keys fund default --network local
 
 # Build the contract
