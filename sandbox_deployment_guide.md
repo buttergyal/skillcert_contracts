@@ -15,10 +15,12 @@ Verify with: stellar --version
 
 Rust and Cargo: Needed to build the contract WASM files.
 Install: Follow instructions at rustup.rs
-Add WASM target: rustup target add wasm32-unknown-unknown
+Add WASM target: rustup target add wasm32v1-none
 Verify with: cargo --version
 
 
+jq (optional): Simplifies JSON parsing for contract.json.
+Install: brew install jq (macOS) or sudo apt-get install jq (Ubuntu)
 
 Ensure you have cloned the repository:
 git clone https://github.com/SkillCert/skillcert_contracts/
@@ -38,8 +40,10 @@ invoke_example.sh: Invokes example functions on the CourseRegistry contract to c
 The build.sh script starts Docker, sets up a local Stellar network, funds the default account, and builds the contract WASM files.
 
 Run the script:
-chmod +x build.sh
-./build.sh
+```
+chmod +x scripts/build_contracts.sh
+./scripts/build_contracts.sh
+```
 
 What it does:
 
@@ -69,9 +73,9 @@ The deploy_contract.sh script deploys the CourseAccess and CourseRegistry contra
 Run the script:
 
 ``` rust
-chmod +x deploy_contract.sh
+chmod +x scripts/deploy_contracts.sh
 
-./deploy_contract.sh
+./scripts/deploy_contracts.sh
 ```
 
 What it does:
@@ -109,8 +113,8 @@ The invoke_example.sh script invokes example functions on the CourseRegistry con
 Run the script:
 
 ```
-chmod +x invoke_example.sh
-./invoke_example.sh
+chmod +x scripts/invoke_examples.sh
+./scripts/invoke_examples.sh
 ```
 What it does:
 

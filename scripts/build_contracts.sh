@@ -18,17 +18,18 @@ fi
 # Start Stellar container
 stellar container start
 
-
 # Add Stellar local network
 stellar network add local \
   --rpc-url http://localhost:8000/soroban/rpc \
   --network-passphrase "Standalone Network ; February 2017"
 
 # Generate and fund mulla account, ignore if already exists
-echo "Generating and funding mulla account..."
-stellar keys generate default --network local --fund || {
+echo "Generating and funding default account..."
+stellar keys generate default --network local || {
   echo "Identity 'default' already exists. Proceeding..."
 }
+
+sleep 20
 stellar keys fund default --network local
 
 # Build the contract
