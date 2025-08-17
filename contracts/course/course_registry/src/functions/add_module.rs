@@ -1,6 +1,6 @@
 pub use crate::schema::{Course, CourseModule};
 use soroban_sdk::{symbol_short, Env, String, Symbol, vec};
-use super::utils::{concat_strings, u32_to_string, trim};
+use super::utils::{concat_strings, u32_to_string};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const MODULE_KEY: Symbol = symbol_short!("module");

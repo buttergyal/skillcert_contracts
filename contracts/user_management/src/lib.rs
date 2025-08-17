@@ -1,4 +1,4 @@
-#![cfg_attr(target_arch = "wasm32", no_std)]
+#![no_std]
 
 pub mod functions;
 pub mod schema;

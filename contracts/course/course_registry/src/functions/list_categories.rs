@@ -1,6 +1,6 @@
 use crate::schema::{Category, Course};
 use soroban_sdk::{symbol_short, Env, Map, String, Symbol, Vec};
-use super::utils::{concat_strings, u32_to_string, trim, to_lowercase};
+use super::utils::u32_to_string;
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const COURSE_ID_COUNTER: Symbol = symbol_short!("course");
