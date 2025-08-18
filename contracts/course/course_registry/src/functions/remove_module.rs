@@ -51,6 +51,8 @@ mod tests {
             &Some(String::from_str(&env, "category")),
             &Some(String::from_str(&env, "language")),
             &Some(String::from_str(&env, "thumbnail_url")),
+            &None,
+            &None,
         );
         let new_module = client.add_module(&course.id, &0, &String::from_str(&env, "Module Title"));
 

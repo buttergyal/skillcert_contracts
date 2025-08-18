@@ -145,6 +145,8 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         let course2 = client.create_course(
             &creator,
@@ -154,12 +156,16 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         let course3 = client.create_course(
             &creator,
             &String::from_str(&env, "Course 3"),
             &String::from_str(&env, "description"),
             &1000,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -203,12 +209,16 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         let course2 = client.create_course(
             &creator,
             &String::from_str(&env, "Course 2"),
             &String::from_str(&env, "description"),
             &1000,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -221,12 +231,16 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         let course4 = client.create_course(
             &creator,
             &String::from_str(&env, "Course 4"),
             &String::from_str(&env, "description"),
             &1000,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -272,12 +286,16 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         let course2 = client.create_course(
             &creator,
             &String::from_str(&env, "Course 2"),
             &String::from_str(&env, "description"),
             &1000,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -336,6 +354,8 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
         let mut prerequisites = Vec::new(&env);
@@ -359,6 +379,8 @@ mod tests {
             &String::from_str(&env, "Course 1"),
             &String::from_str(&env, "description"),
             &1000,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -388,6 +410,8 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         let course2 = client.create_course(
             &creator,
@@ -397,12 +421,16 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         let course3 = client.create_course(
             &creator,
             &String::from_str(&env, "Course 3"),
             &String::from_str(&env, "description"),
             &1000,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -439,12 +467,16 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         let course2 = client.create_course(
             &creator,
             &String::from_str(&env, "Course 2"),
             &String::from_str(&env, "description"),
             &1000,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -482,12 +514,16 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         let course2 = client.create_course(
             &creator,
             &String::from_str(&env, "Course 2"),
             &String::from_str(&env, "description"),
             &1000,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -500,6 +536,8 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         let course4 = client.create_course(
             &creator,
@@ -509,12 +547,16 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         let course5 = client.create_course(
             &creator,
             &String::from_str(&env, "Course 5"),
             &String::from_str(&env, "description"),
             &1000,
+            &None,
+            &None,
             &None,
             &None,
             &None,

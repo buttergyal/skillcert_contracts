@@ -27,7 +27,7 @@ mod test {
         let title = String::from_str(&client.env, "title");
         let description = String::from_str(&client.env, "description");
         let price = 1000_u128;
-        client.create_course(&creator, &title, &description, &price, &None, &None, &None)
+        client.create_course(&creator, &title, &description, &price, &None, &None, &None, &None, &None)
     }
 
     #[test]

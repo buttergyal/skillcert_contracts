@@ -1,4 +1,4 @@
-use crate::schema::Course;
+use crate::schema::{Course, CourseLevel};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
 use super::utils::{u32_to_string, trim, to_lowercase};
 
@@ -15,6 +15,8 @@ pub fn course_registry_create_course(
     category: Option<String>,
     language: Option<String>,
     thumbnail_url: Option<String>,
+    level: Option<CourseLevel>,
+    duration_hours: Option<u32>,
 ) -> Course {
     creator.require_auth();
 
@@ -64,6 +66,8 @@ pub fn course_registry_create_course(
         published: false,
         prerequisites: Vec::new(&env),
         is_archived: false,
+        level,
+        duration_hours,
     };
 
     // save to the storage
@@ -125,6 +129,8 @@ mod test {
             &category,
             &language,
             &thumbnail_url,
+            &None,
+            &None,
         );
         let course = client.get_course(&course.id);
         assert_eq!(course.title, title);
@@ -160,6 +166,8 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
         let course2 = client.create_course(
@@ -167,6 +175,8 @@ mod test {
             &another_course_title,
             &another_course_description,
             &another_price,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -200,6 +210,8 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
         client.create_course(
@@ -207,6 +219,8 @@ mod test {
             &title,
             &another_description,
             &price,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -232,6 +246,8 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
     }
 
@@ -254,6 +270,8 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
     }
 
@@ -273,6 +291,8 @@ mod test {
             &title,
             &description,
             &price,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -299,12 +319,16 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         client.create_course(
             &Address::generate(&env),
             &title2,
             &description,
             &price,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -326,6 +350,8 @@ mod test {
             &long_title,
             &description,
             &price,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -356,6 +382,8 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         assert_eq!(course.title, title);
         assert_eq!(course.description, description);
@@ -380,6 +408,8 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         assert_eq!(course.price, max_price);
         assert_eq!(course.title, title);
@@ -400,6 +430,8 @@ mod test {
             &env,
             "https://example.com/course-thumbnail.png",
         ));
+        let level: Option<CourseLevel> = Some(String::from_str(&env, "Intermediate"));
+        let duration_hours: Option<u32> = Some(40);
 
         let course = client.create_course(
             &Address::generate(&env),
@@ -409,6 +441,8 @@ mod test {
             &category,
             &language,
             &thumbnail_url,
+            &level,
+            &duration_hours,
         );
         assert_eq!(course.title, title);
         assert_eq!(course.description, description);
@@ -416,6 +450,8 @@ mod test {
         assert_eq!(course.category, category);
         assert_eq!(course.language, language);
         assert_eq!(course.thumbnail_url, thumbnail_url);
+        assert_eq!(course.level, level);
+        assert_eq!(course.duration_hours, duration_hours);
         assert!(!course.published);
     }
 
@@ -436,6 +472,8 @@ mod test {
             &description,
             &price,
             &category,
+            &None,
+            &None,
             &None,
             &None,
         );
@@ -464,6 +502,8 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         assert_eq!(course.title, title);
         assert_eq!(course.description, description);
@@ -486,6 +526,8 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
         let course2 = client.create_course(
@@ -496,6 +538,8 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
         let course3 = client.create_course(
@@ -503,6 +547,8 @@ mod test {
             &String::from_str(&env, "Course Three"),
             &String::from_str(&env, "Third course"),
             &price,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -534,6 +580,8 @@ mod test {
             &price,
             &None,
             &language,
+            &None,
+            &None,
             &None,
         );
         assert_eq!(course.title, title);

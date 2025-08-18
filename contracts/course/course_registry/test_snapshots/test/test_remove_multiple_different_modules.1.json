@@ -37,7 +37,9 @@
                 },
                 {
                   "string": "thumbnail_url"
-                }
+                },
+                "void",
+                "void"
               ]
             }
           },
@@ -159,6 +161,12 @@
                     },
                     {
                       "key": {
+                        "symbol": "duration_hours"
+                      },
+                      "val": "void"
+                    },
+                    {
+                      "key": {
                         "symbol": "id"
                       },
                       "val": {
@@ -180,6 +188,12 @@
                       "val": {
                         "string": "language"
                       }
+                    },
+                    {
+                      "key": {
+                        "symbol": "level"
+                      },
+                      "val": "void"
                     },
                     {
                       "key": {
