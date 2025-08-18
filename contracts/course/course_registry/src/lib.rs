@@ -150,6 +150,7 @@ impl CourseRegistry {
         functions::list_categories::course_registry_list_categories(&env)
     }
 
+
     pub fn list_courses_with_filters(
         env: Env,
         filters: CourseFilters,
