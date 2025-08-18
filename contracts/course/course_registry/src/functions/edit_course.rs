@@ -1,5 +1,6 @@
 use crate::schema::{Course, EditCourseParams};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
+use super::utils::{trim, to_lowercase};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const TITLE_KEY: Symbol = symbol_short!("title");
@@ -28,32 +29,34 @@ pub fn course_registry_edit_course(
     }
 
     // --- Title update (validate + uniqueness) ---
+
     if let Some(t) = params.new_title {
         let t_str = t.to_string();
         let t_trim = t_str.trim();
+      
         if t_trim.is_empty() {
             panic!("Course error: Course Title cannot be empty");
         }
 
         // Only check/rotate title index if it's effectively changing (case-insensitive)
-        let old_title_lc = course.title.to_string().to_lowercase();
-        let new_title_lc = t_str.to_lowercase();
+        let old_title_lc = to_lowercase(&env,&course.title);
+        let new_title_lc = to_lowercase(&env, &t_str);
 
         if old_title_lc != new_title_lc {
             // uniqueness index key for the *new* title
             let new_title_key: (Symbol, String) =
-                (TITLE_KEY, String::from_str(&env, &new_title_lc));
+                (TITLE_KEY, new_title_lc);
             if env.storage().persistent().has(&new_title_key) {
                 panic!("Course error: Course Title already exists");
             }
 
             // remove old title index and set new one
             let old_title_key: (Symbol, String) =
-                (TITLE_KEY, String::from_str(&env, &old_title_lc));
+                (TITLE_KEY, old_title_lc);
             env.storage().persistent().remove(&old_title_key);
             env.storage().persistent().set(&new_title_key, &true);
 
-            course.title = String::from_str(&env, t_trim);
+            course.title = t_trim;
         }
     }
 
