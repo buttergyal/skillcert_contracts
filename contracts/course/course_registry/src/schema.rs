@@ -47,6 +47,8 @@ pub struct Course {
     pub published: bool,
     pub prerequisites: Vec<CourseId>,
     pub is_archived: bool,
+    pub level: Option<CourseLevel>,
+    pub duration_hours: Option<u32>,
 }
 
 #[contracttype]
@@ -63,10 +65,31 @@ pub struct Category {
     pub count: u128,
 }
 
+// Course level as string to avoid Soroban enum serialization issues
+// Valid values: "Beginner", "Intermediate", "Advanced"
+pub type CourseLevel = String;
+
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]
-pub struct CourseCategory {
-    pub id: u128,
-    pub name: String,
-    pub description: Option<String>,
+pub struct CourseFilters {
+    pub min_price: Option<u128>,
+    pub max_price: Option<u128>,
+    pub category: Option<String>,
+    pub level: Option<CourseLevel>,
+    pub min_duration: Option<u32>,
+    pub max_duration: Option<u32>,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct EditCourseParams {
+    pub new_title: Option<String>,
+    pub new_description: Option<String>,
+    pub new_price: Option<u128>,
+    pub new_category: Option<Option<String>>,
+    pub new_language: Option<Option<String>>,
+    pub new_thumbnail_url: Option<Option<String>>,
+    pub new_published: Option<bool>,
+    pub new_level: Option<Option<CourseLevel>>,
+    pub new_duration_hours: Option<Option<u32>>,
 }

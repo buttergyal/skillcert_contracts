@@ -1,10 +1,12 @@
+#![no_std]
+
 pub mod functions;
 pub mod schema;
 
 #[cfg(test)]
 mod test;
 
-use crate::schema::{Course, CourseGoal, CourseModule};
+use crate::schema::{Course, CourseFilters, CourseGoal, CourseLevel, CourseModule, EditCourseParams};
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
 
 #[contract]
@@ -21,6 +23,8 @@ impl CourseRegistry {
         category: Option<String>,
         language: Option<String>,
         thumbnail_url: Option<String>,
+        level: Option<CourseLevel>,
+        duration_hours: Option<u32>,
     ) -> Course {
         functions::create_course::course_registry_create_course(
             env,
@@ -31,6 +35,8 @@ impl CourseRegistry {
             category,
             language,
             thumbnail_url,
+            level,
+            duration_hours,
         )
     }
 
@@ -122,30 +128,13 @@ impl CourseRegistry {
         env: Env,
         creator: Address,
         course_id: String,
-
-        // Editable fields (use Option for "provided or not")
-        new_title: Option<String>,
-        new_description: Option<String>,
-        new_price: Option<u128>,
-
-        // Double-Option lets caller clear the value: Some(None) -> clear, None -> no change
-        new_category: Option<Option<String>>,
-        new_language: Option<Option<String>>,
-        new_thumbnail_url: Option<Option<String>>,
-
-        new_published: Option<bool>,
+        params: EditCourseParams,
     ) -> Course {
         functions::edit_course::course_registry_edit_course(
             env,
             creator,
             course_id,
-            new_title,
-            new_description,
-            new_price,
-            new_category,
-            new_language,
-            new_thumbnail_url,
-            new_published,
+            params,
         )
     }
 
@@ -161,21 +150,18 @@ impl CourseRegistry {
         functions::list_categories::course_registry_list_categories(&env)
     }
 
-    pub fn create_course_category(
-        env: Env,
-        caller: Address,
-        name: String,
-        description: Option<String>,
-    ) -> u128 {
-        functions::create_course_category::course_registry_create_course_category(
-            env,
-            caller,
-            name,
-            description,
-        )
-    }
 
-    pub fn get_course_category(env: Env, category_id: u128) -> Option<crate::schema::CourseCategory> {
-        functions::get_course_category::course_registry_get_course_category(&env, category_id)
+    pub fn list_courses_with_filters(
+        env: Env,
+        filters: CourseFilters,
+        limit: Option<u32>,
+        offset: Option<u32>,
+    ) -> Vec<Course> {
+        functions::list_courses_with_filters::course_registry_list_courses_with_filters(
+            &env,
+            filters,
+            limit,
+            offset,
+        )
     }
 }

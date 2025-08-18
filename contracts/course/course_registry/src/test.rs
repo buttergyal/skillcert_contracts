@@ -26,6 +26,8 @@ fn test_remove_module_success() {
         &Some(String::from_str(&env, "category")),
         &Some(String::from_str(&env, "language")),
         &Some(String::from_str(&env, "thumbnail_url")),
+        &None,
+        &None,
     );
     let new_module = client.add_module(&course.id, &0, &String::from_str(&env, "Module Title"));
 
@@ -62,6 +64,8 @@ fn test_remove_multiple_different_modules() {
         &Some(String::from_str(&env, "category")),
         &Some(String::from_str(&env, "language")),
         &Some(String::from_str(&env, "thumbnail_url")),
+        &None,
+        &None,
     );
     let module1 = client.add_module(&course.id, &0, &String::from_str(&env, "Module 1 Title"));
     let module2 = client.add_module(&course.id, &1, &String::from_str(&env, "Module 2 Title"));
@@ -101,6 +105,8 @@ fn test_remove_module_storage_isolation() {
         &Some(String::from_str(&env, "category")),
         &Some(String::from_str(&env, "language")),
         &Some(String::from_str(&env, "thumbnail_url")),
+        &None,
+        &None,
     );
     let module1 = client.add_module(&course.id, &0, &String::from_str(&env, "Module 1 Title"));
     let module2 = client.add_module(&course.id, &1, &String::from_str(&env, "Module 2 Title"));
@@ -136,6 +142,8 @@ fn test_get_course_success() {
         &String::from_str(&env, "Course 1"),
         &String::from_str(&env, "description"),
         &1000,
+        &None,
+        &None,
         &None,
         &None,
         &None,
@@ -193,6 +201,8 @@ fn test_get_courses_by_instructor_found() {
         &None,
         &None,
         &None,
+        &None,
+        &None,
     );
 
     let results = client.get_courses_by_instructor(&creator);
@@ -215,6 +225,8 @@ fn test_get_prerequisites_by_course_id() {
         &String::from_str(&env, "Course 1"),
         &String::from_str(&env, "description"),
         &1000,
+        &None,
+        &None,
         &None,
         &None,
         &None,
@@ -244,6 +256,8 @@ fn test_list_categories_counts() {
         &Some(String::from_str(&env, "Programming")),
         &None,
         &None,
+        &None,
+        &None,
     );
     client.create_course(
         &creator,
@@ -253,6 +267,8 @@ fn test_list_categories_counts() {
         &Some(String::from_str(&env, "Data")),
         &None,
         &None,
+        &None,
+        &None,
     );
     client.create_course(
         &creator,
@@ -260,6 +276,8 @@ fn test_list_categories_counts() {
         &String::from_str(&env, "d"),
         &10,
         &Some(String::from_str(&env, "Programming")),
+        &None,
+        &None,
         &None,
         &None,
     );
@@ -273,10 +291,10 @@ fn test_list_categories_counts() {
     let mut data = 0u128;
     for c in cats.iter() {
         let cname = c.name.clone();
-        if cname.to_string() == "Programming" {
+        if cname == String::from_str(&env, "Programming") {
             prog = c.count;
         }
-        if cname.to_string() == "Data" {
+        if cname ==  String::from_str(&env, "Data") {
             data = c.count;
         }
     }
@@ -311,6 +329,8 @@ fn test_list_categories_ignores_none() {
         &Some(String::from_str(&env, "Programming")),
         &None,
         &None,
+        &None,
+        &None,
     );
 
     let cats = client.list_categories();
@@ -338,6 +358,8 @@ fn test_list_categories_with_id_gaps() {
         &Some(String::from_str(&env, "Programming")),
         &None,
         &None,
+        &None,
+        &None,
     );
     client.create_course(
         &creator,
@@ -345,6 +367,8 @@ fn test_list_categories_with_id_gaps() {
         &String::from_str(&env, "Desc"),
         &10,
         &Some(String::from_str(&env, "Data")),
+        &None,
+        &None,
         &None,
         &None,
     );
@@ -364,6 +388,8 @@ fn test_list_categories_with_id_gaps() {
         &Some(String::from_str(&env, "Programming")),
         &None,
         &None,
+        &None,
+        &None,
     );
 
     // Call the function - it should skip missing ID 2 but still count 1 and 3
@@ -371,10 +397,10 @@ fn test_list_categories_with_id_gaps() {
     let mut prog = 0u128;
     let mut data = 0u128;
     for c in cats.iter() {
-        if c.name.to_string() == "Programming" {
+        if c.name == String::from_str(&env, "Programming") {
             prog = c.count;
         }
-        if c.name.to_string() == "Data" {
+        if c.name == String::from_str(&env, "Data") {
             data = c.count;
         }
     }

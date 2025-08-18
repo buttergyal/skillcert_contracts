@@ -1,5 +1,6 @@
 use crate::schema::Course;
-use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
+use soroban_sdk::{symbol_short, Address, Env, Symbol, Vec};
+use super::utils::u32_to_string;
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 
@@ -8,7 +9,7 @@ pub fn course_registry_get_courses_by_instructor(env: &Env, instructor: Address)
     let mut id: u128 = 1;
 
     loop {
-        let course_id = String::from_str(env, &id.to_string());
+        let course_id = u32_to_string(env, id as u32);
         let key = (COURSE_KEY, course_id.clone());
 
         if !env.storage().persistent().has(&key) {
@@ -44,7 +45,7 @@ mod test {
         let title = String::from_str(&client.env, title);
         let description = String::from_str(&client.env, "description");
         let price = 1000_u128;
-        client.create_course(&creator, &title, &description, &price, &None, &None, &None)
+        client.create_course(&creator, &title, &description, &price, &None, &None, &None, &None, &None)
     }
 
     #[test]

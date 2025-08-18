@@ -83,6 +83,8 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
         let course2: Course = client.create_course(
@@ -90,6 +92,8 @@ mod test {
             &String::from_str(&env, "Course 2"),
             &String::from_str(&env, "Description 2"),
             &1000_u128,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -138,6 +142,8 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
         let course2: Course = client.create_course(
@@ -145,6 +151,8 @@ mod test {
             &String::from_str(&env, "Course 2"),
             &String::from_str(&env, "Description 2"),
             &1000_u128,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -191,6 +199,8 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
         let course2: Course = client.create_course(
@@ -198,6 +208,8 @@ mod test {
             &String::from_str(&env, "Course 2"),
             &String::from_str(&env, "Description 2"),
             &1000_u128,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -224,6 +236,8 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
         let course2: Course = client.create_course(
@@ -234,6 +248,8 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
         let course3: Course = client.create_course(
@@ -241,6 +257,8 @@ mod test {
             &String::from_str(&env, "Course 3"),
             &String::from_str(&env, "Description 3"),
             &1000_u128,
+            &None,
+            &None,
             &None,
             &None,
             &None,

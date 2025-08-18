@@ -14,6 +14,7 @@ pub mod get_courses_by_instructor;
 pub mod get_prerequisites_by_course;
 pub mod is_course_creator;
 pub mod list_categories;
+pub mod list_courses_with_filters;
 pub mod list_modules;
 pub mod remove_module;
 pub mod remove_prerequisite;
