@@ -15,7 +15,6 @@ pub struct UserCourses {
     pub courses: Vec<String>,
 }
 
-/// Storage key types for the course access contract
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[contracttype]
 pub enum DataKey {
@@ -23,6 +22,10 @@ pub enum DataKey {
     CourseAccess(String, Address),
     /// Key for storing user profile: user -> UserProfile
     UserProfile(Address),
+    /// Key for storing courses per user: user -> UserCourses
+    UserCourses(Address),
+    /// Key for storing users per course: course_id -> CourseUsers
+    CourseUsers(String),
 }
 
 /// Represents a user's profile information

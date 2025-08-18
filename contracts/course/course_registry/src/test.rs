@@ -273,10 +273,10 @@ fn test_list_categories_counts() {
     let mut data = 0u128;
     for c in cats.iter() {
         let cname = c.name.clone();
-        if cname.to_string() == "Programming" {
+        if cname == String::from_str(&env, "Programming") {
             prog = c.count;
         }
-        if cname.to_string() == "Data" {
+        if cname ==  String::from_str(&env, "Data") {
             data = c.count;
         }
     }
@@ -371,10 +371,10 @@ fn test_list_categories_with_id_gaps() {
     let mut prog = 0u128;
     let mut data = 0u128;
     for c in cats.iter() {
-        if c.name.to_string() == "Programming" {
+        if c.name == String::from_str(&env, "Programming") {
             prog = c.count;
         }
-        if c.name.to_string() == "Data" {
+        if c.name == String::from_str(&env, "Data") {
             data = c.count;
         }
     }

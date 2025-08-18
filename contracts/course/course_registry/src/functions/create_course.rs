@@ -1,5 +1,6 @@
 use crate::schema::Course;
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
+use super::utils::{u32_to_string, trim, to_lowercase};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const TITLE_KEY: Symbol = symbol_short!("title");
@@ -18,8 +19,7 @@ pub fn course_registry_create_course(
     creator.require_auth();
 
     // ensure the title is not empty and not just whitespace
-    let title_string = title.to_string();
-    let trimmed_title = title_string.trim();
+    let trimmed_title = trim(&env, &title);
     if title.is_empty() || trimmed_title.is_empty() {
         panic!("Course error: Course Title cannot be empty");
     }
@@ -29,10 +29,12 @@ pub fn course_registry_create_course(
         panic!("Course error: Price must be greater than 0");
     }
 
+    let lowercase_title = to_lowercase(&env, &title);
+
     // to avoid duplicate title,
     let title_key: (Symbol, String) = (
         TITLE_KEY,
-        String::from_str(&env, title.to_string().to_lowercase().as_str()),
+        lowercase_title
     );
 
     if env.storage().persistent().has(&title_key) {
@@ -41,7 +43,7 @@ pub fn course_registry_create_course(
 
     // generate the unique id
     let id: u128 = generate_course_id(&env);
-    let converted_id: String = String::from_str(&env, id.to_string().as_str());
+    let converted_id = u32_to_string(&env, id as u32);
 
     let storage_key: (Symbol, String) = (COURSE_KEY, converted_id.clone());
 

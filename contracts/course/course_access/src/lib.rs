@@ -1,3 +1,5 @@
+#![no_std]
+
 mod functions;
 mod schema;
 

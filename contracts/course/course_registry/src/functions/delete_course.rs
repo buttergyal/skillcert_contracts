@@ -1,7 +1,8 @@
 use crate::schema::{Course, CourseModule};
 use soroban_sdk::{
-    symbol_short, Address, Env, String, Symbol, Vec,
+    symbol_short, Address, Env, String, Symbol, Vec,vec
 };
+use super::utils::{concat_strings, u32_to_string, to_lowercase};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const MODULE_KEY: Symbol = symbol_short!("module");
@@ -36,9 +37,11 @@ pub fn course_registry_delete_course(
 
     delete_course_modules(env, &course_id);
 
+    let lowercase_title = to_lowercase(env, &course.title);
+
     let title_key = (
         TITLE_KEY,
-        String::from_str(env, course.title.to_string().to_lowercase().as_str()),
+        lowercase_title
     );
     env.storage().persistent().remove(&title_key);
     env.storage().persistent().remove(&course_storage_key);
@@ -52,12 +55,20 @@ fn delete_course_modules(env: &Env, course_id: &String) {
 
     let mut counter = 0u32;
     loop {
-        let module_id = format!("module_{}_{}_0", course_id.to_string(), counter);
-        let key = (MODULE_KEY, String::from_str(env, &module_id));
+        let arr = vec![
+            &env, String::from_str(&env, "module_"), 
+            course_id.clone(), 
+            String::from_str(&env, "_"),
+            u32_to_string(&env, counter),
+            String::from_str(&env, "_0"),
+            ];   
+
+        let module_id = concat_strings(&env, arr);
+        let key = (MODULE_KEY, module_id.clone());
         if env.storage().persistent().has(&key) {
             if let Some(module) = env.storage().persistent().get::<_, CourseModule>(&key) {
                 if module.course_id == *course_id {
-                    modules_to_delete.push_back(String::from_str(env, &module_id));
+                    modules_to_delete.push_back(module_id);
                 }
             }
         } else {
