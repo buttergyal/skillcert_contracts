@@ -29,17 +29,17 @@ pub fn course_registry_edit_course(
     }
 
     // --- Title update (validate + uniqueness) ---
-
     if let Some(t) = params.new_title {
-        let t_str = t.to_string();
-        let t_trim = t_str.trim();
+        // Clone the string to avoid move issues
+        let t_str = t.clone();
+        let t_trim = trim(&env, &t_str);
       
         if t_trim.is_empty() {
             panic!("Course error: Course Title cannot be empty");
         }
 
         // Only check/rotate title index if it's effectively changing (case-insensitive)
-        let old_title_lc = to_lowercase(&env,&course.title);
+        let old_title_lc = to_lowercase(&env, &course.title);
         let new_title_lc = to_lowercase(&env, &t_str);
 
         if old_title_lc != new_title_lc {
