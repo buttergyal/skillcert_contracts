@@ -33,6 +33,57 @@ impl UserManagement {
         functions::get_user_by_id::get_user_by_id(env, requester, user_id)
     }
 
+    /// Create a new user profile
+    ///
+    /// Creates a new user profile with the provided information.
+    /// Validates required fields, ensures email uniqueness, and assigns default values.
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `creator` - Address creating the profile (usually an admin or the user themselves)
+    /// * `user_address` - Address of the user whose profile is being created
+    /// * `name` - User's full name (required)
+    /// * `email` - User's email address (required, must be unique)
+    /// * `role` - User's role in the system (required)
+    /// * `country` - User's country (required)
+    /// * `profession` - User's profession (optional)
+    /// * `goals` - User's goals or bio (optional)
+    /// * `profile_picture` - URL to profile picture (optional)
+    /// * `language` - User's preferred language (optional, defaults to "en")
+    ///
+    /// # Returns
+    /// * `UserProfile` - The created user profile
+    ///
+    /// # Events
+    /// Emits a user creation event upon successful creation
+    pub fn create_user_profile(
+        env: Env,
+        creator: Address,
+        user_address: Address,
+        name: String,
+        email: String,
+        role: UserRole,
+        country: String,
+        profession: Option<String>,
+        goals: Option<String>,
+        profile_picture: Option<String>,
+        language: Option<String>,
+    ) -> UserProfile {
+        functions::create_user_profile::create_user_profile(
+            env,
+            creator,
+            user_address,
+            name,
+            email,
+            role,
+            country,
+            profession,
+            goals,
+            profile_picture,
+            language,
+        )
+    }
+
     /// Lists all registered users with pagination and filtering (admin-only)
     ///
     /// # Arguments

@@ -5,9 +5,12 @@ use soroban_sdk::{contracttype, Address, String};
 pub struct UserProfile {
     pub name: String,
     pub email: String,
+    pub role: UserRole,
+    pub country: String,
     pub profession: Option<String>,
     pub goals: Option<String>,
-    pub country: String,
+    pub profile_picture: Option<String>,
+    pub language: String,
     pub user: Address,
 }
 
@@ -60,6 +63,7 @@ pub enum DataKey {
     UserProfile(Address), // This represents the ("user_profile", user_address) key
     UserProfileLight(Address), // Lightweight profile storage
     UsersIndex,           // List of all registered user addresses
+    EmailIndex(String),   // Email to Address mapping for uniqueness
     Admins,               // List of admin addresses
     UserRoles,            // Role assignments
     AdminConfig,          // System configuration

@@ -80,13 +80,37 @@ pub fn user_management_save_profile(
     let storage_key = DataKey::UserProfile(caller.clone());
     let is_new_user = !env.storage().persistent().has(&storage_key);
 
-    // Create the user profile
+    // If this is a new user, we need to get the existing profile to preserve role and other fields
+    let existing_profile = if !is_new_user {
+        env.storage()
+            .persistent()
+            .get::<DataKey, UserProfile>(&storage_key)
+            .expect("Profile should exist for update")
+    } else {
+        // For new users, create with default values
+        UserProfile {
+            name: name.clone(),
+            email: email.clone(),
+            role: UserRole::Student, // Default role
+            country: country.clone(),
+            profession: profession.clone(),
+            goals: goals.clone(),
+            profile_picture: None,
+            language: String::from_str(&env, "en"),
+            user: caller.clone(),
+        }
+    };
+
+    // Create the updated user profile (preserving role and other system fields)
     let user_profile = UserProfile {
         name: name.clone(),
-        email,
+        email: if is_new_user { email.clone() } else { existing_profile.email.clone() }, // Don't change email on update
+        role: existing_profile.role.clone(), // Preserve role
+        country: country.clone(),
         profession: profession.clone(),
         goals,
-        country: country.clone(),
+        profile_picture: existing_profile.profile_picture.clone(), // Preserve profile picture
+        language: existing_profile.language.clone(), // Preserve language
         user: caller.clone(),
     };
 
@@ -98,7 +122,7 @@ pub fn user_management_save_profile(
         name,
         country,
         profession,
-        role: UserRole::Student, // Default role, should be set by admin separately
+        role: existing_profile.role, // Use role from existing profile
         status: UserStatus::Active, // Default status
         user_address: caller.clone(),
     };
