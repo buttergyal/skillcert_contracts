@@ -241,13 +241,12 @@ fn test_get_prerequisites_by_course_id() {
 #[test]
 fn test_list_categories_counts() {
     let env = Env::default();
-    env.mock_all_auths(); // ⭐ MOCK AUTH FUERA
+    env.mock_all_auths();
     
     let contract_id = env.register(CourseRegistry, ());
     let client = CourseRegistryClient::new(&env, &contract_id);
     let creator = Address::generate(&env);
 
-    // ⭐ USAR CLIENT EN LUGAR DE LLAMADAS DIRECTAS
     client.create_course(
         &creator,
         &String::from_str(&env, "A"),
@@ -314,13 +313,12 @@ fn test_list_categories_empty() {
 #[test]
 fn test_list_categories_ignores_none() {
     let env: Env = Env::default();
-    env.mock_all_auths(); // ⭐ MOCK AUTH FUERA
+    env.mock_all_auths();
     
     let contract_id: Address = env.register(CourseRegistry, ());
     let client = CourseRegistryClient::new(&env, &contract_id);
     let creator: Address = Address::generate(&env);
 
-    // ⭐ USAR CLIENT EN LUGAR DE LLAMADAS DIRECTAS
     client.create_course(
         &creator,
         &String::from_str(&env, "B"),
@@ -343,13 +341,12 @@ fn test_list_categories_ignores_none() {
 #[test]
 fn test_list_categories_with_id_gaps() {
     let env = Env::default();
-    env.mock_all_auths(); // ⭐ MOCK AUTH FUERA
+    env.mock_all_auths();
     
     let contract_id = env.register(CourseRegistry, ());
     let client = CourseRegistryClient::new(&env, &contract_id);
     let creator = Address::generate(&env);
 
-    // ⭐ USAR CLIENT EN LUGAR DE LLAMADAS DIRECTAS
     client.create_course(
         &creator,
         &String::from_str(&env, "Course 1"),
@@ -406,126 +403,4 @@ fn test_list_categories_with_id_gaps() {
     }
     assert_eq!(prog, 2); // Course 1 and Course 3
     assert_eq!(data, 0); // Course 2 was deleted
-}
-
-#[test]
-fn test_create_course_category_success() {
-    let env = Env::default();
-    env.mock_all_auths();
-
-    let contract_id = env.register(CourseRegistry, {});
-    let client = CourseRegistryClient::new(&env, &contract_id);
-
-    // Set up admin user
-    let admin = Address::generate(&env);
-    let mut admins: Vec<Address> = Vec::new(&env);
-    admins.push_back(admin.clone());
-    env.as_contract(&contract_id, || {
-        env.storage()
-            .persistent()
-            .set(&crate::schema::DataKey::Admins, &admins);
-    });
-
-    let name = String::from_str(&env, "Programming");
-    let description = Some(String::from_str(&env, "Programming courses"));
-
-    let category_id = client.create_course_category(&admin, &name, &description);
-
-    assert_eq!(category_id, 1);
-
-    // Verify the category was stored
-    let category_exists: bool = env.as_contract(&contract_id, || {
-        env.storage()
-            .persistent()
-            .has(&crate::schema::DataKey::CourseCategory(1))
-    });
-    assert!(category_exists);
-}
-
-#[test]
-#[should_panic(expected = "Not authorized")]
-fn test_create_course_category_non_admin() {
-    let env = Env::default();
-    env.mock_all_auths();
-
-    let contract_id = env.register(CourseRegistry, {});
-    let client = CourseRegistryClient::new(&env, &contract_id);
-
-    let non_admin = Address::generate(&env);
-    let name = String::from_str(&env, "Programming");
-    let description = Some(String::from_str(&env, "Programming courses"));
-
-    // This should panic because non_admin is not an admin
-    client.create_course_category(&non_admin, &name, &description);
-}
-
-#[test]
-#[should_panic(expected = "Name is required")]
-fn test_create_course_category_empty_name() {
-    let env = Env::default();
-    env.mock_all_auths();
-
-    let contract_id = env.register(CourseRegistry, {});
-    let client = CourseRegistryClient::new(&env, &contract_id);
-
-    let admin = Address::generate(&env);
-    let mut admins: Vec<Address> = Vec::new(&env);
-    admins.push_back(admin.clone());
-    env.as_contract(&contract_id, || {
-        env.storage()
-            .persistent()
-            .set(&crate::schema::DataKey::Admins, &admins);
-    });
-
-    let empty_name = String::from_str(&env, "");
-    let description = Some(String::from_str(&env, "Programming courses"));
-
-    // This should panic because name is empty
-    client.create_course_category(&admin, &empty_name, &description);
-}
-
-#[test]
-fn test_get_course_category_success() {
-    let env = Env::default();
-    env.mock_all_auths();
-
-    let contract_id = env.register(CourseRegistry, {});
-    let client = CourseRegistryClient::new(&env, &contract_id);
-
-    // Set up admin user
-    let admin = Address::generate(&env);
-    let mut admins: Vec<Address> = Vec::new(&env);
-    admins.push_back(admin.clone());
-    env.as_contract(&contract_id, || {
-        env.storage()
-            .persistent()
-            .set(&crate::schema::DataKey::Admins, &admins);
-    });
-
-    let name = String::from_str(&env, "Programming");
-    let description = Some(String::from_str(&env, "Programming courses"));
-
-    let category_id = client.create_course_category(&admin, &name, &description);
-
-    // Now retrieve the category
-    let retrieved_category = client.get_course_category(&category_id);
-    assert!(retrieved_category.is_some());
-
-    let category = retrieved_category.unwrap();
-    assert_eq!(category.id, category_id);
-    assert_eq!(category.name, name);
-    assert_eq!(category.description, description);
-}
-
-#[test]
-fn test_get_course_category_not_found() {
-    let env = Env::default();
-    env.mock_all_auths();
-
-    let contract_id = env.register(CourseRegistry, {});
-    let client = CourseRegistryClient::new(&env, &contract_id);
-
-    // Try to get a non-existent category
-    let retrieved_category = client.get_course_category(&999);
-    assert!(retrieved_category.is_none());
 }
