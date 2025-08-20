@@ -1,5 +1,5 @@
 use soroban_sdk::{Address, Env, String};
-use crate::schema::{CourseAccess, DataKey, UserCourses, CourseUsers};
+use crate::schema::{DataKey, UserCourses, CourseUsers};
 
 // pub fn course_access_revoke_access(env: Env, course_id: String, user: Address) -> bool {
 //     // Create storage key

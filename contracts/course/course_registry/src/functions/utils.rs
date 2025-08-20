@@ -157,7 +157,7 @@ pub fn concat_strings(env: &Env, strings: Vec<String>) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::schema::{Course, CourseModule};
+    use crate::schema::{Course};
     use crate::CourseRegistry;
     use soroban_sdk::{testutils::Address as _, Address, Env, log, vec};
 
@@ -181,9 +181,9 @@ mod tests {
     #[test]
     fn test_delete_course_success() {
         let env = Env::default();
-        let contract_id = env.register(CourseRegistry, {});
+        let _contract_id = env.register(CourseRegistry, {});
         let course_id = String::from_str(&env, "course_1");
-        let course = create_test_course(&env, "course_1.");
+        let _course = create_test_course(&env, "course_1.");
         let course_id2 = String::from_str(&env, "    course_1.  ");
 
 
