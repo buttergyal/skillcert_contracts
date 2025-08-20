@@ -22,6 +22,14 @@ pub struct CourseGoal {
 
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]
+pub struct CourseCategory {
+    pub id: u128,
+    pub name: String,
+    pub description: Option<String>,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
 pub enum DataKey {
     Module(String),
     Courses,
