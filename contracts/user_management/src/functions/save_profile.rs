@@ -5,9 +5,11 @@ use soroban_sdk::{Address, Env, String, Vec};
 /// Security constants for profile validation
 const MAX_NAME_LENGTH: usize = 100;
 const MAX_EMAIL_LENGTH: usize = 320; // RFC 5321 standard
-const MAX_PROFESSION_LENGTH: usize = 100;
-const MAX_GOALS_LENGTH: usize = 500;
-const MAX_COUNTRY_LENGTH: usize = 56; // Longest country name
+const MAX_SPECIALIZATION_LENGTH: usize = 100;
+const MAX_LANGUAGE_LENGTH: usize = 50;
+const MAX_CATEGORY_LENGTH: usize = 100;
+const MAX_PASSWORD_LENGTH: usize = 128;
+const MIN_PASSWORD_LENGTH: usize = 8;
 
 /// Validates string content for security
 fn validate_string_content(_env: &Env, s: &String, max_len: usize) -> bool {
@@ -24,10 +26,13 @@ pub fn user_management_save_profile(
     env: Env,
     caller: Address,
     name: String,
+    lastname: String,
     email: String,
-    profession: Option<String>,
-    goals: Option<String>,
-    country: String,
+    password: String,
+    confirm_password: String,
+    specialization: String,
+    languages: Vec<String>,
+    teaching_categories: Vec<String>,
 ) -> UserProfile {
     // Require authentication - only the user themselves can update their profile
     caller.require_auth();
@@ -37,15 +42,37 @@ pub fn user_management_save_profile(
         panic!("Invalid input");
     }
 
+    if lastname.is_empty() {
+        panic!("Invalid input");
+    }
+
     if email.is_empty() {
         panic!("Invalid input");
     }
 
-    if country.is_empty() {
+    if password.is_empty() {
         panic!("Invalid input");
     }
 
-    // Basic email validation - check minimum length (more detailed validation can be added later)
+    if confirm_password.is_empty() {
+        panic!("Invalid input");
+    }
+
+    if specialization.is_empty() {
+        panic!("Invalid input");
+    }
+
+    // Validate password confirmation
+    if password != confirm_password {
+        panic!("Password and confirmation password do not match");
+    }
+
+    // Validate password length
+    if password.len() < MIN_PASSWORD_LENGTH as u32 || password.len() > MAX_PASSWORD_LENGTH as u32 {
+        panic!("Invalid input");
+    }
+
+    // Basic email validation - check minimum length
     if email.len() < 5 || email.len() > MAX_EMAIL_LENGTH as u32 {
         panic!("Invalid input");
     }
@@ -55,23 +82,36 @@ pub fn user_management_save_profile(
         panic!("Invalid input");
     }
 
+    if !validate_string_content(&env, &lastname, MAX_NAME_LENGTH) {
+        panic!("Invalid input");
+    }
+
     if !validate_string_content(&env, &email, MAX_EMAIL_LENGTH) {
         panic!("Invalid input");
     }
 
-    if !validate_string_content(&env, &country, MAX_COUNTRY_LENGTH) {
+    if !validate_string_content(&env, &specialization, MAX_SPECIALIZATION_LENGTH) {
         panic!("Invalid input");
     }
 
-    // Validate optional fields
-    if let Some(ref prof) = profession {
-        if !validate_string_content(&env, prof, MAX_PROFESSION_LENGTH) {
+    // Validate languages array
+    if languages.is_empty() {
+        panic!("Invalid input");
+    }
+
+    for language in languages.iter() {
+        if language.is_empty() || !validate_string_content(&env, &language, MAX_LANGUAGE_LENGTH) {
             panic!("Invalid input");
         }
     }
 
-    if let Some(ref goal) = goals {
-        if !validate_string_content(&env, goal, MAX_GOALS_LENGTH) {
+    // Validate teaching categories array
+    if teaching_categories.is_empty() {
+        panic!("Invalid input");
+    }
+
+    for category in teaching_categories.iter() {
+        if category.is_empty() || !validate_string_content(&env, &category, MAX_CATEGORY_LENGTH) {
             panic!("Invalid input");
         }
     }
@@ -83,10 +123,13 @@ pub fn user_management_save_profile(
     // Create the user profile
     let user_profile = UserProfile {
         name: name.clone(),
+        lastname: lastname.clone(),
         email,
-        profession: profession.clone(),
-        goals,
-        country: country.clone(),
+        password: password.clone(), // In production, this should be hashed
+        confirm_password: confirm_password.clone(),
+        specialization: specialization.clone(),
+        languages: languages.clone(),
+        teaching_categories: teaching_categories.clone(),
         user: caller.clone(),
     };
 
@@ -96,8 +139,10 @@ pub fn user_management_save_profile(
     // Create and store lightweight profile for listing
     let light_profile = LightProfile {
         name,
-        country,
-        profession,
+        lastname,
+        specialization,
+        languages,
+        teaching_categories,
         role: UserRole::Student, // Default role, should be set by admin separately
         status: UserStatus::Active, // Default status
         user_address: caller.clone(),
@@ -137,7 +182,7 @@ fn add_to_users_index(env: Env, user: Address) {
 mod test {
     use crate::schema::{DataKey, UserProfile};
     use crate::{UserManagement, UserManagementClient};
-    use soroban_sdk::{testutils::Address as _, Address, Env, String};
+    use soroban_sdk::{testutils::Address as _, Address, Env, String, Vec};
 
     #[test]
     fn test_save_profile_success() {
@@ -146,24 +191,39 @@ mod test {
         let client = UserManagementClient::new(&env, &contract_id);
 
         let user: Address = Address::generate(&env);
-        let name: String = String::from_str(&env, "John Doe");
-        let email: String = String::from_str(&env, "john@example.com");
-        let profession: Option<String> = Some(String::from_str(&env, "Software Engineer"));
-        let goals: Option<String> = Some(String::from_str(&env, "Learn blockchain development"));
-        let country: String = String::from_str(&env, "United States");
+        let name: String = String::from_str(&env, "John");
+        let lastname: String = String::from_str(&env, "Doe");
+        let email: String = String::from_str(&env, "john.doe@example.com");
+        let password: String = String::from_str(&env, "securepassword123");
+        let confirm_password: String = String::from_str(&env, "securepassword123");
+        let specialization: String = String::from_str(&env, "Software Engineering");
+        let languages = Vec::from_array(&env, [
+            String::from_str(&env, "English"),
+            String::from_str(&env, "Spanish")
+        ]);
+        let teaching_categories = Vec::from_array(&env, [
+            String::from_str(&env, "Programming"),
+            String::from_str(&env, "Web Development")
+        ]);
 
-        // Mock all authentication in the environment (CORRECT PATTERN)
+        // Mock all authentication in the environment
         env.mock_all_auths();
 
         // Use contract client
-        let profile = client.save_profile(&name, &email, &profession, &goals, &country, &user);
+        let profile = client.save_profile(
+            &name, &lastname, &email, &password, &confirm_password,
+            &specialization, &languages, &teaching_categories, &user
+        );
 
         // Verify profile creation
         assert_eq!(profile.name, name);
+        assert_eq!(profile.lastname, lastname);
         assert_eq!(profile.email, email);
-        assert_eq!(profile.profession, profession);
-        assert_eq!(profile.goals, goals);
-        assert_eq!(profile.country, country);
+        assert_eq!(profile.password, password);
+        assert_eq!(profile.confirm_password, confirm_password);
+        assert_eq!(profile.specialization, specialization);
+        assert_eq!(profile.languages, languages);
+        assert_eq!(profile.teaching_categories, teaching_categories);
         assert_eq!(profile.user, user);
 
         // Verify storage within contract context
@@ -176,97 +236,153 @@ mod test {
     }
 
     #[test]
-    fn test_save_profile_without_optional_fields() {
+    #[should_panic(expected = "Password and confirmation password do not match")]
+    fn test_save_profile_password_mismatch() {
         let env = Env::default();
         let contract_id = env.register(UserManagement, {});
         let client = UserManagementClient::new(&env, &contract_id);
+
         let user: Address = Address::generate(&env);
+        let name: String = String::from_str(&env, "John");
+        let lastname: String = String::from_str(&env, "Doe");
+        let email: String = String::from_str(&env, "john@example.com");
+        let password: String = String::from_str(&env, "password123");
+        let confirm_password: String = String::from_str(&env, "differentpassword456");
+        let specialization: String = String::from_str(&env, "Software Engineering");
+        let languages = Vec::from_array(&env, [String::from_str(&env, "English")]);
+        let teaching_categories = Vec::from_array(&env, [String::from_str(&env, "Programming")]);
 
-        let name: String = String::from_str(&env, "Jane Smith");
-        let email: String = String::from_str(&env, "jane@example.com");
-        let country: String = String::from_str(&env, "Canada");
-
-        // Mock authentication in environment
         env.mock_all_auths();
 
-        // Use contract client
-        let profile = client.save_profile(
-            &name, &email, &None, // profession
-            &None, // goals
-            &country, &user,
+        // This should panic due to password mismatch
+        client.save_profile(
+            &name, &lastname, &email, &password, &confirm_password,
+            &specialization, &languages, &teaching_categories, &user
         );
-
-        // Verify profile creation
-        assert_eq!(profile.name, name);
-        assert_eq!(profile.email, email);
-        assert_eq!(profile.profession, None);
-        assert_eq!(profile.goals, None);
-        assert_eq!(profile.country, country);
-        assert_eq!(profile.user, user);
-
-        // Verify storage within contract context
-        env.as_contract(&contract_id, || {
-            let storage_key = DataKey::UserProfile(user);
-            let stored_profile: Option<UserProfile> = env.storage().persistent().get(&storage_key);
-            let stored = stored_profile.expect("Profile should be stored");
-            assert_eq!(stored, profile);
-        });
     }
 
     #[test]
     #[should_panic(expected = "Invalid input")]
     fn test_save_profile_with_empty_name() {
         let env = Env::default();
-        let _contract_id: Address = env.register(UserManagement, {});
+        let contract_id = env.register(UserManagement, {});
+        let client = UserManagementClient::new(&env, &contract_id);
         let user: Address = Address::generate(&env);
 
         let name: String = String::from_str(&env, "");
+        let lastname: String = String::from_str(&env, "Doe");
         let email: String = String::from_str(&env, "test@example.com");
-        let country: String = String::from_str(&env, "Germany");
+        let password: String = String::from_str(&env, "password123");
+        let confirm_password: String = String::from_str(&env, "password123");
+        let specialization: String = String::from_str(&env, "Engineering");
+        let languages = Vec::from_array(&env, [String::from_str(&env, "English")]);
+        let teaching_categories = Vec::from_array(&env, [String::from_str(&env, "Tech")]);
 
-        let contract_id = env.register(UserManagement, {});
-        let client = UserManagementClient::new(&env, &contract_id);
-        env.mock_all_auths(); // Mock authentication
+        env.mock_all_auths();
 
-        // Use contract client for consistency
-        client.save_profile(&name, &email, &None, &None, &country, &user);
+        client.save_profile(
+            &name, &lastname, &email, &password, &confirm_password,
+            &specialization, &languages, &teaching_categories, &user
+        );
     }
 
     #[test]
     #[should_panic(expected = "Invalid input")]
     fn test_save_profile_with_empty_email() {
         let env = Env::default();
-        let _contract_id: Address = env.register(UserManagement, {});
-        let user: Address = Address::generate(&env);
-
-        let name: String = String::from_str(&env, "Test User");
-        let email: String = String::from_str(&env, "");
-        let country: String = String::from_str(&env, "France");
-
         let contract_id = env.register(UserManagement, {});
         let client = UserManagementClient::new(&env, &contract_id);
-        env.mock_all_auths(); // Mock authentication
+        let user: Address = Address::generate(&env);
 
-        // Use contract client for consistency
-        client.save_profile(&name, &email, &None, &None, &country, &user);
+        let name: String = String::from_str(&env, "John");
+        let lastname: String = String::from_str(&env, "Doe");
+        let email: String = String::from_str(&env, "");
+        let password: String = String::from_str(&env, "password123");
+        let confirm_password: String = String::from_str(&env, "password123");
+        let specialization: String = String::from_str(&env, "Engineering");
+        let languages = Vec::from_array(&env, [String::from_str(&env, "English")]);
+        let teaching_categories = Vec::from_array(&env, [String::from_str(&env, "Tech")]);
+
+        env.mock_all_auths();
+
+        client.save_profile(
+            &name, &lastname, &email, &password, &confirm_password,
+            &specialization, &languages, &teaching_categories, &user
+        );
     }
 
     #[test]
     #[should_panic(expected = "Invalid input")]
-    fn test_save_profile_with_empty_country() {
+    fn test_save_profile_with_short_password() {
         let env = Env::default();
-        let _contract_id: Address = env.register(UserManagement, {});
-        let user: Address = Address::generate(&env);
-
-        let name: String = String::from_str(&env, "Test User");
-        let email: String = String::from_str(&env, "test@example.com");
-        let country: String = String::from_str(&env, "");
-
         let contract_id = env.register(UserManagement, {});
         let client = UserManagementClient::new(&env, &contract_id);
-        env.mock_all_auths(); // Mock authentication
+        let user: Address = Address::generate(&env);
 
-        // Use contract client for consistency
-        client.save_profile(&name, &email, &None, &None, &country, &user);
+        let name: String = String::from_str(&env, "John");
+        let lastname: String = String::from_str(&env, "Doe");
+        let email: String = String::from_str(&env, "john@example.com");
+        let password: String = String::from_str(&env, "123"); // Too short
+        let confirm_password: String = String::from_str(&env, "123");
+        let specialization: String = String::from_str(&env, "Engineering");
+        let languages = Vec::from_array(&env, [String::from_str(&env, "English")]);
+        let teaching_categories = Vec::from_array(&env, [String::from_str(&env, "Tech")]);
+
+        env.mock_all_auths();
+
+        client.save_profile(
+            &name, &lastname, &email, &password, &confirm_password,
+            &specialization, &languages, &teaching_categories, &user
+        );
+    }
+
+    #[test]
+    #[should_panic(expected = "Invalid input")]
+    fn test_save_profile_with_empty_languages() {
+        let env = Env::default();
+        let contract_id = env.register(UserManagement, {});
+        let client = UserManagementClient::new(&env, &contract_id);
+        let user: Address = Address::generate(&env);
+
+        let name: String = String::from_str(&env, "John");
+        let lastname: String = String::from_str(&env, "Doe");
+        let email: String = String::from_str(&env, "john@example.com");
+        let password: String = String::from_str(&env, "password123");
+        let confirm_password: String = String::from_str(&env, "password123");
+        let specialization: String = String::from_str(&env, "Engineering");
+        let languages = Vec::new(&env); // Empty languages array
+        let teaching_categories = Vec::from_array(&env, [String::from_str(&env, "Tech")]);
+
+        env.mock_all_auths();
+
+        client.save_profile(
+            &name, &lastname, &email, &password, &confirm_password,
+            &specialization, &languages, &teaching_categories, &user
+        );
+    }
+
+    #[test]
+    #[should_panic(expected = "Invalid input")]
+    fn test_save_profile_with_empty_teaching_categories() {
+        let env = Env::default();
+        let contract_id = env.register(UserManagement, {});
+        let client = UserManagementClient::new(&env, &contract_id);
+        let user: Address = Address::generate(&env);
+
+        let name: String = String::from_str(&env, "John");
+        let lastname: String = String::from_str(&env, "Doe");
+        let email: String = String::from_str(&env, "john@example.com");
+        let password: String = String::from_str(&env, "password123");
+        let confirm_password: String = String::from_str(&env, "password123");
+        let specialization: String = String::from_str(&env, "Engineering");
+        let languages = Vec::from_array(&env, [String::from_str(&env, "English")]);
+        let teaching_categories = Vec::new(&env); // Empty categories array
+
+        env.mock_all_auths();
+
+        client.save_profile(
+            &name, &lastname, &email, &password, &confirm_password,
+            &specialization, &languages, &teaching_categories, &user
+        );
     }
 }
