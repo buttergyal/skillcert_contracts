@@ -16,6 +16,7 @@ pub mod is_course_creator;
 pub mod list_categories;
 pub mod list_courses_with_filters;
 pub mod list_modules;
+pub mod remove_goal;
 pub mod remove_module;
 pub mod remove_prerequisite;
 pub mod utils;
