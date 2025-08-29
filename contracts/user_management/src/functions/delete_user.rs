@@ -116,24 +116,32 @@ mod tests {
     }
 
     fn create_test_user(env: &Env, contract_id: &Address, user: &Address) -> UserProfile {
-        let name = String::from_str(env, "Test User");
+        let name = String::from_str(env, "Test");
+        let lastname = String::from_str(env, "User");
         let email = String::from_str(env, "test@example.com");
-        let country = String::from_str(env, "Test Country");
+        let specialization = String::from_str(env, "Testing");
+        let languages = soroban_sdk::Vec::from_array(env, [String::from_str(env, "English")]);
+        let teaching_categories = soroban_sdk::Vec::from_array(env, [String::from_str(env, "QA")]);
 
         // Create user profile directly in storage for testing
         let user_profile = UserProfile {
             name: name.clone(),
+            lastname: lastname.clone(),
             email,
-            profession: None,
-            goals: None,
-            country: country.clone(),
+            password: String::from_str(env, "password123"),
+            confirm_password: String::from_str(env, "password123"),
+            specialization: specialization.clone(),
+            languages: languages.clone(),
+            teaching_categories: teaching_categories.clone(),
             user: user.clone(),
         };
 
         let light_profile = LightProfile {
             name,
-            country,
-            profession: None,
+            lastname,
+            specialization,
+            languages,
+            teaching_categories,
             role: UserRole::Student,
             status: UserStatus::Active,
             user_address: user.clone(),
