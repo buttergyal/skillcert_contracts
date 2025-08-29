@@ -82,6 +82,10 @@ impl CourseRegistry {
         functions::add_goal::course_registry_add_goal(env, creator, course_id, content)
     }
 
+    pub fn remove_goal(env: Env, caller: Address, course_id: String, goal_id: String) -> () {
+        functions::remove_goal::course_registry_remove_goal(env, caller, course_id, goal_id)
+    }
+
     pub fn add_prerequisite(
         env: Env,
         creator: Address,
