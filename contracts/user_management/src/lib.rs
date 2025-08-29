@@ -17,14 +17,17 @@ impl UserManagement {
     pub fn save_profile(
         env: Env,
         name: String,
+        lastname: String,
         email: String,
-        profession: Option<String>,
-        goals: Option<String>,
-        country: String,
+        password: String,
+        confirm_password: String,
+        specialization: String,
+        languages: Vec<String>,
+        teaching_categories: Vec<String>,
         user: Address,
     ) -> UserProfile {
         functions::save_profile::user_management_save_profile(
-            env, user, name, email, profession, goals, country,
+            env, user, name, lastname, email, password, confirm_password, specialization, languages, teaching_categories,
         )
     }
 
