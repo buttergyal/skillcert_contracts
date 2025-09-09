@@ -1,4 +1,4 @@
-#![cfg_attr(target_arch = "wasm32", no_std)]
+#![no_std]
 
 pub mod functions;
 pub mod schema;
@@ -17,14 +17,17 @@ impl UserManagement {
     pub fn save_profile(
         env: Env,
         name: String,
+        lastname: String,
         email: String,
-        profession: Option<String>,
-        goals: Option<String>,
-        country: String,
+        password: String,
+        confirm_password: String,
+        specialization: String,
+        languages: Vec<String>,
+        teaching_categories: Vec<String>,
         user: Address,
     ) -> UserProfile {
         functions::save_profile::user_management_save_profile(
-            env, user, name, email, profession, goals, country,
+            env, user, name, lastname, email, password, confirm_password, specialization, languages, teaching_categories,
         )
     }
 
@@ -82,6 +85,33 @@ impl UserManagement {
             profile_picture,
             language,
         )
+    }
+
+    /// Public admin check for cross-contract calls
+    pub fn is_admin(env: Env, who: Address) -> bool {
+        functions::is_admin::is_admin(env, who)
+    }
+
+    /// Delete (deactivate) a user account
+    ///
+    /// Performs a soft delete by marking the user as inactive instead of permanent deletion.
+    /// Only admins or the user themselves can trigger deletion.
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `caller` - Address performing the deletion (must be admin or the user themselves)
+    /// * `user_id` - Address of the user to be deactivated
+    ///
+    /// # Panics
+    /// * If caller authentication fails
+    /// * If user doesn't exist
+    /// * If caller is neither admin nor the user themselves
+    /// * If user is already inactive
+    ///
+    /// # Events
+    /// Emits a user deactivation event upon successful deletion
+    pub fn delete_user(env: Env, caller: Address, user_id: Address) {
+        functions::delete_user::delete_user(env, caller, user_id)
     }
 
     /// Lists all registered users with pagination and filtering (admin-only)

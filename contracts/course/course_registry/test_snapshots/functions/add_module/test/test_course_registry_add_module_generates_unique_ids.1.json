@@ -31,6 +31,8 @@
                 },
                 "void",
                 "void",
+                "void",
+                "void",
                 "void"
               ]
             }
@@ -147,6 +149,12 @@
                     },
                     {
                       "key": {
+                        "symbol": "duration_hours"
+                      },
+                      "val": "void"
+                    },
+                    {
+                      "key": {
                         "symbol": "id"
                       },
                       "val": {
@@ -164,6 +172,12 @@
                     {
                       "key": {
                         "symbol": "language"
+                      },
+                      "val": "void"
+                    },
+                    {
+                      "key": {
+                        "symbol": "level"
                       },
                       "val": "void"
                     },

@@ -32,7 +32,7 @@ pub fn course_registry_archive_course(env: &Env, creator: Address, course_id: St
 mod tests {
     use super::*;
     use crate::{CourseRegistry, CourseRegistryClient};
-    use soroban_sdk::{testutils::Address as TestAddress, testutils::Events, Address, Env};
+    use soroban_sdk::{testutils::Address as _, testutils::Events, Address, Env};
 
     #[test]
     fn test_archive_course_success() {
@@ -52,6 +52,8 @@ mod tests {
             &Some(String::from_str(&env, "category")),
             &Some(String::from_str(&env, "language")),
             &Some(String::from_str(&env, "thumbnail_url")),
+            &None,
+            &None,
         );
 
         assert_eq!(new_course, client.get_course(&new_course.id.clone()));
@@ -99,6 +101,8 @@ mod tests {
             &Some(String::from_str(&env, "category")),
             &Some(String::from_str(&env, "language")),
             &Some(String::from_str(&env, "thumbnail_url")),
+            &None,
+            &None,
         );
 
         client.archive_course(&non_creator, &new_course.id);
@@ -123,6 +127,8 @@ mod tests {
             &Some(String::from_str(&env, "category")),
             &Some(String::from_str(&env, "language")),
             &Some(String::from_str(&env, "thumbnail_url")),
+            &None,
+            &None,
         );
 
         let archived_course = client.archive_course(&creator, &new_course.id);
@@ -149,6 +155,8 @@ mod tests {
             &Some(String::from_str(&env, "category")),
             &Some(String::from_str(&env, "language")),
             &Some(String::from_str(&env, "thumbnail_url")),
+            &None,
+            &None,
         );
 
         client.archive_course(&creator, &new_course.id);

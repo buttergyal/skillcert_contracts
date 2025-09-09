@@ -1,4 +1,5 @@
 use crate::schema::{Course, DataKey};
+
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
 
 const PREREQ_REMOVED_EVENT: Symbol = symbol_short!("prereqrmv");
@@ -54,6 +55,7 @@ pub fn course_registry_remove_prerequisite(
     // Emit event
     env.events()
         .publish((PREREQ_REMOVED_EVENT, course_id), prerequisite_course_id);
+
 }
 
 #[cfg(test)]
@@ -81,6 +83,8 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
         let course2: Course = client.create_course(
@@ -88,6 +92,8 @@ mod test {
             &String::from_str(&env, "Course 2"),
             &String::from_str(&env, "Description 2"),
             &1000_u128,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -136,6 +142,8 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
         let course2: Course = client.create_course(
@@ -143,6 +151,8 @@ mod test {
             &String::from_str(&env, "Course 2"),
             &String::from_str(&env, "Description 2"),
             &1000_u128,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -189,6 +199,8 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
         let course2: Course = client.create_course(
@@ -196,6 +208,8 @@ mod test {
             &String::from_str(&env, "Course 2"),
             &String::from_str(&env, "Description 2"),
             &1000_u128,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -222,6 +236,8 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
         let course2: Course = client.create_course(
@@ -232,6 +248,8 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
         let course3: Course = client.create_course(
@@ -239,6 +257,8 @@ mod test {
             &String::from_str(&env, "Course 3"),
             &String::from_str(&env, "Description 3"),
             &1000_u128,
+            &None,
+            &None,
             &None,
             &None,
             &None,

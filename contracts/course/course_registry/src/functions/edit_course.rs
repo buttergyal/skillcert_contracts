@@ -1,5 +1,6 @@
-use crate::schema::Course;
+use crate::schema::{Course, EditCourseParams};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
+use super::utils::{trim, to_lowercase};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const TITLE_KEY: Symbol = symbol_short!("title");
@@ -10,18 +11,7 @@ pub fn course_registry_edit_course(
     env: Env,
     creator: Address,
     course_id: String,
-
-    // Editable fields (use Option for "provided or not")
-    new_title: Option<String>,
-    new_description: Option<String>,
-    new_price: Option<u128>,
-
-    // Double-Option lets caller clear the value: Some(None) -> clear, None -> no change
-    new_category: Option<Option<String>>,
-    new_language: Option<Option<String>>,
-    new_thumbnail_url: Option<Option<String>>,
-
-    new_published: Option<bool>,
+    params: EditCourseParams,
 ) -> Course {
     creator.require_auth();
 
@@ -39,42 +29,44 @@ pub fn course_registry_edit_course(
     }
 
     // --- Title update (validate + uniqueness) ---
-    if let Some(t) = new_title {
-        let t_str = t.to_string();
-        let t_trim = t_str.trim();
+    if let Some(t) = params.new_title {
+        // Clone the string to avoid move issues
+        let t_str = t.clone();
+        let t_trim = trim(&env, &t_str);
+      
         if t_trim.is_empty() {
             panic!("Course error: Course Title cannot be empty");
         }
 
         // Only check/rotate title index if it's effectively changing (case-insensitive)
-        let old_title_lc = course.title.to_string().to_lowercase();
-        let new_title_lc = t_str.to_lowercase();
+        let old_title_lc = to_lowercase(&env, &course.title);
+        let new_title_lc = to_lowercase(&env, &t_str);
 
         if old_title_lc != new_title_lc {
             // uniqueness index key for the *new* title
             let new_title_key: (Symbol, String) =
-                (TITLE_KEY, String::from_str(&env, &new_title_lc));
+                (TITLE_KEY, new_title_lc);
             if env.storage().persistent().has(&new_title_key) {
                 panic!("Course error: Course Title already exists");
             }
 
             // remove old title index and set new one
             let old_title_key: (Symbol, String) =
-                (TITLE_KEY, String::from_str(&env, &old_title_lc));
+                (TITLE_KEY, old_title_lc);
             env.storage().persistent().remove(&old_title_key);
             env.storage().persistent().set(&new_title_key, &true);
 
-            course.title = String::from_str(&env, t_trim);
+            course.title = t_trim;
         }
     }
 
     // --- Description ---
-    if let Some(d) = new_description {
+    if let Some(d) = params.new_description {
         course.description = d;
     }
 
     // --- Price (>0) ---
-    if let Some(p) = new_price {
+    if let Some(p) = params.new_price {
         if p == 0 {
             panic!("Course error: Price must be greater than 0");
         }
@@ -82,19 +74,29 @@ pub fn course_registry_edit_course(
     }
 
     // --- Optional fields: category / language / thumbnail ---
-    if let Some(cat) = new_category {
+    if let Some(cat) = params.new_category {
         course.category = cat; // Some(value) sets; None clears
     }
-    if let Some(lang) = new_language {
+    if let Some(lang) = params.new_language {
         course.language = lang;
     }
-    if let Some(url) = new_thumbnail_url {
+    if let Some(url) = params.new_thumbnail_url {
         course.thumbnail_url = url;
     }
 
     // --- Published flag ---
-    if let Some(p) = new_published {
+    if let Some(p) = params.new_published {
         course.published = p;
+    }
+
+    // --- Level field ---
+    if let Some(level) = params.new_level {
+        course.level = level; // Some(value) sets; None clears
+    }
+
+    // --- Duration hours field ---
+    if let Some(duration) = params.new_duration_hours {
+        course.duration_hours = duration; // Some(value) sets; None clears
     }
 
     // --- Persist updated course ---
@@ -109,7 +111,7 @@ pub fn course_registry_edit_course(
 
 #[cfg(test)]
 mod test {
-    use crate::schema::Course;
+    use crate::schema::{Course, EditCourseParams};
     use crate::{CourseRegistry, CourseRegistryClient};
     use soroban_sdk::{testutils::Address as _, Address, Env, String};
 
@@ -131,18 +133,25 @@ mod test {
             &Some(String::from_str(&env, "original_category")),
             &Some(String::from_str(&env, "original_language")),
             &Some(String::from_str(&env, "original_thumbnail")),
+            &None,
+            &None,
         );
 
+        let params = EditCourseParams {
+            new_title: Some(String::from_str(&env, "New Title")),
+            new_description: Some(String::from_str(&env, "New Description")),
+            new_price: Some(2000_u128),
+            new_category: Some(Some(String::from_str(&env, "new_category"))),
+            new_language: Some(Some(String::from_str(&env, "new_language"))),
+            new_thumbnail_url: Some(Some(String::from_str(&env, "new_thumbnail"))),
+            new_published: Some(true),
+            new_level: None,
+            new_duration_hours: None,
+        };
         let edited_course = client.edit_course(
             &creator,
             &course.id,
-            &Some(String::from_str(&env, "New Title")),
-            &Some(String::from_str(&env, "New Description")),
-            &Some(2000_u128),
-            &Some(Some(String::from_str(&env, "new_category"))),
-            &Some(Some(String::from_str(&env, "new_language"))),
-            &Some(Some(String::from_str(&env, "new_thumbnail"))),
-            &Some(true),
+            &params,
         );
 
         assert_eq!(edited_course.title, String::from_str(&env, "New Title"));
@@ -208,18 +217,25 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
+        let params = EditCourseParams {
+            new_title: Some(String::from_str(&env, "New Title")),
+            new_description: None,
+            new_price: None,
+            new_category: None,
+            new_language: None,
+            new_thumbnail_url: None,
+            new_published: None,
+            new_level: None,
+            new_duration_hours: None,
+        };
         client.edit_course(
             &impostor,
             &course.id,
-            &Some(String::from_str(&env, "New Title")),
-            &None,
-            &None,
-            &None,
-            &None,
-            &None,
-            &None,
+            &params,
         );
     }
 
@@ -235,16 +251,21 @@ mod test {
         let creator: Address = Address::generate(&env);
         let fake_course_id = String::from_str(&env, "nonexistent_course");
 
+        let params = EditCourseParams {
+            new_title: Some(String::from_str(&env, "New Title")),
+            new_description: None,
+            new_price: None,
+            new_category: None,
+            new_language: None,
+            new_thumbnail_url: None,
+            new_published: None,
+            new_level: None,
+            new_duration_hours: None,
+        };
         client.edit_course(
             &creator,
             &fake_course_id,
-            &Some(String::from_str(&env, "New Title")),
-            &None,
-            &None,
-            &None,
-            &None,
-            &None,
-            &None,
+            &params,
         );
     }
 
@@ -267,18 +288,25 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
+        let params = EditCourseParams {
+            new_title: Some(String::from_str(&env, "")),
+            new_description: None,
+            new_price: None,
+            new_category: None,
+            new_language: None,
+            new_thumbnail_url: None,
+            new_published: None,
+            new_level: None,
+            new_duration_hours: None,
+        };
         client.edit_course(
             &creator,
             &course.id,
-            &Some(String::from_str(&env, "")),
-            &None,
-            &None,
-            &None,
-            &None,
-            &None,
-            &None,
+            &params,
         );
     }
 
@@ -301,18 +329,25 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
+        let params = EditCourseParams {
+            new_title: None,
+            new_description: None,
+            new_price: Some(0_u128),
+            new_category: None,
+            new_language: None,
+            new_thumbnail_url: None,
+            new_published: None,
+            new_level: None,
+            new_duration_hours: None,
+        };
         client.edit_course(
             &creator,
             &course.id,
-            &None,
-            &None,
-            &Some(0_u128),
-            &None,
-            &None,
-            &None,
-            &None,
+            &params,
         );
     }
 
@@ -335,6 +370,8 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
         let course2: Course = client.create_course(
@@ -345,18 +382,25 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
+        let params = EditCourseParams {
+            new_title: Some(String::from_str(&env, "Course 1")),
+            new_description: None,
+            new_price: None,
+            new_category: None,
+            new_language: None,
+            new_thumbnail_url: None,
+            new_published: None,
+            new_level: None,
+            new_duration_hours: None,
+        };
         client.edit_course(
             &creator,
             &course2.id,
-            &Some(String::from_str(&env, "Course 1")),
-            &None,
-            &None,
-            &None,
-            &None,
-            &None,
-            &None,
+            &params,
         );
     }
 
@@ -379,18 +423,25 @@ mod test {
             &Some(String::from_str(&env, "original_category")),
             &Some(String::from_str(&env, "original_language")),
             &Some(String::from_str(&env, "original_thumbnail")),
+            &None,
+            &None,
         );
 
+        let params = EditCourseParams {
+            new_title: Some(String::from_str(&env, "New Title")),
+            new_description: None,
+            new_price: Some(2000_u128),
+            new_category: None,
+            new_language: None,
+            new_thumbnail_url: None,
+            new_published: None,
+            new_level: None,
+            new_duration_hours: None,
+        };
         let edited_course = client.edit_course(
             &creator,
             &course.id,
-            &Some(String::from_str(&env, "New Title")),
-            &None,
-            &Some(2000_u128),
-            &None,
-            &None,
-            &None,
-            &None,
+            &params,
         );
 
         assert_eq!(edited_course.title, String::from_str(&env, "New Title"));
@@ -432,18 +483,25 @@ mod test {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
+        let params = EditCourseParams {
+            new_title: Some(String::from_str(&env, "original title")), // Same title, different case
+            new_description: Some(String::from_str(&env, "New Description")),
+            new_price: None,
+            new_category: None,
+            new_language: None,
+            new_thumbnail_url: None,
+            new_published: None,
+            new_level: None,
+            new_duration_hours: None,
+        };
         let edited_course = client.edit_course(
             &creator,
             &course.id,
-            &Some(String::from_str(&env, "original title")), // Same title, different case
-            &Some(String::from_str(&env, "New Description")),
-            &None,
-            &None,
-            &None,
-            &None,
-            &None,
+            &params,
         );
 
         assert_eq!(

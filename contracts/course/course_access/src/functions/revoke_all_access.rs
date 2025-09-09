@@ -1,0 +1,104 @@
+use crate::schema::{DataKey, KEY_COURSE_REG_ADDR, KEY_USER_MGMT_ADDR};
+use soroban_sdk::{symbol_short, Address, Env, IntoVal, String, Symbol, Vec};
+
+const USER_KEY: Symbol = symbol_short!("user");
+const COURSES_KEY: Symbol = symbol_short!("courses");
+const REVOKE_ALL_EVENT: Symbol = symbol_short!("revokeall");
+
+pub fn course_access_revoke_all_access(env: Env, caller: Address, course_id: String) -> u32 {
+    caller.require_auth();
+
+    // Resolve admin via cross-contract if configured
+    let user_mgmt_addr: Address = env
+        .storage()
+        .instance()
+        .get(&(KEY_USER_MGMT_ADDR,))
+        .expect("user_mgmt_addr not configured; call initialize/set_config");
+    let is_admin: bool = env.invoke_contract(
+        &user_mgmt_addr,
+        &Symbol::new(&env,"is_admin"),
+        (caller.clone(),).into_val(&env),
+    );
+
+    // Resolve creator via cross-contract if configured
+    let course_registry_addr: Address = env
+        .storage()
+        .instance()
+        .get(&(KEY_COURSE_REG_ADDR,))
+        .expect("course_registry_addr not configured; call initialize/set_config");
+    let is_creator: bool = env.invoke_contract(
+        &course_registry_addr,
+        &Symbol::new(&env, "is_course_creator"),
+        (course_id.clone(), caller.clone()).into_val(&env),
+    );
+
+    // Authorization: only admin or course creator
+    if !(is_admin || is_creator) {
+        panic!("Not authorized");
+    }
+
+    // Fetch all users with access to this course
+    let course_key: (Symbol, String) = (COURSES_KEY, course_id.clone());
+    let affected_users: Vec<Address> = match env.storage().persistent().get(&course_key) {
+        Some(course_users) => {
+            // CourseUsers { users, course } serialized as struct; we only need users list here.
+            // To avoid cross-struct dependency, read vector directly if stored that way; otherwise, try to extract.
+            // Prefer reading as Vec<Address> if that's what was stored; else fallback by mapping.
+            let cu: crate::schema::CourseUsers = course_users;
+            cu.users
+        }
+        None => Vec::new(&env),
+    };
+
+    let count = affected_users.len();
+    if count == 0 {
+        // Emit event with 0 and return
+        env.events().publish((REVOKE_ALL_EVENT, course_id.clone()), count);
+        return 0;
+    }
+
+    // Remove each user's access entry and update per-user course index if present
+    let mut i = 0u32;
+    while i < count {
+        if let Some(user) = affected_users.get(i) {
+            // Remove composite access key
+            let access_key: DataKey = DataKey::CourseAccess(course_id.clone(), user.clone());
+            if env.storage().persistent().has(&access_key) {
+                env.storage().persistent().remove(&access_key);
+            }
+
+            // Update per-user courses index if present: (USER_KEY, user.to_string()) -> UserCourses
+            let user_key = (USER_KEY, user.to_string());
+            if let Some(mut uc) = env.storage().persistent().get::<_, crate::schema::UserCourses>(&user_key) {
+                // Remove course_id from the list
+                let mut new_courses: Vec<String> = Vec::new(&env);
+                let mut j = 0u32;
+                let total = uc.courses.len();
+                while j < total {
+                    if let Some(cid) = uc.courses.get(j) {
+                        if cid != course_id {
+                            new_courses.push_back(cid);
+                        }
+                    }
+                    j = j.saturating_add(1);
+                }
+                uc.courses = new_courses;
+                env.storage().persistent().set(&user_key, &uc);
+            }
+        }
+        i = i.saturating_add(1);
+    }
+
+    // Clear course -> users index: set empty or remove key
+    let empty = Vec::new(&env);
+    if env.storage().persistent().has(&course_key) {
+        let mut cu: crate::schema::CourseUsers = env.storage().persistent().get(&course_key).unwrap();
+        cu.users = empty;
+        env.storage().persistent().set(&course_key, &cu);
+    }
+
+    // Emit event with number of users affected
+    env.events().publish((REVOKE_ALL_EVENT, course_id.clone()), count);
+
+    count
+}

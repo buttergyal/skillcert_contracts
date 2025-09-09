@@ -23,11 +23,12 @@ pub fn course_registry_get_course(env: &Env, course_id: String) -> Course {
 mod test {
     use crate::{schema::Course, CourseRegistry, CourseRegistryClient};
     use soroban_sdk::{testutils::Address as _, Address, Env, String};
+    
     fn create_course<'a>(client: &CourseRegistryClient<'a>, creator: &Address) -> Course {
         let title = String::from_str(&client.env, "title");
         let description = String::from_str(&client.env, "description");
         let price = 1000_u128;
-        client.create_course(&creator, &title, &description, &price, &None, &None, &None)
+        client.create_course(&creator, &title, &description, &price, &None, &None, &None, &None, &None)
     }
 
     #[test]

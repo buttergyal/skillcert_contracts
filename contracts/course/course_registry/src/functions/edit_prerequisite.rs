@@ -122,7 +122,7 @@ fn has_cycle(
 mod tests {
     use super::*;
     use crate::CourseRegistry;
-    use crate::{functions::create_course::course_registry_create_course, CourseRegistryClient};
+    use crate::CourseRegistryClient;
     use soroban_sdk::{
         testutils::{Address as TestAddress, Events},
         Address, Env, String,
@@ -145,6 +145,8 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         let course2 = client.create_course(
             &creator,
@@ -154,12 +156,16 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         let course3 = client.create_course(
             &creator,
             &String::from_str(&env, "Course 3"),
             &String::from_str(&env, "description"),
             &1000,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -203,12 +209,16 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         let course2 = client.create_course(
             &creator,
             &String::from_str(&env, "Course 2"),
             &String::from_str(&env, "description"),
             &1000,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -221,6 +231,8 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         let course4 = client.create_course(
             &creator,
@@ -230,11 +242,14 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
         let mut initial_prerequisites = Vec::new(&env);
         initial_prerequisites.push_back(course2.id.clone());
         client.edit_prerequisite(&creator, &course1.id, &initial_prerequisites);
+
 
         let mut new_prerequisites = Vec::new(&env);
         new_prerequisites.push_back(course3.id.clone());
@@ -258,6 +273,7 @@ mod tests {
         let env = Env::default();
         env.mock_all_auths();
 
+
         let contract_id = env.register(CourseRegistry, ());
         let client = CourseRegistryClient::new(&env, &contract_id);
 
@@ -270,6 +286,8 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         let course2 = client.create_course(
             &creator,
@@ -279,11 +297,14 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
         let mut initial_prerequisites = Vec::new(&env);
         initial_prerequisites.push_back(course2.id.clone());
         client.edit_prerequisite(&creator, &course1.id, &initial_prerequisites);
+
 
         let empty_prerequisites = Vec::new(&env);
         client.edit_prerequisite(&creator, &course1.id.clone(), &empty_prerequisites);
@@ -307,6 +328,7 @@ mod tests {
         let contract_id = env.register(CourseRegistry, ());
         let client = CourseRegistryClient::new(&env, &contract_id);
 
+
         client.edit_prerequisite(
             &Address::generate(&env),
             &String::from_str(&env, "404"),
@@ -329,6 +351,8 @@ mod tests {
             &String::from_str(&env, "Course 1"),
             &String::from_str(&env, "description"),
             &1000,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -358,6 +382,8 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
         let mut prerequisites = Vec::new(&env);
@@ -384,6 +410,8 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         let course2 = client.create_course(
             &creator,
@@ -393,12 +421,16 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         let course3 = client.create_course(
             &creator,
             &String::from_str(&env, "Course 3"),
             &String::from_str(&env, "description"),
             &1000,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -420,6 +452,7 @@ mod tests {
     #[test]
     fn test_edit_prerequisite_authorization() {
         let env = Env::default();
+
         env.mock_all_auths();
 
         let contract_id = env.register(CourseRegistry, ());
@@ -434,6 +467,8 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         let course2 = client.create_course(
             &creator,
@@ -443,12 +478,15 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
         let mut prerequisites = Vec::new(&env);
         prerequisites.push_back(course2.id.clone());
 
         client.edit_prerequisite(&creator, &course1.id, &prerequisites);
+
 
         let stored_prerequisites: Vec<String> = env.as_contract(&contract_id, || {
             env.storage()
@@ -476,12 +514,16 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         let course2 = client.create_course(
             &creator,
             &String::from_str(&env, "Course 2"),
             &String::from_str(&env, "description"),
             &1000,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -494,12 +536,16 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
         let course4 = client.create_course(
             &creator,
             &String::from_str(&env, "Course 4"),
             &String::from_str(&env, "description"),
             &1000,
+            &None,
+            &None,
             &None,
             &None,
             &None,
@@ -512,11 +558,14 @@ mod tests {
             &None,
             &None,
             &None,
+            &None,
+            &None,
         );
 
         let mut prerequisites2 = Vec::new(&env);
         prerequisites2.push_back(course4.id.clone());
         client.edit_prerequisite(&creator, &course2.id, &prerequisites2);
+
 
         let mut prerequisites3 = Vec::new(&env);
         prerequisites3.push_back(course5.id.clone());
