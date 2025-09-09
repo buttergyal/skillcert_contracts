@@ -6,6 +6,12 @@ pub struct UserProfile {
     pub name: String,
     pub lastname: String,
     pub email: String,
+    pub role: UserRole,
+    pub country: String,
+    pub profession: Option<String>,
+    pub goals: Option<String>,
+    pub profile_picture: Option<String>,
+    pub language: String,
     pub password: String,
     pub confirm_password: String,
     pub specialization: String,
@@ -66,6 +72,7 @@ pub enum DataKey {
     Admin(Address),       // Admin flag per address
     UserProfileLight(Address), // Lightweight profile storage
     UsersIndex,           // List of all registered user addresses
+    EmailIndex(String),   // Email to Address mapping for uniqueness
     Admins,               // List of admin addresses
     UserRoles,            // Role assignments
     AdminConfig,          // System configuration

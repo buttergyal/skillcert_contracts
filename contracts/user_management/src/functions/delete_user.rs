@@ -1,4 +1,4 @@
-use crate::schema::{AdminConfig, DataKey, LightProfile, UserProfile, UserStatus};
+use crate::schema::{AdminConfig, DataKey, LightProfile, UserProfile, UserRole, UserStatus};
 use core::iter::Iterator;
 use soroban_sdk::{symbol_short, Address, Env, Symbol};
 
@@ -128,6 +128,12 @@ mod tests {
             name: name.clone(),
             lastname: lastname.clone(),
             email,
+            role: UserRole::Student, // Default role
+            country: String::from_str(env, ""),
+            profession: None,
+            goals: None,
+            profile_picture: None,
+            language: String::from_str(env, "en"),
             password: String::from_str(env, "password123"),
             confirm_password: String::from_str(env, "password123"),
             specialization: specialization.clone(),
