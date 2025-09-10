@@ -2,7 +2,7 @@ pub use crate::schema::{Course, CourseModule};
 use soroban_sdk::{Bytes, Env, String, Vec, vec};
 
 pub fn generate_unique_id(env: &Env) -> String {
-    let ts = env.ledger().timestamp();
+    let ts: u64 = env.ledger().timestamp();
     let rand1: u64 = env.prng().gen();
     let rand2: u64 = env.prng().gen();
 
@@ -138,7 +138,8 @@ pub fn concat_strings(env: &Env, strings: Vec<String>) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::schema::Course;
+    use crate::schema::{Course};
+
     use crate::CourseRegistry;
     use soroban_sdk::{testutils::Address as _, Address, Env, vec};
 
@@ -155,8 +156,10 @@ mod tests {
             published: false,
             prerequisites: Vec::new(&env),
             is_archived: false,
-            level: None,
-            duration_hours: None,
+
+            duration_hours: Some(1),
+            level: Some(String::from_str(env, "entry"))
+
         }
     }
 
