@@ -17,20 +17,74 @@ impl UserManagement {
     pub fn save_profile(
         env: Env,
         name: String,
+        lastname: String,
         email: String,
-        profession: Option<String>,
-        goals: Option<String>,
-        country: String,
+        password: String,
+        confirm_password: String,
+        specialization: String,
+        languages: Vec<String>,
+        teaching_categories: Vec<String>,
         user: Address,
     ) -> UserProfile {
         functions::save_profile::user_management_save_profile(
-            env, user, name, email, profession, goals, country,
+            env, user, name, lastname, email, password, confirm_password, specialization, languages, teaching_categories,
         )
     }
 
     // Aquí agregamos la nueva función get_user_by_id
     pub fn get_user_by_id(env: Env, requester: Address, user_id: Address) -> UserProfile {
         functions::get_user_by_id::get_user_by_id(env, requester, user_id)
+    }
+
+    /// Create a new user profile
+    ///
+    /// Creates a new user profile with the provided information.
+    /// Validates required fields, ensures email uniqueness, and assigns default values.
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `creator` - Address creating the profile (usually an admin or the user themselves)
+    /// * `user_address` - Address of the user whose profile is being created
+    /// * `name` - User's full name (required)
+    /// * `email` - User's email address (required, must be unique)
+    /// * `role` - User's role in the system (required)
+    /// * `country` - User's country (required)
+    /// * `profession` - User's profession (optional)
+    /// * `goals` - User's goals or bio (optional)
+    /// * `profile_picture` - URL to profile picture (optional)
+    /// * `language` - User's preferred language (optional, defaults to "en")
+    ///
+    /// # Returns
+    /// * `UserProfile` - The created user profile
+    ///
+    /// # Events
+    /// Emits a user creation event upon successful creation
+    pub fn create_user_profile(
+        env: Env,
+        creator: Address,
+        user_address: Address,
+        name: String,
+        email: String,
+        role: UserRole,
+        country: String,
+        profession: Option<String>,
+        goals: Option<String>,
+        profile_picture: Option<String>,
+        language: Option<String>,
+    ) -> UserProfile {
+        functions::create_user_profile::create_user_profile(
+            env,
+            creator,
+            user_address,
+            name,
+            email,
+            role,
+            country,
+            profession,
+            goals,
+            profile_picture,
+            language,
+        )
     }
 
     /// Public admin check for cross-contract calls

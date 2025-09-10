@@ -1,13 +1,22 @@
-use soroban_sdk::{contracttype, Address, String};
+use soroban_sdk::{contracttype, Address, String, Vec};
 
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]
 pub struct UserProfile {
     pub name: String,
+    pub lastname: String,
     pub email: String,
+    pub role: UserRole,
+    pub country: String,
     pub profession: Option<String>,
     pub goals: Option<String>,
-    pub country: String,
+    pub profile_picture: Option<String>,
+    pub language: String,
+    pub password: String,
+    pub confirm_password: String,
+    pub specialization: String,
+    pub languages: Vec<String>,
+    pub teaching_categories: Vec<String>,
     pub user: Address,
 }
 
@@ -38,8 +47,10 @@ pub struct UserFilter {
 #[derive(Clone, Debug, PartialEq)]
 pub struct LightProfile {
     pub name: String,
-    pub country: String,
-    pub profession: Option<String>,
+    pub lastname: String,
+    pub specialization: String,
+    pub languages: Vec<String>,
+    pub teaching_categories: Vec<String>,
     pub role: UserRole,
     pub status: UserStatus,
     pub user_address: Address,
@@ -61,6 +72,7 @@ pub enum DataKey {
     Admin(Address),       // Admin flag per address
     UserProfileLight(Address), // Lightweight profile storage
     UsersIndex,           // List of all registered user addresses
+    EmailIndex(String),   // Email to Address mapping for uniqueness
     Admins,               // List of admin addresses
     UserRoles,            // Role assignments
     AdminConfig,          // System configuration

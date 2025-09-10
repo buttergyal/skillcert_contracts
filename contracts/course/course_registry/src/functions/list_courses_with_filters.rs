@@ -1,6 +1,8 @@
 use crate::schema::{Course, CourseFilters};
 use soroban_sdk::{symbol_short, Env, Symbol, Vec};
 
+
+
 const COURSE_KEY: Symbol = symbol_short!("course");
 
 pub fn course_registry_list_courses_with_filters(
@@ -26,8 +28,11 @@ pub fn course_registry_list_courses_with_filters(
         if id > 50 || empty_checks > 10 {
             break;
         }
+        
+        // Use the utility function instead of to_string()
+        let course_id = u32_to_string(env, id as u32);
+        let key = (COURSE_KEY, course_id.clone());
 
-        let key: (Symbol, u128) = (COURSE_KEY, id.clone());
         if !env.storage().persistent().has(&key) {
             empty_checks += 1;
             id += 1;

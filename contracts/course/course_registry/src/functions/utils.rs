@@ -1,19 +1,10 @@
 pub use crate::schema::{Course, CourseModule};
-use soroban_sdk::{Bytes, Env, String, Vec, log, vec};
+use soroban_sdk::{Bytes, Env, String, Vec, vec};
 
 pub fn generate_unique_id(env: &Env) -> String {
     let ts: u64 = env.ledger().timestamp();
     let rand1: u64 = env.prng().gen();
     let rand2: u64 = env.prng().gen();
-
-    // let rust_str = format!(
-    //     "{:08x}-{:04x}-{:04x}-{:04x}-{:012x}",
-    //     ts,
-    //     (rand1 & 0xFFFF) as u16,
-    //     ((rand1 >> 16) & 0xFFFF) as u16,
-    //     (rand2 & 0xFFFF) as u16,
-    //     (rand2 >> 16) as u64
-    // );
 
     let str_vec = vec![
             &env, 
@@ -30,12 +21,8 @@ pub fn generate_unique_id(env: &Env) -> String {
             ];   
 
     let rust_str = concat_strings(&env, str_vec);
-
-    // String::from_str(env, &rust_str)
     rust_str
 }
-
-
 
 pub fn to_lowercase(env: &Env, s: &String) -> String {
     let len: u32 = s.len() as u32;
@@ -43,9 +30,6 @@ pub fn to_lowercase(env: &Env, s: &String) -> String {
     let slice = &mut buffer[..len as usize];
     s.copy_into_slice(slice);
     let mut result_bytes = Bytes::new(env);
-    let res_len = result_bytes.len();
-    log!(&env, "len of str: {}", len);
-    log!(&env, "res_len: {}", res_len);
 
     for byte in slice.iter() {
         if *byte >= b'A' && *byte <= b'Z' {
@@ -60,7 +44,6 @@ pub fn to_lowercase(env: &Env, s: &String) -> String {
     result_bytes.copy_into_slice(new_slice);
     String::from_bytes(env, &new_slice)
 }
-
 
 pub fn u32_to_string(env: &Env, n: u32) -> String {
         // Simple conversion: handle 0 and build digits
@@ -152,14 +135,13 @@ pub fn concat_strings(env: &Env, strings: Vec<String>) -> String {
     String::from_bytes(env, &new_slice)
 }
 
-
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::schema::{Course};
+
     use crate::CourseRegistry;
-    use soroban_sdk::{testutils::Address as _, Address, Env, log, vec};
+    use soroban_sdk::{testutils::Address as _, Address, Env, vec};
 
     fn create_test_course(env: &Env, id: &str) -> Course {
         Course {
@@ -174,8 +156,10 @@ mod tests {
             published: false,
             prerequisites: Vec::new(&env),
             is_archived: false,
+
             duration_hours: Some(1),
             level: Some(String::from_str(env, "entry"))
+
         }
     }
 
@@ -186,7 +170,6 @@ mod tests {
         let course_id = String::from_str(&env, "course_1");
         let _course = create_test_course(&env, "course_1.");
         let course_id2 = String::from_str(&env, "    course_1.  ");
-
 
         let counter = 5;
 
@@ -201,10 +184,13 @@ mod tests {
         let module_id = concat_strings(&env, arr);
 
         let count = u32_to_string(&env, counter);
-        log!(&env, "LOWERCASE: {}", to_lowercase(&env, &course_id));
-        log!(&env, "TRIM: {}", trim(&env, &course_id2));
-        log!(&env, "count: {}", count);
-        log!(&env, "concat: {}", module_id);
-
+        let lowercase_result = to_lowercase(&env, &course_id);
+        let trim_result = trim(&env, &course_id2);
+        
+        // You can add assertions here if needed for testing
+        assert!(!count.is_empty());
+        assert!(!module_id.is_empty());
+        assert!(!lowercase_result.is_empty());
+        assert!(!trim_result.is_empty());
     }
 }

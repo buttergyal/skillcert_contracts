@@ -1,4 +1,4 @@
-use crate::schema::{CourseCategory, DataKey};
+use crate::schema::{DataKey, CourseCategory};
 use soroban_sdk::{Address, Env, String, Vec};
 
 /// Checks whether who is an admin using the same pattern as user_management contract.
@@ -8,7 +8,7 @@ fn is_admin(env: &Env, who: Address) -> bool {
     // In a production environment, you might want to integrate with the user_management contract
     let admins: Option<Vec<Address>> = env.storage().persistent().get(&DataKey::Admins);
     match admins {
-        Some(list) => list.iter().any(|a| a == who),
+        Some(list) => list.iter().any(|a| a == *who),
         None => false,
     }
 }

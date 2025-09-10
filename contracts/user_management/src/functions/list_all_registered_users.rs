@@ -4,7 +4,6 @@ use soroban_sdk::{Address, Env, String, Vec};
 
 /// Security constants
 const MAX_PAGE_SIZE_ABSOLUTE: u32 = 1000;
-const MAX_STRING_LENGTH: usize = 256;
 
 /// Checks whether the system is properly initialized
 fn is_system_initialized(env: &Env) -> bool {
@@ -56,7 +55,7 @@ fn is_admin(env: &Env, who: &Address) -> bool {
 fn matches_filter(
     profile: &LightProfile,
     role_filter: &Option<UserRole>,
-    country_filter: &Option<String>,
+    _country_filter: &Option<String>, // Deprecated but kept for API compatibility
     status_filter: &Option<UserStatus>,
 ) -> bool {
     // Check role filter
@@ -66,12 +65,9 @@ fn matches_filter(
         }
     }
 
-    // Check country filter
-    if let Some(ref country) = country_filter {
-        if &profile.country != country {
-            return false;
-        }
-    }
+    // Note: Country filter was removed from the new schema as LightProfile
+    // no longer has a 'country' field. The parameter is kept for backward compatibility
+    // but the actual filtering is disabled.
 
     // Check status filter
     if let Some(ref status) = status_filter {
@@ -86,7 +82,7 @@ fn matches_filter(
 /// Validates and sanitizes input parameters
 fn validate_input(
     page_size: u32,
-    country_filter: &Option<String>,
+    _country_filter: &Option<String>, // Deprecated but kept for API compatibility
     config: &AdminConfig,
 ) -> Result<(), &'static str> {
     // Validate page_size
@@ -98,12 +94,8 @@ fn validate_input(
         return Err("page_size exceeds maximum allowed limit");
     }
 
-    // Validate country filter string length
-    if let Some(country) = country_filter {
-        if country.len() > MAX_STRING_LENGTH as u32 {
-            return Err("country filter string too long");
-        }
-    }
+    // Country filter validation is no longer needed as it's deprecated
+    // but we keep the parameter for backward compatibility
 
     Ok(())
 }
@@ -232,19 +224,25 @@ pub fn list_all_users(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use soroban_sdk::{testutils::Address as _, Env, String};
+    use soroban_sdk::{testutils::Address as _, Env, String, Vec};
+
+    fn create_test_profile(env: &Env) -> LightProfile {
+        LightProfile {
+            name: String::from_str(env, "John"),
+            lastname: String::from_str(env, "Doe"),
+            specialization: String::from_str(env, "Software Engineering"),
+            languages: Vec::from_array(env, [String::from_str(env, "English")]),
+            teaching_categories: Vec::from_array(env, [String::from_str(env, "Programming")]),
+            role: UserRole::Student,
+            status: UserStatus::Active,
+            user_address: Address::generate(env),
+        }
+    }
 
     #[test]
     fn test_matches_filter_no_filter() {
         let env = Env::default();
-        let profile = LightProfile {
-            name: String::from_str(&env, "John Doe"),
-            country: String::from_str(&env, "US"),
-            profession: Some(String::from_str(&env, "Developer")),
-            role: UserRole::Student,
-            status: UserStatus::Active,
-            user_address: Address::generate(&env),
-        };
+        let profile = create_test_profile(&env);
 
         assert!(matches_filter(&profile, &None, &None, &None));
     }
@@ -252,14 +250,7 @@ mod tests {
     #[test]
     fn test_matches_filter_role_match() {
         let env = Env::default();
-        let profile = LightProfile {
-            name: String::from_str(&env, "John Doe"),
-            country: String::from_str(&env, "US"),
-            profession: Some(String::from_str(&env, "Developer")),
-            role: UserRole::Student,
-            status: UserStatus::Active,
-            user_address: Address::generate(&env),
-        };
+        let profile = create_test_profile(&env);
 
         assert!(matches_filter(
             &profile,
@@ -272,14 +263,7 @@ mod tests {
     #[test]
     fn test_matches_filter_role_no_match() {
         let env = Env::default();
-        let profile = LightProfile {
-            name: String::from_str(&env, "John Doe"),
-            country: String::from_str(&env, "US"),
-            profession: Some(String::from_str(&env, "Developer")),
-            role: UserRole::Student,
-            status: UserStatus::Active,
-            user_address: Address::generate(&env),
-        };
+        let profile = create_test_profile(&env);
 
         assert!(!matches_filter(
             &profile,
@@ -290,21 +274,27 @@ mod tests {
     }
 
     #[test]
+    fn test_matches_filter_status_match() {
+        let env = Env::default();
+        let profile = create_test_profile(&env);
+
+        assert!(matches_filter(
+            &profile,
+            &None,
+            &None,
+            &Some(UserStatus::Active)
+        ));
+    }
+
+    #[test]
     fn test_matches_filter_multiple_criteria() {
         let env = Env::default();
-        let profile = LightProfile {
-            name: String::from_str(&env, "John Doe"),
-            country: String::from_str(&env, "US"),
-            profession: Some(String::from_str(&env, "Developer")),
-            role: UserRole::Student,
-            status: UserStatus::Active,
-            user_address: Address::generate(&env),
-        };
+        let profile = create_test_profile(&env);
 
         assert!(matches_filter(
             &profile,
             &Some(UserRole::Student),
-            &Some(String::from_str(&env, "US")),
+            &None, // Country filter is deprecated but kept for compatibility
             &Some(UserStatus::Active)
         ));
     }

@@ -6,7 +6,7 @@ pub mod schema;
 #[cfg(test)]
 mod test;
 
-use crate::schema::{Course, CourseCategory, CourseFilters, CourseGoal, CourseLevel, CourseModule, EditCourseParams};
+use crate::schema::{Course, CourseFilters, CourseGoal, CourseLevel, CourseModule, EditCourseParams, CourseCategory};
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
 
 #[contract]
@@ -90,6 +90,10 @@ impl CourseRegistry {
         functions::add_goal::course_registry_add_goal(env, creator, course_id, content)
     }
 
+    pub fn remove_goal(env: Env, caller: Address, course_id: String, goal_id: String) -> () {
+        functions::remove_goal::course_registry_remove_goal(env, caller, course_id, goal_id)
+    }
+
     pub fn add_prerequisite(
         env: Env,
         creator: Address,
@@ -158,7 +162,6 @@ impl CourseRegistry {
         functions::list_categories::course_registry_list_categories(&env)
     }
 
-
     pub fn list_courses_with_filters(
         env: Env,
         filters: CourseFilters,
@@ -171,5 +174,25 @@ impl CourseRegistry {
             limit,
             offset,
         )
+    }
+
+    /// Create a new course category (admin-only)
+    pub fn create_course_category(
+        env: Env,
+        caller: Address,
+        name: String,
+        description: Option<String>,
+    ) -> u128 {
+        functions::create_course_category::course_registry_create_course_category(
+            env,
+            caller,
+            name,
+            description,
+        )
+    }
+
+    /// Get a course category by ID
+    pub fn get_course_category(env: Env, category_id: u128) -> Option<CourseCategory> {
+        functions::get_course_category::course_registry_get_course_category(&env, category_id)
     }
 }
