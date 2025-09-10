@@ -1,5 +1,6 @@
 use crate::functions::utils;
 use crate::schema::{Course, CourseGoal, DataKey};
+use crate::error::{Error, handle_error};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
 const GOAL_ADDED_EVENT: Symbol = symbol_short!("goaladd");
@@ -13,7 +14,8 @@ pub fn course_registry_add_goal(
     creator.require_auth();
     // Validate input
     if content.is_empty() {
-        panic!("Goal content cannot be empty");
+        handle_error(&env, Error::EmptyGoalContent)
+
     }
 
     // Load course
@@ -26,7 +28,7 @@ pub fn course_registry_add_goal(
 
     // Only creator can add goal (or later: check admin)
     if course.creator != creator {
-        panic!("Only the course creator can add goals");
+        handle_error(&env, Error::OnlyCreatorCanAddGoals)
     }
 
     // Generate a unique goal ID
@@ -93,7 +95,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "Only the course creator can add goals")]
+    #[should_panic(expected = "HostError: Error(Contract, #1)")]
     fn test_add_goal_unauthorized() {
         let env = Env::default();
         env.mock_all_auths();
@@ -137,7 +139,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "Goal content cannot be empty")]
+    #[should_panic(expected = "HostError: Error(Contract, #2)")]
     fn test_add_goal_empty_content() {
         let env = Env::default();
         env.mock_all_auths();

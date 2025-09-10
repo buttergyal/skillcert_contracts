@@ -1,4 +1,5 @@
 use crate::schema::{Course, DataKey};
+use crate::error::{Error, handle_error};
 use soroban_sdk::{symbol_short, Address, Env, Map, String, Symbol, Vec};
 
 const PREREQ_UPDATED_EVENT: Symbol = symbol_short!("preqedit");
@@ -21,14 +22,16 @@ pub fn course_registry_edit_prerequisite(
 
     // Authorization: only creator can edit prerequisites
     if course.creator != creator {
-        panic!("Only the course creator can edit prerequisites");
+        handle_error(&env, Error::Unauthorized)
+
     }
 
     // Validate that all prerequisite courses exist
     for prerequisite_id in new_prerequisites.iter() {
         let prereq_course_key = (symbol_short!("course"), prerequisite_id.clone());
         if !env.storage().persistent().has(&prereq_course_key) {
-            panic!("Prerequisite course not found");
+            handle_error(&env, Error::PrereqCourseNotFound)
+
         }
     }
 
@@ -52,7 +55,7 @@ fn validate_no_circular_dependency(env: &Env, course_id: &String, new_prerequisi
     // Check if course_id appears in new_prerequisites (direct circular dependency)
     for prerequisite_id in new_prerequisites.iter() {
         if prerequisite_id.eq(course_id) {
-            panic!("Course cannot be its own prerequisite");
+            handle_error(&env, Error::SelfPrerequisite)
         }
     }
 
@@ -68,7 +71,7 @@ fn validate_no_circular_dependency(env: &Env, course_id: &String, new_prerequisi
             &mut visited,
             &mut rec_stack,
         ) {
-            panic!("Circular dependency detected");
+            handle_error(&env, Error::CircularDependency);
         }
     }
 }
@@ -337,7 +340,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Prerequisite course not found")]
+    #[should_panic(expected = "HostError: Error(Contract, #13)")]
     fn test_edit_prerequisite_invalid_prerequisite() {
         let env = Env::default();
         env.mock_all_auths();
@@ -365,7 +368,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Course cannot be its own prerequisite")]
+    #[should_panic(expected = "HostError: Error(Contract, #14)")]
     fn test_edit_prerequisite_direct_circular_dependency() {
         let env = Env::default();
         env.mock_all_auths();
@@ -393,7 +396,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Circular dependency detected")]
+    #[should_panic(expected = "HostError: Error(Contract, #15)")]
     fn test_edit_prerequisite_indirect_circular_dependency() {
         let env = Env::default();
         env.mock_all_auths();

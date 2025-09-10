@@ -2,6 +2,7 @@
 
 pub mod functions;
 pub mod schema;
+pub mod error;
 
 #[cfg(test)]
 mod test;

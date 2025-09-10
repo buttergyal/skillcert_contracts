@@ -1,4 +1,5 @@
 use crate::schema::{DataKey, CourseCategory};
+use crate::error::{Error, handle_error};
 use soroban_sdk::{Address, Env, String, Vec};
 
 /// Checks whether who is an admin using the same pattern as user_management contract.
@@ -45,12 +46,12 @@ pub fn course_registry_create_course_category(
     // Authentication and authorization
     caller.require_auth();
     if !is_admin(&env, &caller) {
-        panic!("Not authorized");
+        handle_error(&env, Error::Unauthorized)
     }
 
     // Basic validation
     if name.is_empty() {
-        panic!("Name is required");
+        handle_error(&env, Error::NameRequired)
     }
 
     // Generate a new category ID

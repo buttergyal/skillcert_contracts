@@ -2,11 +2,13 @@
 
 mod functions;
 mod schema;
+mod error;
 
 use soroban_sdk::{contract, contractimpl, Address, Env, String};
 
 pub use functions::*;
 pub use schema::{CourseUsers, UserCourses};
+pub use error::Error;
 
 #[contract]
 pub struct CourseAccessContract;

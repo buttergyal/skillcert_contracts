@@ -1,4 +1,5 @@
 use crate::schema::{DataKey, LightProfile, UserProfile, UserRole, UserStatus};
+use crate::error::{Error, handle_error};
 use core::iter::Iterator;
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
 
@@ -134,57 +135,57 @@ pub fn create_user_profile(
     // Check if user profile already exists
     let storage_key = DataKey::UserProfile(user_address.clone());
     if env.storage().persistent().has(&storage_key) {
-        panic!("User profile already exists");
+        handle_error(&env, Error::UserProfileExists)
     }
 
     // Validate required fields
     if name.is_empty() {
-        panic!("Name is required");
+        handle_error(&env, Error::NameRequired)
     }
 
     if email.is_empty() {
-        panic!("Email is required");
+        handle_error(&env, Error::EmailRequired)
     }
 
     if country.is_empty() {
-        panic!("Country is required");
+        handle_error(&env, Error::CountryRequired)
     }
 
     // Validate field lengths and content
     if !validate_string_content(&env, &name, MAX_NAME_LENGTH) {
-        panic!("Invalid name");
+        handle_error(&env, Error::InvalidName)
     }
 
     if !validate_string_content(&env, &country, MAX_COUNTRY_LENGTH) {
-        panic!("Invalid country");
+        handle_error(&env, Error::InvalidCountry)
     }
 
     // Validate email format
     if !validate_email_format(&email) {
-        panic!("Invalid email format");
+        handle_error(&env, Error::InvalidEmailFormat)
     }
 
     // Ensure email uniqueness
     if !is_email_unique(&env, &email) {
-        panic!("Email already exists");
+        handle_error(&env, Error::EmailAlreadyExists)
     }
 
     // Validate optional fields
     if let Some(ref prof) = profession {
         if !validate_string_content(&env, prof, MAX_PROFESSION_LENGTH) {
-            panic!("Invalid profession");
+            handle_error(&env, Error::InvalidProfession)
         }
     }
 
     if let Some(ref goal) = goals {
         if !validate_string_content(&env, goal, MAX_GOALS_LENGTH) {
-            panic!("Invalid goals");
+            handle_error(&env, Error::InvalidGoals)
         }
     }
 
     if let Some(ref pic) = profile_picture {
         if !validate_string_content(&env, pic, MAX_PROFILE_PICTURE_LENGTH) {
-            panic!("Invalid profile picture URL");
+            handle_error(&env, Error::InvalidProfilePicURL)
         }
     }
 
@@ -373,7 +374,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Email already exists")]
+    #[should_panic(expected = "HostError: Error(Contract, #16)")]
     fn test_create_user_profile_duplicate_email() {
         let (env, _contract_id, client) = setup_test_env();
         let creator = Address::generate(&env);
@@ -400,7 +401,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "User profile already exists")]
+    #[should_panic(expected = "HostError: Error(Contract, #9)")]
     fn test_create_user_profile_duplicate_address() {
         let (env, _contract_id, client) = setup_test_env();
         let creator = Address::generate(&env);
@@ -426,7 +427,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Invalid email format")]
+    #[should_panic(expected = "HostError: Error(Contract, #15)")]
     fn test_create_user_profile_invalid_email() {
         let (env, _contract_id, client) = setup_test_env();
         let creator = Address::generate(&env);
@@ -445,7 +446,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Name is required")]
+    #[should_panic(expected = "HostError: Error(Contract, #10)")]
     fn test_create_user_profile_empty_name() {
         let (env, _contract_id, client) = setup_test_env();
         let creator = Address::generate(&env);

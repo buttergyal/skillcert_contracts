@@ -1,4 +1,5 @@
 use crate::schema::{Course, CourseModule};
+use crate::error::{Error, handle_error};
 use soroban_sdk::{
     symbol_short, Address, Env, String, Symbol, Vec,vec
 };
@@ -16,13 +17,14 @@ pub fn course_registry_delete_course(
     creator.require_auth();
 
     if course_id.is_empty() {
-        return Err("Course ID cannot be empty");
+        handle_error(&env, Error::EmptyCourseId)
     }
 
     let course_storage_key = (COURSE_KEY, course_id.clone());
 
     if !env.storage().persistent().has(&course_storage_key) {
-        return Err("Course not found");
+        handle_error(&env, Error::CourseNotFound)
+
     }
 
     let course: Course = env
@@ -32,7 +34,8 @@ pub fn course_registry_delete_course(
         .ok_or("Course not found")?;
 
     if course.creator != creator {
-        return Err("Unauthorized");
+        handle_error(&env, Error::Unauthorized)
+
     }
 
     delete_course_modules(env, &course_id);
@@ -96,7 +99,7 @@ mod tests {
 
 
     #[test]
-    #[should_panic(expected = "Unauthorized")]
+    #[should_panic(expected = "HostError: Error(Contract, #6)")]
     fn test_delete_course_unauthorized() {
         let env = Env::default();
         env.mock_all_auths();
@@ -123,7 +126,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Unauthorized")]
+    #[should_panic(expected = "HostError: Error(Contract, #6)")]
     fn test_impostor_cannot_delete_course() {
         let env = Env::default();
         env.mock_all_auths();
@@ -240,7 +243,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Course not found")]
+    #[should_panic(expected = "HostError: Error(Contract, #17)")]
     fn test_delete_course_not_found() {
         let env = Env::default();
         env.mock_all_auths();

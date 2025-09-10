@@ -1,4 +1,5 @@
 use crate::schema::{DataKey, LightProfile, UserProfile, UserRole, UserStatus};
+use crate::error::{Error, handle_error};
 use core::iter::Iterator;
 use soroban_sdk::{Address, Env, String, Vec};
 
@@ -39,80 +40,80 @@ pub fn user_management_save_profile(
 
     // Validate required fields
     if name.is_empty() {
-        panic!("Invalid input");
+        handle_error(&env, Error::InvalidInput);
     }
 
     if lastname.is_empty() {
-        panic!("Invalid input");
+        handle_error(&env, Error::InvalidInput);
     }
 
     if email.is_empty() {
-        panic!("Invalid input");
+        handle_error(&env, Error::InvalidInput);
     }
 
     if password.is_empty() {
-        panic!("Invalid input");
+        handle_error(&env, Error::InvalidInput);
     }
 
     if confirm_password.is_empty() {
-        panic!("Invalid input");
+        handle_error(&env, Error::InvalidInput);
     }
 
     if specialization.is_empty() {
-        panic!("Invalid input");
+        handle_error(&env, Error::InvalidInput);
     }
 
     // Validate password confirmation
     if password != confirm_password {
-        panic!("Password and confirmation password do not match");
+        handle_error(&env, Error::PasswordMismatch);
     }
 
     // Validate password length
     if password.len() < MIN_PASSWORD_LENGTH as u32 || password.len() > MAX_PASSWORD_LENGTH as u32 {
-        panic!("Invalid input");
+        handle_error(&env, Error::InvalidInput);
     }
 
     // Basic email validation - check minimum length
     if email.len() < 5 || email.len() > MAX_EMAIL_LENGTH as u32 {
-        panic!("Invalid input");
+        handle_error(&env, Error::InvalidInput);
     }
 
     // Validate string lengths and content
     if !validate_string_content(&env, &name, MAX_NAME_LENGTH) {
-        panic!("Invalid input");
+        handle_error(&env, Error::InvalidInput);
     }
 
     if !validate_string_content(&env, &lastname, MAX_NAME_LENGTH) {
-        panic!("Invalid input");
+        handle_error(&env, Error::InvalidInput);
     }
 
     if !validate_string_content(&env, &email, MAX_EMAIL_LENGTH) {
-        panic!("Invalid input");
+        handle_error(&env, Error::InvalidInput);
     }
 
     if !validate_string_content(&env, &specialization, MAX_SPECIALIZATION_LENGTH) {
-        panic!("Invalid input");
+        handle_error(&env, Error::InvalidInput);
     }
 
     // Validate languages array
     if languages.is_empty() {
-        panic!("Invalid input");
+        handle_error(&env, Error::InvalidInput);
     }
 
     for language in languages.iter() {
         if language.is_empty() || !validate_string_content(&env, &language, MAX_LANGUAGE_LENGTH) {
-            panic!("Invalid input");
+            handle_error(&env, Error::InvalidInput);
         }
     }
 
     // Validate teaching categories array
     if teaching_categories.is_empty() {
-        panic!("Invalid input");
+        handle_error(&env, Error::InvalidInput);
     }
 
     for category in teaching_categories.iter() {
         if category.is_empty() || !validate_string_content(&env, &category, MAX_CATEGORY_LENGTH) {
-            panic!("Invalid input");
+            handle_error(&env, Error::InvalidInput);
         }
     }
 
@@ -269,7 +270,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "Password and confirmation password do not match")]
+    #[should_panic(expected = "HostError: Error(Contract, #25)")]
     fn test_save_profile_password_mismatch() {
         let env = Env::default();
         let contract_id = env.register(UserManagement, {});
@@ -295,7 +296,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "Invalid input")]
+    #[should_panic(expected = "HostError: Error(Contract, #24)")]
     fn test_save_profile_with_empty_name() {
         let env = Env::default();
         let contract_id = env.register(UserManagement, {});
@@ -320,7 +321,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "Invalid input")]
+    #[should_panic(expected = "HostError: Error(Contract, #24)")]
     fn test_save_profile_with_empty_email() {
         let env = Env::default();
         let contract_id = env.register(UserManagement, {});
@@ -345,7 +346,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "Invalid input")]
+    #[should_panic(expected = "HostError: Error(Contract, #24)")]
     fn test_save_profile_with_short_password() {
         let env = Env::default();
         let contract_id = env.register(UserManagement, {});
@@ -370,7 +371,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "Invalid input")]
+    #[should_panic(expected = "HostError: Error(Contract, #24)")]
     fn test_save_profile_with_empty_languages() {
         let env = Env::default();
         let contract_id = env.register(UserManagement, {});
@@ -395,7 +396,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "Invalid input")]
+    #[should_panic(expected = "HostError: Error(Contract, #24)")]
     fn test_save_profile_with_empty_teaching_categories() {
         let env = Env::default();
         let contract_id = env.register(UserManagement, {});

@@ -42,7 +42,8 @@ pub fn list_users_with_access(env: Env, caller: Address, course_id: u128) -> Vec
 
     // Authorization: must be course creator or admin
     if !(is_creator(&env, course_id, &caller) || is_admin(&env, &caller)) {
-        panic!("Not authorized");
+        // panic!("Not authorized");
+        handle_error(&env, Error::Unauthorized)
     }
 
     // Retrieve the list of users with access from storage

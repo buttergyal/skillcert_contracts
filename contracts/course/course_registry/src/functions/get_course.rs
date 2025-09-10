@@ -1,4 +1,5 @@
 use soroban_sdk::{Env, String, Symbol};
+use crate::error::{Error, handle_error};
 
 use crate::schema::Course;
 
@@ -14,7 +15,7 @@ pub fn course_registry_get_course(env: &Env, course_id: String) -> Course {
         .expect("Course not found");
 
     match course.is_archived {
-        true => panic!("Course is archived"),
+        true => handle_error(&env, Error::CourseAlreadyArchived),
         false => course,
     }
 }
@@ -54,7 +55,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "Course is archived")]
+    #[should_panic(expected = "HostError: Error(Contract, #5)")]
     fn test_get_archived_course() {
         let env = Env::default();
         env.mock_all_auths();
