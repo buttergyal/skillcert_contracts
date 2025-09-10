@@ -1,7 +1,7 @@
 use crate::schema::{Course, EditCourseParams};
 use crate::error::{Error, handle_error};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
-use super::utils::{trim, to_lowercase};
+use super::utils::{to_lowercase, trim};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const TITLE_KEY: Symbol = symbol_short!("title");
@@ -30,6 +30,7 @@ pub fn course_registry_edit_course(
     }
 
     // --- Title update (validate + uniqueness) ---
+
     if let Some(t) = params.new_title {
         // Clone the string to avoid move issues
         let t_str = t.clone();

@@ -4,7 +4,7 @@ use soroban_sdk::{Address, Env, String, Vec};
 
 /// Checks whether who is an admin using the same pattern as user_management contract.
 /// This assumes the course_registry contract has its own admin system or uses a similar pattern.
-fn is_admin(env: &Env, who: &Address) -> bool {
+fn is_admin(env: &Env, who: Address) -> bool {
     // For now, we'll use a simple storage-based admin check
     // In a production environment, you might want to integrate with the user_management contract
     let admins: Option<Vec<Address>> = env.storage().persistent().get(&DataKey::Admins);

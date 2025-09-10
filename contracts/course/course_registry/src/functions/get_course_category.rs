@@ -1,5 +1,6 @@
-use crate::schema::{DataKey, CourseCategory};
-use soroban_sdk::Env;
+
+use crate::schema::{CourseCategory, DataKey};
+use soroban_sdk::{Env};
 
 /// Retrieves a course category by its ID.
 ///
