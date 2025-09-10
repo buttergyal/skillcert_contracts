@@ -1,4 +1,5 @@
 use crate::schema::{AdminConfig, DataKey};
+use crate::error::{Error, handle_error};
 use core::iter::Iterator;
 use soroban_sdk::{Address, Env, Vec};
 
@@ -18,7 +19,7 @@ pub fn initialize_system(
         .get::<DataKey, AdminConfig>(&DataKey::AdminConfig)
     {
         if existing_config.initialized {
-            panic!("System already initialized");
+            handle_error(&env, Error::AlreadInitialized)
         }
     }
 
@@ -26,7 +27,7 @@ pub fn initialize_system(
     let validated_max_page_size = match max_page_size {
         Some(size) => {
             if size == 0 || size > 1000 {
-                panic!("Invalid max_page_size: must be between 1 and 1000");
+                handle_error(&env, Error::InvalidMaxPageSize)
             }
             size
         }
@@ -62,20 +63,20 @@ pub fn add_admin(env: Env, caller: Address, new_admin: Address) {
         .storage()
         .persistent()
         .get::<DataKey, AdminConfig>(&DataKey::AdminConfig)
-        .unwrap_or_else(|| panic!("System not initialized"));
+        .unwrap_or_else(||handle_error(&env, Error::SystemNotInitialized));
 
     if !config.initialized {
-        panic!("System not initialized");
+        handle_error(&env, Error::SystemNotInitialized)
     }
 
     // Only super admin can add admins
     if caller != config.super_admin {
-        panic!("Access denied");
+        handle_error(&env, Error::AccessDenied)
     }
 
     // Prevent adding super admin to regular admin list
     if new_admin == config.super_admin {
-        panic!("Super admin cannot be added to regular admin list");
+        handle_error(&env, Error::SuperAdminNotRegular)
     }
 
     let mut admins: Vec<Address> = env
@@ -86,12 +87,12 @@ pub fn add_admin(env: Env, caller: Address, new_admin: Address) {
 
     // Check if admin already exists
     if admins.iter().any(|a| a == new_admin) {
-        panic!("Operation failed"); // Don't disclose admin status
+        handle_error(&env, Error::OperationFailed) // Don't disclose admin status
     }
 
     // Limit number of admins for security
     if admins.len() >= 10 {
-        panic!("Maximum number of admins reached");
+        handle_error(&env, Error::MaxAdminsReached)
     }
 
     admins.push_back(new_admin);
@@ -106,20 +107,20 @@ pub fn remove_admin(env: Env, caller: Address, admin_to_remove: Address) {
         .storage()
         .persistent()
         .get::<DataKey, AdminConfig>(&DataKey::AdminConfig)
-        .unwrap_or_else(|| panic!("System not initialized"));
+        .unwrap_or_else(|| handle_error(&env, Error::SystemNotInitialized));
 
     if !config.initialized {
-        panic!("System not initialized");
+        handle_error(&env, Error::SystemNotInitialized)
     }
 
     // Only super admin can remove admins
     if caller != config.super_admin {
-        panic!("Access denied");
+        handle_error(&env, Error::AccessDenied)
     }
 
     // Cannot remove super admin
     if admin_to_remove == config.super_admin {
-        panic!("Cannot remove super admin");
+         handle_error(&env, Error::CannotRemoveSuperAdmin)
     }
 
     let admins: Vec<Address> = env
@@ -139,7 +140,7 @@ pub fn remove_admin(env: Env, caller: Address, admin_to_remove: Address) {
     }
 
     if new_admins.len() == initial_len {
-        panic!("Access denied"); // Don't disclose admin existence
+        handle_error(&env, Error::AccessDenied) // Don't disclose admin existence
     }
 
     env.storage()
@@ -155,10 +156,10 @@ pub fn get_admins(env: Env, caller: Address) -> Vec<Address> {
         .storage()
         .persistent()
         .get::<DataKey, AdminConfig>(&DataKey::AdminConfig)
-        .unwrap_or_else(|| panic!("System not initialized"));
+        .unwrap_or_else(|| handle_error(&env, Error::SystemNotInitialized));
 
     if !config.initialized {
-        panic!("System not initialized");
+        handle_error(&env, Error::SystemNotInitialized);
     }
 
     // Check if caller is an admin (including super admin)
@@ -171,7 +172,7 @@ pub fn get_admins(env: Env, caller: Address) -> Vec<Address> {
     let is_regular_admin = regular_admins.iter().any(|a| a == caller);
 
     if !is_super_admin && !is_regular_admin {
-        panic!("Access denied");
+        handle_error(&env, Error::AccessDenied)
     }
 
     // Return all admins including super admin
@@ -225,7 +226,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "System already initialized")]
+    #[should_panic(expected = "HostError: Error(Contract, #1)")]
     fn test_cannot_initialize_twice() {
         let env = Env::default();
         let contract_id = env.register(UserManagement, {});
@@ -266,7 +267,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Access denied")]
+    #[should_panic(expected = "HostError: Error(Contract, #4)")]
     fn test_non_super_admin_cannot_add_admin() {
         let env = Env::default();
         let contract_id = env.register(UserManagement, {});

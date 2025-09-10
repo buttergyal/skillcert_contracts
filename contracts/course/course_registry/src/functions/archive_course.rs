@@ -1,4 +1,5 @@
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
+use crate::error::{Error, handle_error};
 
 use crate::schema::Course;
 
@@ -15,10 +16,12 @@ pub fn course_registry_archive_course(env: &Env, creator: Address, course_id: St
         .expect("Course not found");
 
     if course.creator != creator {
-        panic!("Only the creator can archive the course");
+        handle_error(&env, Error::OnlyCreatorCanArchive)
     }
 
-    assert!(!course.is_archived, "Course Already Archived");
+    if course.is_archived{
+        handle_error(&env, Error::CourseAlreadyArchived)
+    }
     course.is_archived = true;
 
     env.storage().persistent().set(&key, &course);
@@ -82,7 +85,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Only the creator can archive the course")]
+    #[should_panic(expected = "HostError: Error(Contract, #4)")]
     fn test_archive_course_by_non_creator() {
         let env = Env::default();
         env.mock_all_auths();
@@ -109,7 +112,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Course Already Archived")]
+    #[should_panic(expected = "HostError: Error(Contract, #5)")]
     fn test_archive_already_archived_course() {
         let env = Env::default();
         env.mock_all_auths();

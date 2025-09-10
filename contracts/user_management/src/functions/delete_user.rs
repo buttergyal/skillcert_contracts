@@ -1,4 +1,5 @@
-use crate::schema::{AdminConfig, DataKey, LightProfile, UserProfile, UserRole, UserStatus};
+use crate::schema::{AdminConfig, DataKey, LightProfile, UserProfile, UserStatus};
+use crate::error::{Error, handle_error};
 use core::iter::Iterator;
 use soroban_sdk::{symbol_short, Address, Env, Symbol};
 
@@ -62,14 +63,14 @@ pub fn delete_user(env: Env, caller: Address, user_id: Address) -> () {
 
     // DEPENDENCY: Validate that user exists (using user existence validation)
     let _user_profile = validate_user_exists(&env, &user_id)
-        .unwrap_or_else(|_| panic!("User not found"));
+        .unwrap_or_else(|_| handle_error(&env, Error::UserNotFound));
 
     // Authorization: only admin or the user themselves can trigger deletion
     let is_caller_admin = is_admin(&env, &caller);
     let is_self_deletion = caller == user_id;
     
     if !is_caller_admin && !is_self_deletion {
-        panic!("Access denied");
+        handle_error(&env, Error::AccessDenied)
     }
 
     // Check current user status from light profile
@@ -78,11 +79,11 @@ pub fn delete_user(env: Env, caller: Address, user_id: Address) -> () {
         .storage()
         .persistent()
         .get(&light_profile_key)
-        .unwrap_or_else(|| panic!("User profile not found"));
+        .unwrap_or_else(|| handle_error(&env, Error::UserProfileNotFound));
 
     // Check if user is already inactive
     if light_profile.status == UserStatus::Inactive {
-        panic!("User already inactive");
+        handle_error(&env, Error::InactiveUser)
     }
 
     // Perform soft delete: mark user as inactive
@@ -243,7 +244,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Access denied")]
+    #[should_panic(expected = "HostError: Error(Contract, #4)")]
     fn test_delete_user_unauthorized() {
         let (env, contract_id, client) = setup_test_env();
         let user1 = Address::generate(&env);
@@ -260,7 +261,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "User not found")]
+    #[should_panic(expected = "HostError: Error(Contract, #20)")]
     fn test_delete_nonexistent_user() {
         let (env, contract_id, client) = setup_test_env();
         let admin = Address::generate(&env);
@@ -275,7 +276,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "User already inactive")]
+    #[should_panic(expected = "HostError: Error(Contract, #22)")]
     fn test_delete_already_inactive_user() {
         let (env, contract_id, client) = setup_test_env();
         let admin = Address::generate(&env);

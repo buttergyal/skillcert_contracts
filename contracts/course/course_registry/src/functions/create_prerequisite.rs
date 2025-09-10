@@ -1,4 +1,5 @@
 use crate::schema::{Course, DataKey};
+use crate::error::{Error, handle_error};
 use soroban_sdk::{symbol_short, Address, Env, Map, String, Symbol, Vec};
 
 const PREREQ_CREATED_EVENT: Symbol = symbol_short!("prereqAdd");
@@ -19,13 +20,13 @@ pub fn course_registry_add_prerequisite(
         .expect("Course not found");
 
     if course.creator != creator {
-        panic!("Only the course creator can edit prerequisites");
+        handle_error(&env, Error::OnlyCreatorCanEditPrereqs)
     }
 
     for prerequisite_id in prerequisites.iter() {
         let prereq_course_key: (Symbol, String) = (symbol_short!("course"), prerequisite_id.clone());
         if !env.storage().persistent().has(&prereq_course_key) {
-            panic!("Prerequisite course not found");
+            handle_error(&env, Error::PrereqCourseNotFound)
         }
     }
 
@@ -47,7 +48,7 @@ fn validate_no_circular_dependency(env: &Env, course_id: &String, new_prerequisi
     // Check if course_id appears in new_prerequisites (direct circular dependency)
     for prerequisite_id in new_prerequisites.iter() {
         if prerequisite_id.eq(course_id) {
-            panic!("Course cannot be its own prerequisite");
+            handle_error(&env, Error::SelfPrerequisite)
         }
     }
 
@@ -63,7 +64,7 @@ fn validate_no_circular_dependency(env: &Env, course_id: &String, new_prerequisi
             &mut visited,
             &mut rec_stack,
         ) {
-            panic!("Circular dependency detected");
+            handle_error(&env, Error::CircularDependency)
         }
     }
 }

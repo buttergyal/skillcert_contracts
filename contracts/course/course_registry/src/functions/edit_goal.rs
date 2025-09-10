@@ -1,4 +1,5 @@
 use crate::schema::{Course, CourseGoal, DataKey};
+use crate::error::{Error, handle_error};
 use super::is_course_creator::is_course_creator;
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 // use soroban_sdk::testutils::Logs;
@@ -17,7 +18,7 @@ pub fn course_registry_edit_goal(
     creator.require_auth();
     // Validate input
     if new_content.is_empty() {
-        panic!("New goal content cannot be empty");
+        handle_error(&env, Error::EmptyNewGoalContent)
     }
 
     // Load course
@@ -30,7 +31,7 @@ pub fn course_registry_edit_goal(
 
     // Only creator can edit goal (or later: check admin)
     if !is_course_creator(&env, course.id.clone(), creator) {
-        panic!("Only the course creator can edit goals");
+        handle_error(&env, Error::Unauthorized)
     }
 
     let goal_key = DataKey::CourseGoal(course_id.clone(), goal_id.clone());
@@ -114,7 +115,7 @@ mod test {
 
 
     #[test]
-    #[should_panic(expected = "Only the course creator can edit goals")]
+    #[should_panic(expected = "HostError: Error(Contract, #6)")]
     fn test_edit_goal_unauthorized() {
         let env = Env::default();
         env.mock_all_auths();
@@ -132,7 +133,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "New goal content cannot be empty")]
+    #[should_panic(expected = "HostError: Error(Contract, #18)")]
     fn test_edit_goal_empty_content() {
         let env = Env::default();
         env.mock_all_auths();

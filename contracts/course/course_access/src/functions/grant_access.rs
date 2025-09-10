@@ -1,5 +1,6 @@
 use crate::schema::{CourseAccess, DataKey, UserCourses, CourseUsers};
 use soroban_sdk::{Address, Env, String, Vec};
+use crate::error::{Error, handle_error};
 
 /// Grant access to a specific user for a given course
 pub fn course_access_grant_access(env: Env, course_id: String, user: Address) {
@@ -7,7 +8,7 @@ pub fn course_access_grant_access(env: Env, course_id: String, user: Address) {
 
     // Check if access already exists to prevent duplicates
     if env.storage().persistent().has(&key) {
-        panic!("User already has access to this course");
+        handle_error(&env, Error::UserAlreadyHasAccess)
     }
 
     // Create the course access entry

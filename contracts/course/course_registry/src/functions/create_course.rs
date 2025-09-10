@@ -1,5 +1,6 @@
 use crate::schema::{Course, CourseLevel};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
+use crate::error::{Error, handle_error};
 use super::utils::{u32_to_string, trim, to_lowercase};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
@@ -23,12 +24,13 @@ pub fn course_registry_create_course(
     // ensure the title is not empty and not just whitespace
     let trimmed_title = trim(&env, &title);
     if title.is_empty() || trimmed_title.is_empty() {
-        panic!("Course error: Course Title cannot be empty");
+        handle_error(&env, Error::EmptyCourseTitle)
+
     }
 
     // ensure the price is greater than 0
     if price == 0 {
-        panic!("Course error: Price must be greater than 0");
+        handle_error(&env, Error::InvalidPrice)
     }
 
     let lowercase_title = to_lowercase(&env, &title);
@@ -40,7 +42,7 @@ pub fn course_registry_create_course(
     );
 
     if env.storage().persistent().has(&title_key) {
-        panic!("Course error: Course Title already exists");
+        handle_error(&env, Error::DuplicateCourseTitle)
     }
 
     // generate the unique id
@@ -50,7 +52,8 @@ pub fn course_registry_create_course(
     let storage_key: (Symbol, String) = (COURSE_KEY, converted_id.clone());
 
     if env.storage().persistent().has(&storage_key) {
-        panic!("Course with this ID already exists");
+        handle_error(&env, Error::DuplicateCourseId)
+
     }
 
     // create a new course
@@ -191,7 +194,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "Course error: Course Title already exists")]
+    #[should_panic(expected = "HostError: Error(Contract, #10)")]
     fn test_cannot_create_courses_with_duplicate_title() {
         let env: Env = Env::default();
         env.mock_all_auths();
@@ -228,7 +231,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "Course error: Course Title cannot be empty")]
+    #[should_panic(expected = "HostError: Error(Contract, #8)")]
     fn test_cannot_create_courses_with_empty_title() {
         let env: Env = Env::default();
         env.mock_all_auths();
@@ -252,7 +255,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "Course error: Price must be greater than 0")]
+    #[should_panic(expected = "HostError: Error(Contract, #9)")]
     fn test_cannot_create_courses_with_zero_price() {
         let env: Env = Env::default();
         env.mock_all_auths();
@@ -276,7 +279,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "Course error: Course Title cannot be empty")]
+    #[should_panic(expected = "HostError: Error(Contract, #8)")]
     fn test_cannot_create_courses_with_whitespace_only_title() {
         let env: Env = Env::default();
         env.mock_all_auths();
@@ -300,7 +303,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "Course error: Course Title already exists")]
+    #[should_panic(expected = "HostError: Error(Contract, #10)")]
     fn test_duplicate_title_case_insensitive() {
         let env: Env = Env::default();
         env.mock_all_auths();

@@ -1,4 +1,5 @@
 pub use crate::schema::{Course, CourseModule};
+use crate::error::{Error, handle_error};
 use soroban_sdk::{symbol_short, Env, String, Symbol, vec};
 use super::utils::{concat_strings, u32_to_string};
 
@@ -17,7 +18,7 @@ pub fn course_registry_add_module(
     // require!(env.storage().persistent().has(&course_storage_key), "Course with the specified ID does not exist");
 
     if !env.storage().persistent().has(&course_storage_key) {
-        panic!("Course with the specified ID does not exist");
+        handle_error(&env, Error::CourseIdNotExist)
     }
 
     let ledger_seq: u32 = env.ledger().sequence();
@@ -81,7 +82,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "Course with the specified ID does not exist")]
+    #[should_panic(expected = "HostError: Error(Contract, #3)")]
     fn test_add_module_invalid_course() {
         let env = Env::default();
         env.mock_all_auths();

@@ -1,4 +1,5 @@
 use crate::schema::{DataKey, UserProfile};
+use crate::error::{Error, handle_error};
 use core::iter::Iterator;
 use soroban_sdk::{symbol_short, Address, Env, Symbol};
 
@@ -42,7 +43,7 @@ pub fn get_user_by_id(env: Env, requester: Address, user_id: Address) -> UserPro
     // Authorization: allow only if the requester is the same as the user_id or is an admin
     let allowed = requester == user_id || is_admin(&env, &requester);
     if !allowed {
-        panic!("Access denied"); // Generic error message
+        handle_error(&env, Error::AccessDenied); // Generic error message
     }
 
     // Retrieve the user profile from storage
@@ -50,7 +51,7 @@ pub fn get_user_by_id(env: Env, requester: Address, user_id: Address) -> UserPro
         .storage()
         .persistent()
         .get::<DataKey, UserProfile>(&DataKey::UserProfile(user_id.clone()))
-        .unwrap_or_else(|| panic!("Access denied")); // Don't disclose if user exists
+        .unwrap_or_else(|| handle_error(&env, Error::AccessDenied)); // Don't disclose if user exists
 
     // (Optional) Emit a read event
     env.events()

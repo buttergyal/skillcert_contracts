@@ -1,9 +1,10 @@
 use crate::schema::CourseModule;
+use crate::error::{Error, handle_error};
 use soroban_sdk::{symbol_short, Env, String};
 
 pub fn course_registry_remove_module(env: &Env, module_id: String) -> Result<(), &'static str> {
     if module_id.len() == 0 {
-        return Err("Module ID cannot be empty");
+        handle_error(&env, Error::EmptyModuleId)
     }
 
     // Try to get the module data to verify it exists and is a valid CourseModule
@@ -14,7 +15,7 @@ pub fn course_registry_remove_module(env: &Env, module_id: String) -> Result<(),
 
     // Validate that the module exists and is a valid CourseModule
     if module.is_none() {
-        return Err("Module not found");
+        handle_error(&env, Error::ModuleNotFound)
     }
 
     // Delete the CourseModule directly from persistent storage using its key.
@@ -73,7 +74,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Module ID cannot be empty")]
+    #[should_panic(expected = "HostError: Error(Contract, #22)")]
     fn test_remove_module_with_empty_id() {
         let env = Env::default();
         env.mock_all_auths();
@@ -85,7 +86,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Module not found")]
+    #[should_panic(expected = "HostError: Error(Contract, #21)")]
     fn test_remove_module_not_found() {
         let env = Env::default();
         env.mock_all_auths();

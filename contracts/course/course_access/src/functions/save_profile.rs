@@ -1,5 +1,6 @@
 use crate::schema::{DataKey, UserProfile};
 use soroban_sdk::{Address, Env, String};
+use crate::error::{Error, handle_error};
 
 pub fn save_profile(
     env: Env,
@@ -12,13 +13,14 @@ pub fn save_profile(
 ) {
     // Validate required fields
     if name.is_empty() {
-        panic!("Name is required");
+        handle_error(&env, Error::NameRequired)
+
     }
     if email.is_empty() {
-        panic!("Email is required");
+        handle_error(&env, Error::EmailRequired)
     }
     if country.is_empty() {
-        panic!("Country is required");
+        handle_error(&env, Error::CountryRequired)
     }
 
     let profile = UserProfile {
