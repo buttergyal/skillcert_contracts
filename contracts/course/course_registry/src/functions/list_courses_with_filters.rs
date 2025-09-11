@@ -1,4 +1,6 @@
+
 use crate::functions::utils::u32_to_string;
+
 use crate::schema::{Course, CourseFilters};
 use soroban_sdk::{symbol_short, Env, Symbol, Vec};
 

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2025 SkillCert
+
 pub use crate::schema::{Course, CourseModule};
 use soroban_sdk::{Bytes, Env, String, Vec, vec};
 

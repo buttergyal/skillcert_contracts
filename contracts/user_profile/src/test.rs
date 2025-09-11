@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2025 SkillCert
+
 use soroban_sdk::{Address, Env, testutils::Address as _};
 use crate::{
     UserProfileContract,

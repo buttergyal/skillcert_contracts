@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2025 SkillCert
+
 use crate::schema::{AdminConfig, DataKey, LightProfile, UserRole, UserStatus};
 use crate::error::{Error, handle_error};
 use core::iter::Iterator;

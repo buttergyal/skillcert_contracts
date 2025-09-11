@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2025 SkillCert
+
 use crate::schema::{DataKey, KEY_COURSE_REG_ADDR, KEY_USER_MGMT_ADDR};
 use soroban_sdk::{symbol_short, Address, Env, IntoVal, String, Symbol, Vec};
 use crate::error::{Error, handle_error};

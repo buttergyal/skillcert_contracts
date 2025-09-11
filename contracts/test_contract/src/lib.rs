@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2025 SkillCert
+
 #![no_std]
 
 use soroban_sdk::{contract, contractimpl, Env, String};
