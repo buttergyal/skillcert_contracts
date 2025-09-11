@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2025 SkillCert
+
 // src/course_registry/goals_view.rs
 
 use soroban_sdk::{contracttype, Address, Env, String, Symbol, Vec};
