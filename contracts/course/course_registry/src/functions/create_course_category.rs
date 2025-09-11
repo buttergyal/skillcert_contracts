@@ -9,7 +9,7 @@ fn is_admin(env: &Env, who: Address) -> bool {
     // In a production environment, you might want to integrate with the user_management contract
     let admins: Option<Vec<Address>> = env.storage().persistent().get(&DataKey::Admins);
     match admins {
-        Some(list) => list.iter().any(|a| a == *who),
+        Some(list) => list.iter().any(|a| a == who),
         None => false,
     }
 }
@@ -45,7 +45,7 @@ pub fn course_registry_create_course_category(
 ) -> u128 {
     // Authentication and authorization
     caller.require_auth();
-    if !is_admin(&env, &caller) {
+    if !is_admin(&env, caller) {
         handle_error(&env, Error::Unauthorized)
     }
 
