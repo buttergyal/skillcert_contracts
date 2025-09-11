@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2025 SkillCert
+
 use soroban_sdk::{symbol_short, Address, Env, Symbol, Vec};
 
 const EVT_ACCESS_LISTED: Symbol = symbol_short!("ac_listed");

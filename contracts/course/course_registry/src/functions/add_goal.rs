@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2025 SkillCert
+
 use crate::functions::utils;
 use crate::schema::{Course, CourseGoal, DataKey};
 use crate::error::{Error, handle_error};
