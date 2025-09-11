@@ -100,7 +100,7 @@ pub fn delete_user(env: Env, caller: Address, user_id: Address) -> () {
     // Note: We keep the full UserProfile intact for potential future reactivation
     // Only the status in LightProfile is changed to Inactive
 
-    // Emit deactivation event
+    /// Emits a user deactivation event upon successful deletion.
     env.events()
         .publish((EVT_USER_DEACTIVATED, &caller), user_id.clone());
 }

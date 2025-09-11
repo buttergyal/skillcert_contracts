@@ -26,7 +26,7 @@ pub fn course_registry_remove_module(env: &Env, module_id: String) -> Result<(),
         .persistent()
         .remove(&(symbol_short!("module"), module_id.clone()));
 
-    // Emit an event to indicate the module has been removed.
+    /// Emits an event to indicate the module has been removed.
     env.events().publish((module_id,), "module_removed");
 
     Ok(())

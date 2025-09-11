@@ -55,7 +55,7 @@ pub fn course_registry_remove_prerequisite(
         &prerequisites,
     );
 
-    // Emit event
+    /// Emits an event for successful prerequisite removal.
     env.events()
         .publish((PREREQ_REMOVED_EVENT, course_id), prerequisite_course_id);
 

@@ -51,7 +51,7 @@ pub fn course_registry_remove_goal(
     // Remove the goal from storage
     env.storage().persistent().remove(&goal_storage_key);
 
-    // Emit event for successful goal removal
+    /// Emits an event for successful goal removal.
     env.events().publish(
         (GOAL_REMOVED_EVENT, course_id.clone(), goal_id.clone()),
         goal.content.clone(),

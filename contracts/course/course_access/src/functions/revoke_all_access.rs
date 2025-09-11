@@ -56,7 +56,7 @@ pub fn course_access_revoke_all_access(env: Env, caller: Address, course_id: Str
 
     let count = affected_users.len();
     if count == 0 {
-        // Emit event with 0 and return
+        /// Emits an event indicating that no users had their access revoked.
         env.events().publish((REVOKE_ALL_EVENT, course_id.clone()), count);
         return 0;
     }
@@ -102,6 +102,7 @@ pub fn course_access_revoke_all_access(env: Env, caller: Address, course_id: Str
     }
 
     // Emit event with number of users affected
+        /// Emits an event with the number of users whose access was revoked.
     env.events().publish((REVOKE_ALL_EVENT, course_id.clone()), count);
 
     count
