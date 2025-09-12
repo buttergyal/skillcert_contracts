@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use crate::error::{handle_error, Error};
 use crate::schema::{AdminConfig, DataKey, LightProfile, UserProfile, UserStatus};
-use crate::error::{Error, handle_error};
 use core::iter::Iterator;
 use soroban_sdk::{symbol_short, Address, Env, Symbol};
 
@@ -43,21 +43,21 @@ fn validate_user_exists(env: &Env, user_id: &Address) -> Result<UserProfile, ()>
 }
 
 /// Delete (deactivate) a user account
-/// 
-/// This function performs a soft delete by marking the user as inactive instead of 
+///
+/// This function performs a soft delete by marking the user as inactive instead of
 /// permanently removing their data. Only admins or the user themselves can trigger deletion.
-/// 
+///
 /// # Arguments
 /// * `env` - Soroban environment
 /// * `caller` - Address performing the deletion (must be admin or the user themselves)
 /// * `user_id` - Address of the user to be deactivated
-/// 
+///
 /// # Panics
 /// * If caller authentication fails
 /// * If user doesn't exist
 /// * If caller is neither admin nor the user themselves
 /// * If user is already inactive
-/// 
+///
 /// # Events
 /// Emits a user deactivation event upon successful deletion
 pub fn delete_user(env: Env, caller: Address, user_id: Address) -> () {
@@ -71,7 +71,7 @@ pub fn delete_user(env: Env, caller: Address, user_id: Address) -> () {
     // Authorization: only admin or the user themselves can trigger deletion
     let is_caller_admin = is_admin(&env, &caller);
     let is_self_deletion = caller == user_id;
-    
+
     if !is_caller_admin && !is_self_deletion {
         handle_error(&env, Error::AccessDenied)
     }
@@ -100,7 +100,7 @@ pub fn delete_user(env: Env, caller: Address, user_id: Address) -> () {
     // Note: We keep the full UserProfile intact for potential future reactivation
     // Only the status in LightProfile is changed to Inactive
 
-    /// Emits a user deactivation event upon successful deletion.
+    // Emits a user deactivation event upon successful deletion.
     env.events()
         .publish((EVT_USER_DEACTIVATED, &caller), user_id.clone());
 }
@@ -205,7 +205,7 @@ mod tests {
                 .persistent()
                 .get(&DataKey::UserProfileLight(user.clone()))
                 .expect("Light profile should exist");
-            
+
             assert_eq!(light_profile.status, UserStatus::Inactive);
 
             // Verify full profile still exists (soft delete)
@@ -214,7 +214,7 @@ mod tests {
                 .persistent()
                 .get(&DataKey::UserProfile(user.clone()))
                 .expect("Full profile should still exist");
-            
+
             assert_eq!(full_profile.user, user);
         });
     }
@@ -241,7 +241,7 @@ mod tests {
                 .persistent()
                 .get(&DataKey::UserProfileLight(user.clone()))
                 .expect("Light profile should exist");
-            
+
             assert_eq!(light_profile.status, UserStatus::Inactive);
         });
     }
@@ -295,7 +295,7 @@ mod tests {
                 .persistent()
                 .get(&DataKey::UserProfileLight(user.clone()))
                 .expect("Light profile should exist");
-            
+
             light_profile.status = UserStatus::Inactive;
             env.storage()
                 .persistent()

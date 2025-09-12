@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use crate::error::{handle_error, Error};
 use crate::functions::utils;
 use crate::schema::{Course, CourseGoal, DataKey};
-use crate::error::{Error, handle_error};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
 const GOAL_ADDED_EVENT: Symbol = symbol_short!("goaladd");
@@ -18,7 +18,6 @@ pub fn course_registry_add_goal(
     // Validate input
     if content.is_empty() {
         handle_error(&env, Error::EmptyGoalContent)
-
     }
 
     // Load course
@@ -37,7 +36,7 @@ pub fn course_registry_add_goal(
     // Generate a unique goal ID
     let goal_id = utils::generate_unique_id(&env);
 
-     // Create new goal
+    // Create new goal
     let goal = CourseGoal {
         course_id: course_id.clone(),
         goal_id: goal_id.clone(),

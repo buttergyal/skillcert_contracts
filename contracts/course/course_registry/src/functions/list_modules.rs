@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use crate::error::{handle_error, Error};
 use crate::schema::CourseModule;
-use crate::error::{Error, handle_error};
 use soroban_sdk::{Env, String, Symbol};
 
 pub fn course_registry_list_modules(env: &Env, course_id: String) -> CourseModule {

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use crate::error::{handle_error, Error};
 use soroban_sdk::{Env, String, Symbol};
-use crate::error::{Error, handle_error};
 
 use crate::schema::Course;
 
@@ -32,7 +32,17 @@ mod test {
         let title = String::from_str(&client.env, "title");
         let description = String::from_str(&client.env, "description");
         let price = 1000_u128;
-        client.create_course(&creator, &title, &description, &price, &None, &None, &None, &None, &None)
+        client.create_course(
+            &creator,
+            &title,
+            &description,
+            &price,
+            &None,
+            &None,
+            &None,
+            &None,
+            &None,
+        )
     }
 
     #[test]

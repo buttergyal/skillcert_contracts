@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use crate::schema::{Course, CourseGoal, DataKey};
-use crate::error::{Error, handle_error};
 use super::is_course_creator::is_course_creator;
+use crate::error::{handle_error, Error};
+use crate::schema::{Course, CourseGoal, DataKey};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 // use soroban_sdk::testutils::Logs;
 
@@ -16,8 +16,6 @@ pub fn course_registry_edit_goal(
     goal_id: String,
     new_content: String,
 ) -> CourseGoal {
-    
-
     creator.require_auth();
     // Validate input
     if new_content.is_empty() {
@@ -59,15 +57,17 @@ pub fn course_registry_edit_goal(
     goal
 }
 
-
 #[cfg(test)]
 mod test {
     use crate::schema::Course;
     use crate::{CourseRegistry, CourseRegistryClient};
     use soroban_sdk::{testutils::Address as _, Address, Env, String};
 
-    fn setup_course_and_goal(env: &Env, client: &CourseRegistryClient, creator: &Address) -> (Course, String) {
-
+    fn setup_course_and_goal(
+        env: &Env,
+        client: &CourseRegistryClient,
+        creator: &Address,
+    ) -> (Course, String) {
         let course: Course = client.create_course(
             creator,
             &String::from_str(env, "Test Course"),
@@ -115,7 +115,6 @@ mod test {
         assert_eq!(edited_goal.course_id, course.id);
         assert_eq!(edited_goal.created_by, creator);
     }
-
 
     #[test]
     #[should_panic(expected = "HostError: Error(Contract, #6)")]
@@ -189,5 +188,4 @@ mod test {
             &String::from_str(&env, "Some content"),
         );
     }
-
 }

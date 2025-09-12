@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use soroban_sdk::{Address, Env, Vec};
 use crate::schema::{AdminConfig, DataKey};
+use soroban_sdk::{Address, Env, Vec};
 
 /// Returns true if the given address is an admin (either super admin or in admin list).
 pub fn is_admin(env: Env, who: Address) -> bool {
