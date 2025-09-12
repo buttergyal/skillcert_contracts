@@ -39,3 +39,69 @@ The project roadmap is available in Notion:
                 └── test.rs
 ```
 > As the project grows, new modules, contracts and functions will arise in the architecture.
+
+
+#### Contract Deployment
+
+To deploy the contracts to the local network (Course Access, Course Registry, User Management), use the provided script:
+
+
+```bash
+
+./scripts/deploy_contracts.sh
+```
+
+This will deploy all contracts and save their addresses in a `contract.json` file.
+
+#### Example Contract Interactions
+
+Here are some example interactions with the deployed contracts:
+
+1. Create a Course:
+```bash
+stellar contract invoke \
+  --id <course_registry_contract_id> \
+  --source-account default \
+  --network local \
+  -- create_course \
+  --creator <your_public_key> \
+  --title "Introduction to Blockchain" \
+  --description "Learn blockchain basics" \
+  --price 1000 \
+  --category null \
+  --language null \
+  --thumbnail_url null
+```
+
+2. Grant Course Access:
+```bash
+stellar contract invoke \
+  --id <course_access_contract_id> \
+  --source-account default \
+  --network local \
+  -- grant_access \
+  --course_id '{"string": "1"}' \
+  --user <student_public_key>
+```
+
+3. List User's Courses:
+```bash
+stellar contract invoke \
+  --id <course_access_contract_id> \
+  --source-account default \
+  --network local \
+  -- list_user_courses \
+  --user <user_public_key>
+```
+
+4. View Course Details:
+```bash
+stellar contract invoke \
+  --id <course_registry_contract_id> \
+  --source-account default \
+  --network local \
+  -- get_course \
+  --course_id '{"string": "1"}'
+```
+
+For more examples, check out the `scripts/invoke_examples.sh` file.
