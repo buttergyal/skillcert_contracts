@@ -8,8 +8,8 @@ pub mod create_course;
 pub mod create_course_category;
 pub mod create_prerequisite;
 pub mod delete_course;
-pub mod edit_goal;
 pub mod edit_course;
+pub mod edit_goal;
 pub mod edit_prerequisite;
 pub mod get_course;
 pub mod get_course_category;
@@ -23,4 +23,3 @@ pub mod remove_goal;
 pub mod remove_module;
 pub mod remove_prerequisite;
 pub mod utils;
-

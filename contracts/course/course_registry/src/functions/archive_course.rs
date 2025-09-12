@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use crate::error::{handle_error, Error};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
-use crate::error::{Error, handle_error};
 
 use crate::schema::Course;
 
@@ -22,7 +22,7 @@ pub fn course_registry_archive_course(env: &Env, creator: Address, course_id: St
         handle_error(&env, Error::OnlyCreatorCanArchive)
     }
 
-    if course.is_archived{
+    if course.is_archived {
         handle_error(&env, Error::CourseAlreadyArchived)
     }
     course.is_archived = true;

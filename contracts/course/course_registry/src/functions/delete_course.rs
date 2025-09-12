@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use super::utils::{concat_strings, to_lowercase, u32_to_string};
+use crate::error::{handle_error, Error};
 use crate::schema::{Course, CourseModule};
-use crate::error::{Error, handle_error};
-use soroban_sdk::{
-    symbol_short, Address, Env, String, Symbol, Vec,vec
-};
-use super::utils::{concat_strings, u32_to_string, to_lowercase};
+use soroban_sdk::{symbol_short, vec, Address, Env, String, Symbol, Vec};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const MODULE_KEY: Symbol = symbol_short!("module");
@@ -27,7 +25,6 @@ pub fn course_registry_delete_course(
 
     if !env.storage().persistent().has(&course_storage_key) {
         handle_error(&env, Error::CourseNotFound)
-
     }
 
     let course: Course = env
@@ -38,17 +35,13 @@ pub fn course_registry_delete_course(
 
     if course.creator != creator {
         handle_error(&env, Error::Unauthorized)
-
     }
 
     delete_course_modules(env, &course_id);
 
     let lowercase_title = to_lowercase(env, &course.title);
 
-    let title_key = (
-        TITLE_KEY,
-        lowercase_title
-    );
+    let title_key = (TITLE_KEY, lowercase_title);
     env.storage().persistent().remove(&title_key);
     env.storage().persistent().remove(&course_storage_key);
     env.events().publish((course_id,), "course_deleted");
@@ -62,12 +55,13 @@ fn delete_course_modules(env: &Env, course_id: &String) {
     let mut counter = 0u32;
     loop {
         let arr = vec![
-            &env, String::from_str(&env, "module_"), 
-            course_id.clone(), 
+            &env,
+            String::from_str(&env, "module_"),
+            course_id.clone(),
             String::from_str(&env, "_"),
             u32_to_string(&env, counter),
             String::from_str(&env, "_0"),
-            ];   
+        ];
 
         let module_id = concat_strings(&env, arr);
         let key = (MODULE_KEY, module_id.clone());
@@ -97,9 +91,8 @@ mod tests {
     use super::*;
     use crate::schema::Course;
     use crate::{CourseRegistry, CourseRegistryClient};
-    use soroban_sdk::{Env, String};
     use soroban_sdk::testutils::Address as _;
-
+    use soroban_sdk::{Env, String};
 
     #[test]
     #[should_panic(expected = "HostError: Error(Contract, #6)")]

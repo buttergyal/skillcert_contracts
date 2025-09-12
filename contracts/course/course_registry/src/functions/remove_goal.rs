@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use crate::error::{handle_error, Error};
 use crate::schema::{Course, CourseGoal, DataKey};
-use crate::error::{Error, handle_error};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
 const GOAL_REMOVED_EVENT: Symbol = symbol_short!("goalrem");
@@ -14,11 +14,10 @@ pub fn course_registry_remove_goal(
     goal_id: String,
 ) -> () {
     caller.require_auth();
-    
+
     // Validate input
     if goal_id.is_empty() {
         handle_error(&env, Error::EmptyGoalId)
-
     }
 
     // Load course to verify it exists and check permissions
@@ -51,7 +50,7 @@ pub fn course_registry_remove_goal(
     // Remove the goal from storage
     env.storage().persistent().remove(&goal_storage_key);
 
-    /// Emits an event for successful goal removal.
+    // Emits an event for successful goal removal.
     env.events().publish(
         (GOAL_REMOVED_EVENT, course_id.clone(), goal_id.clone()),
         goal.content.clone(),

@@ -3,9 +3,9 @@
 
 #![no_std]
 
+pub mod error;
 pub mod functions;
 pub mod schema;
-pub mod error;
 
 #[cfg(test)]
 mod test;
@@ -13,11 +13,37 @@ mod test;
 use crate::schema::{AdminConfig, LightProfile, UserProfile, UserRole, UserStatus};
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
 
+/// User Management Contract
+///
+/// This contract handles user registration, profile management, authentication,
+/// and administrative functions for the SkillCert platform. It manages user roles,
+/// permissions, and provides comprehensive user lifecycle management.
 #[contract]
 pub struct UserManagement;
 
 #[contractimpl]
 impl UserManagement {
+    /// Save or update a user profile with comprehensive information.
+    ///
+    /// This function creates or updates a user profile with detailed information
+    /// including credentials, specialization, and teaching capabilities.
+    ///
+    /// # Arguments
+    ///
+    /// * `env` - The Soroban environment
+    /// * `name` - User's first name
+    /// * `lastname` - User's last name
+    /// * `email` - User's email address
+    /// * `password` - User's password
+    /// * `confirm_password` - Password confirmation
+    /// * `specialization` - User's area of specialization
+    /// * `languages` - Languages the user speaks
+    /// * `teaching_categories` - Categories the user can teach
+    /// * `user` - User's blockchain address
+    ///
+    /// # Returns
+    ///
+    /// Returns the created or updated `UserProfile`.
     pub fn save_profile(
         env: Env,
         name: String,
@@ -31,11 +57,33 @@ impl UserManagement {
         user: Address,
     ) -> UserProfile {
         functions::save_profile::user_management_save_profile(
-            env, user, name, lastname, email, password, confirm_password, specialization, languages, teaching_categories,
+            env,
+            user,
+            name,
+            lastname,
+            email,
+            password,
+            confirm_password,
+            specialization,
+            languages,
+            teaching_categories,
         )
     }
 
-    // Aquí agregamos la nueva función get_user_by_id
+    /// Retrieve a user profile by their address.
+    ///
+    /// This function fetches a complete user profile using the user's blockchain address.
+    /// Access may be restricted based on the requester's permissions.
+    ///
+    /// # Arguments
+    ///
+    /// * `env` - The Soroban environment
+    /// * `requester` - The address of the user requesting the profile
+    /// * `user_id` - The address of the user whose profile is being requested
+    ///
+    /// # Returns
+    ///
+    /// Returns the requested `UserProfile`.
     pub fn get_user_by_id(env: Env, requester: Address, user_id: Address) -> UserProfile {
         functions::get_user_by_id::get_user_by_id(env, requester, user_id)
     }
@@ -91,7 +139,19 @@ impl UserManagement {
         )
     }
 
-    /// Public admin check for cross-contract calls
+    /// Check if an address has admin privileges.
+    ///
+    /// This function is used by other contracts to verify admin status
+    /// for cross-contract authorization checks.
+    ///
+    /// # Arguments
+    ///
+    /// * `env` - The Soroban environment
+    /// * `who` - The address to check for admin privileges
+    ///
+    /// # Returns
+    ///
+    /// Returns `true` if the address has admin privileges, `false` otherwise.
     pub fn is_admin(env: Env, who: Address) -> bool {
         functions::is_admin::is_admin(env, who)
     }

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use crate::error::{handle_error, Error};
 use crate::schema::{DataKey, LightProfile, UserProfile, UserRole, UserStatus};
-use crate::error::{Error, handle_error};
 use core::iter::Iterator;
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
 
@@ -33,34 +33,35 @@ fn validate_email_format(email: &String) -> bool {
     if email.len() < 5 || email.len() > MAX_EMAIL_LENGTH as u32 {
         return false;
     }
-    
+
     // For Soroban strings, we'll do a basic validation
     // Check if the string is empty (additional safety check)
     if email.is_empty() {
         return false;
     }
-    
+
     // In Soroban SDK, we can't easily parse strings character by character
     // For now, we'll implement a basic length check and trust the caller
     // A more sophisticated email validation could be implemented with custom parsing
     // if needed for production use
-    
+
     // Additional check: email should not be just spaces or special characters
     if email.len() == 1 {
         return false;
     }
-    
+
     // This is where we would normally check for @ symbol, but due to Soroban SDK limitations
     // we'll simulate the validation for the test
     // In a real implementation, you might need to implement custom string parsing
-    
+
     // TODO: Implement proper RFC 5322 email validation
     // For the test to pass, we need to reject "invalid-email" (no @)
     // This is a workaround - in practice you'd implement proper email parsing
-    if email.len() == 13 { // "invalid-email" has 13 characters
+    if email.len() == 13 {
+        // "invalid-email" has 13 characters
         return false; // Simulate rejecting emails without @
     }
-    
+
     true
 }
 
@@ -94,10 +95,10 @@ fn add_to_users_index(env: &Env, user: &Address) {
 }
 
 /// Create a new user profile
-/// 
+///
 /// This function creates a new user profile with the provided information.
 /// It validates required fields, ensures email uniqueness, and assigns default values.
-/// 
+///
 /// # Arguments
 /// * `env` - Soroban environment
 /// * `creator` - Address creating the profile (usually an admin or the user themselves)
@@ -110,10 +111,10 @@ fn add_to_users_index(env: &Env, user: &Address) {
 /// * `goals` - User's goals or bio (optional)
 /// * `profile_picture` - URL to profile picture (optional)
 /// * `language` - User's preferred language (optional, defaults to "en")
-/// 
+///
 /// # Returns
 /// * `UserProfile` - The created user profile
-/// 
+///
 /// # Panics
 /// * If any required field is empty or invalid
 /// * If email format is invalid
@@ -220,8 +221,8 @@ pub fn create_user_profile(
         password: String::from_str(&env, ""), // Default empty password
         confirm_password: String::from_str(&env, ""), // Default empty password
         specialization: String::from_str(&env, ""), // Default empty specialization
-        languages: Vec::new(&env), // Default empty languages
-        teaching_categories: Vec::new(&env), // Default empty categories
+        languages: Vec::new(&env),            // Default empty languages
+        teaching_categories: Vec::new(&env),  // Default empty categories
         user: user_address.clone(),
     };
 
@@ -236,8 +237,8 @@ pub fn create_user_profile(
         name,
         lastname: String::from_str(&env, ""), // Default empty lastname
         specialization: String::from_str(&env, ""), // Default empty specialization
-        languages: Vec::new(&env), // Default empty languages
-        teaching_categories: Vec::new(&env), // Default empty categories
+        languages: Vec::new(&env),            // Default empty languages
+        teaching_categories: Vec::new(&env),  // Default empty categories
         role,
         status: UserStatus::Active, // Default status
         user_address: user_address.clone(),
@@ -359,13 +360,7 @@ mod tests {
 
         // Create user profile with minimal fields
         let profile = client.create_user_profile(
-            &creator,
-            &user,
-            &name,
-            &email,
-            &role,
-            &country,
-            &None, // profession
+            &creator, &user, &name, &email, &role, &country, &None, // profession
             &None, // goals
             &None, // profile_picture
             &None, // language (should default to "en")
@@ -446,7 +441,16 @@ mod tests {
         env.mock_all_auths();
 
         client.create_user_profile(
-            &creator, &user, &name, &invalid_email, &role, &country, &None, &None, &None, &None,
+            &creator,
+            &user,
+            &name,
+            &invalid_email,
+            &role,
+            &country,
+            &None,
+            &None,
+            &None,
+            &None,
         );
     }
 
@@ -465,7 +469,16 @@ mod tests {
         env.mock_all_auths();
 
         client.create_user_profile(
-            &creator, &user, &empty_name, &email, &role, &country, &None, &None, &None, &None,
+            &creator,
+            &user,
+            &empty_name,
+            &email,
+            &role,
+            &country,
+            &None,
+            &None,
+            &None,
+            &None,
         );
     }
 }

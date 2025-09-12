@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use crate::error::{handle_error, Error};
 use crate::schema::{Course, DataKey};
-use crate::error::{Error, handle_error};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
 
 const PREREQ_REMOVED_EVENT: Symbol = symbol_short!("prereqrmv");
@@ -44,9 +44,7 @@ pub fn course_registry_remove_prerequisite(
         Some(i) => {
             prerequisites.remove(i as u32);
         }
-        None => {
-            handle_error(&env, Error::PrereqNotInList)
-        }
+        None => handle_error(&env, Error::PrereqNotInList),
     }
 
     // Save updated prerequisites
@@ -55,10 +53,9 @@ pub fn course_registry_remove_prerequisite(
         &prerequisites,
     );
 
-    /// Emits an event for successful prerequisite removal.
+    // Emits an event for successful prerequisite removal.
     env.events()
         .publish((PREREQ_REMOVED_EVENT, course_id), prerequisite_course_id);
-
 }
 
 #[cfg(test)]

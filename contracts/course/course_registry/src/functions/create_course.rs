@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use super::utils::{to_lowercase, trim, u32_to_string};
+use crate::error::{handle_error, Error};
 use crate::schema::{Course, CourseLevel};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
-use crate::error::{Error, handle_error};
-use super::utils::{u32_to_string, trim, to_lowercase};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const TITLE_KEY: Symbol = symbol_short!("title");
@@ -28,7 +28,6 @@ pub fn course_registry_create_course(
     let trimmed_title = trim(&env, &title);
     if title.is_empty() || trimmed_title.is_empty() {
         handle_error(&env, Error::EmptyCourseTitle)
-
     }
 
     // ensure the price is greater than 0
@@ -39,10 +38,7 @@ pub fn course_registry_create_course(
     let lowercase_title = to_lowercase(&env, &title);
 
     // to avoid duplicate title,
-    let title_key: (Symbol, String) = (
-        TITLE_KEY,
-        lowercase_title
-    );
+    let title_key: (Symbol, String) = (TITLE_KEY, lowercase_title);
 
     if env.storage().persistent().has(&title_key) {
         handle_error(&env, Error::DuplicateCourseTitle)
@@ -56,7 +52,6 @@ pub fn course_registry_create_course(
 
     if env.storage().persistent().has(&storage_key) {
         handle_error(&env, Error::DuplicateCourseId)
-
     }
 
     // create a new course
