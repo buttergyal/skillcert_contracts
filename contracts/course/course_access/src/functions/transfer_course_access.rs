@@ -17,6 +17,8 @@ pub fn transfer_course_access(env: Env, course_id: String, from: Address, to: Ad
         handle_error(&env, Error::UserNoAccessCourse);
     }
 
+    // TODO: Implement checks for recipient eligibility (user status, limits, etc.)
+    
     // Create the course access entry for the new user
     let course_access: CourseAccess = CourseAccess {
         course_id: course_id.clone(),

@@ -19,6 +19,7 @@ pub fn initialize(env: Env, caller: Address, user_mgmt_addr: Address, course_reg
         .get::<_, bool>(&((KEY_INIT,),))
         .unwrap_or(false)
     {
+        // TODO: Implement graceful initialization error handling instead of panic
         panic!("already initialized");
     }
 

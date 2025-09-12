@@ -19,6 +19,7 @@ pub fn save_profile(
         handle_error(&env, Error::NameRequired)
 
     }
+    // TODO: Implement full email validation according to RFC 5322 standard
     if email.is_empty() {
         handle_error(&env, Error::EmailRequired)
     }

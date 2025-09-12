@@ -29,6 +29,8 @@ pub fn user_profile_get_user_profile_with_privacy(
     // Create the storage key for the user profile
     let key = Symbol::new(env, "profile");
     
+    // TODO: Implement caching mechanism for frequently accessed profiles
+    
     // Get the user profile from storage
     let mut profile: UserProfile = env
         .storage()

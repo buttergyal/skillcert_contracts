@@ -38,6 +38,7 @@ pub fn course_registry_edit_prerequisite(
         }
     }
 
+    // TODO: Implement advanced prerequisite validation (depth limits, cyclic dependencies)
     // Prevent circular dependencies
     validate_no_circular_dependency(&env, &course_id, &new_prerequisites);
 

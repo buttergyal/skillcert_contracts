@@ -49,6 +49,8 @@ pub fn user_management_save_profile(
     if lastname.is_empty() {
         handle_error(&env, Error::InvalidInput);
     }
+    
+    // TODO: Implement comprehensive password validation (complexity, special chars, numbers)
 
     if email.is_empty() {
         handle_error(&env, Error::InvalidInput);
