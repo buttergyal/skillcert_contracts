@@ -9,39 +9,6 @@ use soroban_sdk::{symbol_short, Address, Env, Symbol};
 // Event symbol for user deactivation
 const EVT_USER_DEACTIVATED: Symbol = symbol_short!("usr_deact");
 
-/// Check if the caller is an admin
-fn is_admin(env: &Env, who: &Address) -> bool {
-    // Check if system is initialized
-    let config: Option<AdminConfig> = env.storage().persistent().get(&DataKey::AdminConfig);
-    match config {
-        Some(cfg) if cfg.initialized => {
-            // Check if caller is super admin
-            if &cfg.super_admin == who {
-                return true;
-            }
-
-            // Check regular admin list
-            let admins: Option<soroban_sdk::Vec<Address>> =
-                env.storage()
-                    .persistent()
-                    .get::<DataKey, soroban_sdk::Vec<Address>>(&DataKey::Admins);
-            match admins {
-                Some(list) => list.iter().any(|a| a == *who),
-                None => false,
-            }
-        }
-        _ => false,
-    }
-}
-
-/// Validate that a user exists by checking their profile
-fn validate_user_exists(env: &Env, user_id: &Address) -> Result<UserProfile, ()> {
-    env.storage()
-        .persistent()
-        .get::<DataKey, UserProfile>(&DataKey::UserProfile(user_id.clone()))
-        .ok_or(())
-}
-
 /// Delete (deactivate) a user account
 ///
 /// This function performs a soft delete by marking the user as inactive instead of
@@ -103,6 +70,39 @@ pub fn delete_user(env: Env, caller: Address, user_id: Address) -> () {
     // Emits a user deactivation event upon successful deletion.
     env.events()
         .publish((EVT_USER_DEACTIVATED, &caller), user_id.clone());
+}
+
+/// Check if the caller is an admin
+fn is_admin(env: &Env, who: &Address) -> bool {
+    // Check if system is initialized
+    let config: Option<AdminConfig> = env.storage().persistent().get(&DataKey::AdminConfig);
+    match config {
+        Some(cfg) if cfg.initialized => {
+            // Check if caller is super admin
+            if &cfg.super_admin == who {
+                return true;
+            }
+
+            // Check regular admin list
+            let admins: Option<soroban_sdk::Vec<Address>> =
+                env.storage()
+                    .persistent()
+                    .get::<DataKey, soroban_sdk::Vec<Address>>(&DataKey::Admins);
+            match admins {
+                Some(list) => list.iter().any(|a| a == *who),
+                None => false,
+            }
+        }
+        _ => false,
+    }
+}
+
+/// Validate that a user exists by checking their profile
+fn validate_user_exists(env: &Env, user_id: &Address) -> Result<UserProfile, ()> {
+    env.storage()
+        .persistent()
+        .get::<DataKey, UserProfile>(&DataKey::UserProfile(user_id.clone()))
+        .ok_or(())
 }
 
 #[cfg(test)]

@@ -15,17 +15,6 @@ const MAX_CATEGORY_LENGTH: usize = 100;
 const MAX_PASSWORD_LENGTH: usize = 128;
 const MIN_PASSWORD_LENGTH: usize = 8;
 
-/// Validates string content for security
-fn validate_string_content(_env: &Env, s: &String, max_len: usize) -> bool {
-    if s.len() > max_len as u32 {
-        return false;
-    }
-
-    // For no_std environment, we'll do basic length validation
-    // More sophisticated pattern matching can be added if needed
-    true
-}
-
 pub fn user_management_save_profile(
     env: Env,
     caller: Address,
@@ -202,6 +191,17 @@ pub fn user_management_save_profile(
     }
 
     user_profile
+}
+
+/// Validates string content for security
+fn validate_string_content(_env: &Env, s: &String, max_len: usize) -> bool {
+    if s.len() > max_len as u32 {
+        return false;
+    }
+
+    // For no_std environment, we'll do basic length validation
+    // More sophisticated pattern matching can be added if needed
+    true
 }
 
 /// Add user to the global users index
