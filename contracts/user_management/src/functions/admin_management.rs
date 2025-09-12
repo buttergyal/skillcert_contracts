@@ -34,6 +34,7 @@ pub fn initialize_system(
             }
             size
         }
+        // TODO: Make page size configurable through contract configuration
         None => 100, // Default
     };
 

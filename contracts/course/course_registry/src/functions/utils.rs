@@ -78,6 +78,7 @@ pub fn trim(env: &Env, s: &String) -> String {
     // Create a fixed-size buffer for the string's bytes
     let len = s.len() as usize;
     let mut byte_array: [u8; 1024] = [0u8; 1024]; 
+    // TODO: Implement dynamic buffer sizing or proper error handling for large strings
     if len > byte_array.len() {
         panic!("String too long for fixed-size buffer");
     }

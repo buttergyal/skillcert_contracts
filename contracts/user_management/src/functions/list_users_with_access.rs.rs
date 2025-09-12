@@ -43,6 +43,7 @@ pub fn list_users_with_access(env: Env, caller: Address, course_id: u128) -> Vec
     // Require the caller to be authenticated
     caller.require_auth();
 
+    // TODO: Implement role-based access control (RBAC) system for more granular permissions
     // Authorization: must be course creator or admin
     if !(is_creator(&env, course_id, &caller) || is_admin(&env, &caller)) {
         // panic!("Not authorized");
