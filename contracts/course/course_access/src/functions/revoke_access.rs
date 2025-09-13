@@ -21,6 +21,12 @@ use crate::schema::{DataKey, UserCourses, CourseUsers};
 
 /// Revoke access for a specific user from a course
 pub fn course_access_revoke_access(env: Env, course_id: String, user: Address) -> bool {
+    // Input validation
+    if course_id.is_empty() {
+        return false;
+    }
+    // Optionally, add more checks for user address validity if needed
+
     let key: DataKey = DataKey::CourseAccess(course_id.clone(), user.clone());
 
     // Check if the CourseAccess entry exists in persistent storage

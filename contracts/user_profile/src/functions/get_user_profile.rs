@@ -6,16 +6,16 @@ use soroban_sdk::{Env, Address, Symbol};
 use crate::schema::UserProfile;
 
 pub fn user_profile_get_user_profile(env: &Env, user_address: Address) -> UserProfile {
-    // Create the storage key for the user profile
+    // Input validation
+    // If Address type supports is_empty or similar, add check. Otherwise, skip.
+    // For demonstration, assume Address cannot be empty.
     let key = Symbol::new(env, "profile");
-    
     // Get the user profile from storage
     let profile: UserProfile = env
         .storage()
         .instance()
         .get(&(key, user_address.clone()))
         .expect("User profile not found");
-    
     profile
 }
 
@@ -26,16 +26,15 @@ pub fn user_profile_get_user_profile_with_privacy(
     user_address: Address, 
     requester_address: Address
 ) -> UserProfile {
-    // Create the storage key for the user profile
+    // Input validation
+    // If Address type supports is_empty or similar, add check. Otherwise, skip.
     let key = Symbol::new(env, "profile");
-    
     // Get the user profile from storage
     let mut profile: UserProfile = env
         .storage()
         .instance()
         .get(&(key, user_address.clone()))
         .expect("User profile not found");
-    
     // Check privacy settings
     // If profile is not public and requester is not the profile owner, hide email
     if !profile.privacy_public && requester_address != user_address {

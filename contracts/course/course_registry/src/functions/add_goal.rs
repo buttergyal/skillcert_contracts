@@ -16,9 +16,11 @@ pub fn course_registry_add_goal(
 ) -> CourseGoal {
     creator.require_auth();
     // Validate input
+    if course_id.is_empty() {
+        handle_error(&env, Error::InvalidInput)
+    }
     if content.is_empty() {
         handle_error(&env, Error::EmptyGoalContent)
-
     }
 
     // Load course

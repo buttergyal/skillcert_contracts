@@ -16,9 +16,11 @@ pub fn course_registry_remove_goal(
     caller.require_auth();
     
     // Validate input
+    if course_id.is_empty() {
+        handle_error(&env, Error::InvalidInput)
+    }
     if goal_id.is_empty() {
         handle_error(&env, Error::EmptyGoalId)
-
     }
 
     // Load course to verify it exists and check permissions
