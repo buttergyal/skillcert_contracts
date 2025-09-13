@@ -1,30 +1,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use crate::schema::{DataKey, CourseCategory};
-use crate::error::{Error, handle_error};
+use crate::error::{handle_error, Error};
+use crate::schema::{CourseCategory, DataKey};
 use soroban_sdk::{Address, Env, String, Vec};
-
-/// Checks whether who is an admin using the same pattern as user_management contract.
-/// This assumes the course_registry contract has its own admin system or uses a similar pattern.
-fn is_admin(env: &Env, who: Address) -> bool {
-    // For now, we'll use a simple storage-based admin check
-    // In a production environment, you might want to integrate with the user_management contract
-    let admins: Option<Vec<Address>> = env.storage().persistent().get(&DataKey::Admins);
-    match admins {
-        Some(list) => list.iter().any(|a| a == who),
-        None => false,
-    }
-}
-
-/// Retrieves and increments a sequence used for category IDs.
-/// Storage key is DataKey::CategorySeq -> u128.
-fn next_category_id(env: &Env) -> u128 {
-    let mut seq: u128 = env.storage().persistent().get(&DataKey::CategorySeq).unwrap_or(0u128);
-    seq = seq.saturating_add(1);
-    env.storage().persistent().set(&DataKey::CategorySeq, &seq);
-    seq
-}
 
 /// Creates a new course category (admin-only).
 ///
@@ -66,8 +45,35 @@ pub fn course_registry_create_course_category(
         name,
         description,
     };
-    env.storage().persistent().set(&DataKey::CourseCategory(id), &category);
+    env.storage()
+        .persistent()
+        .set(&DataKey::CourseCategory(id), &category);
 
     // Return the new ID
     id
+}
+
+/// Checks whether who is an admin using the same pattern as user_management contract.
+/// This assumes the course_registry contract has its own admin system or uses a similar pattern.
+fn is_admin(env: &Env, who: Address) -> bool {
+    // For now, we'll use a simple storage-based admin check
+    // In a production environment, you might want to integrate with the user_management contract
+    let admins: Option<Vec<Address>> = env.storage().persistent().get(&DataKey::Admins);
+    match admins {
+        Some(list) => list.iter().any(|a| a == who),
+        None => false,
+    }
+}
+
+/// Retrieves and increments a sequence used for category IDs.
+/// Storage key is DataKey::CategorySeq -> u128.
+fn next_category_id(env: &Env) -> u128 {
+    let mut seq: u128 = env
+        .storage()
+        .persistent()
+        .get(&DataKey::CategorySeq)
+        .unwrap_or(0u128);
+    seq = seq.saturating_add(1);
+    env.storage().persistent().set(&DataKey::CategorySeq, &seq);
+    seq
 }

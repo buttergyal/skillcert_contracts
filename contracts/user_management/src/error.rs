@@ -7,8 +7,8 @@ use soroban_sdk::{contracterror, panic_with_error, Env};
 #[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
 #[repr(u32)]
 pub enum Error {
-    AlreadInitialized = 1,  
-    InvalidMaxPageSize = 2,   
+    AlreadInitialized = 1,
+    InvalidMaxPageSize = 2,
     SystemNotInitialized = 3,
     AccessDenied = 4,
     SuperAdminNotRegular = 5,

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use crate::error::{handle_error, Error};
 use crate::schema::{DataKey, LightProfile, UserProfile, UserRole, UserStatus};
-use crate::error::{Error, handle_error};
 use core::iter::Iterator;
 use soroban_sdk::{Address, Env, String, Vec};
 
@@ -14,17 +14,6 @@ const MAX_LANGUAGE_LENGTH: usize = 50;
 const MAX_CATEGORY_LENGTH: usize = 100;
 const MAX_PASSWORD_LENGTH: usize = 128;
 const MIN_PASSWORD_LENGTH: usize = 8;
-
-/// Validates string content for security
-fn validate_string_content(_env: &Env, s: &String, max_len: usize) -> bool {
-    if s.len() > max_len as u32 {
-        return false;
-    }
-
-    // For no_std environment, we'll do basic length validation
-    // More sophisticated pattern matching can be added if needed
-    true
-}
 
 pub fn user_management_save_profile(
     env: Env,
@@ -49,6 +38,8 @@ pub fn user_management_save_profile(
     if lastname.is_empty() {
         handle_error(&env, Error::InvalidInput);
     }
+
+    // TODO: Implement comprehensive password validation (complexity, special chars, numbers)
 
     if email.is_empty() {
         handle_error(&env, Error::InvalidInput);
@@ -155,14 +146,18 @@ pub fn user_management_save_profile(
     let user_profile = UserProfile {
         name: name.clone(),
         lastname: lastname.clone(),
-        email: if is_new_user { email.clone() } else { existing_profile.email.clone() }, // Don't change email on update
+        email: if is_new_user {
+            email.clone()
+        } else {
+            existing_profile.email.clone()
+        }, // Don't change email on update
         role: existing_profile.role.clone(), // Preserve role
         country: existing_profile.country.clone(), // Preserve country
         profession: existing_profile.profession.clone(), // Preserve profession
         goals: existing_profile.goals.clone(), // Preserve goals
         profile_picture: existing_profile.profile_picture.clone(), // Preserve profile picture
         language: existing_profile.language.clone(), // Preserve language
-        password: password.clone(), // In production, this should be hashed
+        password: password.clone(),          // In production, this should be hashed
         confirm_password: confirm_password.clone(),
         specialization: specialization.clone(),
         languages: languages.clone(),
@@ -181,7 +176,7 @@ pub fn user_management_save_profile(
         languages,
         teaching_categories,
         role: existing_profile.role, // Use role from existing profile
-        status: UserStatus::Active, // Default status
+        status: UserStatus::Active,  // Default status
         user_address: caller.clone(),
     };
 
@@ -196,6 +191,17 @@ pub fn user_management_save_profile(
     }
 
     user_profile
+}
+
+/// Validates string content for security
+fn validate_string_content(_env: &Env, s: &String, max_len: usize) -> bool {
+    if s.len() > max_len as u32 {
+        return false;
+    }
+
+    // For no_std environment, we'll do basic length validation
+    // More sophisticated pattern matching can be added if needed
+    true
 }
 
 /// Add user to the global users index
@@ -234,22 +240,35 @@ mod test {
         let password: String = String::from_str(&env, "securepassword123");
         let confirm_password: String = String::from_str(&env, "securepassword123");
         let specialization: String = String::from_str(&env, "Software Engineering");
-        let languages = Vec::from_array(&env, [
-            String::from_str(&env, "English"),
-            String::from_str(&env, "Spanish")
-        ]);
-        let teaching_categories = Vec::from_array(&env, [
-            String::from_str(&env, "Programming"),
-            String::from_str(&env, "Web Development")
-        ]);
+        let languages = Vec::from_array(
+            &env,
+            [
+                String::from_str(&env, "English"),
+                String::from_str(&env, "Spanish"),
+            ],
+        );
+        let teaching_categories = Vec::from_array(
+            &env,
+            [
+                String::from_str(&env, "Programming"),
+                String::from_str(&env, "Web Development"),
+            ],
+        );
 
         // Mock all authentication in the environment
         env.mock_all_auths();
 
         // Use contract client
         let profile = client.save_profile(
-            &name, &lastname, &email, &password, &confirm_password,
-            &specialization, &languages, &teaching_categories, &user
+            &name,
+            &lastname,
+            &email,
+            &password,
+            &confirm_password,
+            &specialization,
+            &languages,
+            &teaching_categories,
+            &user,
         );
 
         // Verify profile creation
@@ -293,8 +312,15 @@ mod test {
 
         // This should panic due to password mismatch
         client.save_profile(
-            &name, &lastname, &email, &password, &confirm_password,
-            &specialization, &languages, &teaching_categories, &user
+            &name,
+            &lastname,
+            &email,
+            &password,
+            &confirm_password,
+            &specialization,
+            &languages,
+            &teaching_categories,
+            &user,
         );
     }
 
@@ -318,8 +344,15 @@ mod test {
         env.mock_all_auths();
 
         client.save_profile(
-            &name, &lastname, &email, &password, &confirm_password,
-            &specialization, &languages, &teaching_categories, &user
+            &name,
+            &lastname,
+            &email,
+            &password,
+            &confirm_password,
+            &specialization,
+            &languages,
+            &teaching_categories,
+            &user,
         );
     }
 
@@ -343,8 +376,15 @@ mod test {
         env.mock_all_auths();
 
         client.save_profile(
-            &name, &lastname, &email, &password, &confirm_password,
-            &specialization, &languages, &teaching_categories, &user
+            &name,
+            &lastname,
+            &email,
+            &password,
+            &confirm_password,
+            &specialization,
+            &languages,
+            &teaching_categories,
+            &user,
         );
     }
 
@@ -368,8 +408,15 @@ mod test {
         env.mock_all_auths();
 
         client.save_profile(
-            &name, &lastname, &email, &password, &confirm_password,
-            &specialization, &languages, &teaching_categories, &user
+            &name,
+            &lastname,
+            &email,
+            &password,
+            &confirm_password,
+            &specialization,
+            &languages,
+            &teaching_categories,
+            &user,
         );
     }
 
@@ -393,8 +440,15 @@ mod test {
         env.mock_all_auths();
 
         client.save_profile(
-            &name, &lastname, &email, &password, &confirm_password,
-            &specialization, &languages, &teaching_categories, &user
+            &name,
+            &lastname,
+            &email,
+            &password,
+            &confirm_password,
+            &specialization,
+            &languages,
+            &teaching_categories,
+            &user,
         );
     }
 
@@ -418,8 +472,15 @@ mod test {
         env.mock_all_auths();
 
         client.save_profile(
-            &name, &lastname, &email, &password, &confirm_password,
-            &specialization, &languages, &teaching_categories, &user
+            &name,
+            &lastname,
+            &email,
+            &password,
+            &confirm_password,
+            &specialization,
+            &languages,
+            &teaching_categories,
+            &user,
         );
     }
 }

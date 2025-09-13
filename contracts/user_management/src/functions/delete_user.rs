@@ -1,13 +1,76 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use crate::error::{handle_error, Error};
 use crate::schema::{AdminConfig, DataKey, LightProfile, UserProfile, UserStatus};
-use crate::error::{Error, handle_error};
 use core::iter::Iterator;
 use soroban_sdk::{symbol_short, Address, Env, Symbol};
 
 // Event symbol for user deactivation
 const EVT_USER_DEACTIVATED: Symbol = symbol_short!("usr_deact");
+
+/// Delete (deactivate) a user account
+///
+/// This function performs a soft delete by marking the user as inactive instead of
+/// permanently removing their data. Only admins or the user themselves can trigger deletion.
+///
+/// # Arguments
+/// * `env` - Soroban environment
+/// * `caller` - Address performing the deletion (must be admin or the user themselves)
+/// * `user_id` - Address of the user to be deactivated
+///
+/// # Panics
+/// * If caller authentication fails
+/// * If user doesn't exist
+/// * If caller is neither admin nor the user themselves
+/// * If user is already inactive
+///
+/// # Events
+/// Emits a user deactivation event upon successful deletion
+pub fn delete_user(env: Env, caller: Address, user_id: Address) -> () {
+    // Require authentication for the caller
+    caller.require_auth();
+
+    // DEPENDENCY: Validate that user exists (using user existence validation)
+    let _user_profile = validate_user_exists(&env, &user_id)
+        .unwrap_or_else(|_| handle_error(&env, Error::UserNotFound));
+
+    // Authorization: only admin or the user themselves can trigger deletion
+    let is_caller_admin = is_admin(&env, &caller);
+    let is_self_deletion = caller == user_id;
+
+    if !is_caller_admin && !is_self_deletion {
+        handle_error(&env, Error::AccessDenied)
+    }
+
+    // Check current user status from light profile
+    let light_profile_key = DataKey::UserProfileLight(user_id.clone());
+    let mut light_profile: LightProfile = env
+        .storage()
+        .persistent()
+        .get(&light_profile_key)
+        .unwrap_or_else(|| handle_error(&env, Error::UserProfileNotFound));
+
+    // Check if user is already inactive
+    if light_profile.status == UserStatus::Inactive {
+        handle_error(&env, Error::InactiveUser)
+    }
+
+    // Perform soft delete: mark user as inactive
+    light_profile.status = UserStatus::Inactive;
+
+    // Update the light profile with new status
+    env.storage()
+        .persistent()
+        .set(&light_profile_key, &light_profile);
+
+    // Note: We keep the full UserProfile intact for potential future reactivation
+    // Only the status in LightProfile is changed to Inactive
+
+    // Emits a user deactivation event upon successful deletion.
+    env.events()
+        .publish((EVT_USER_DEACTIVATED, &caller), user_id.clone());
+}
 
 /// Check if the caller is an admin
 fn is_admin(env: &Env, who: &Address) -> bool {
@@ -40,69 +103,6 @@ fn validate_user_exists(env: &Env, user_id: &Address) -> Result<UserProfile, ()>
         .persistent()
         .get::<DataKey, UserProfile>(&DataKey::UserProfile(user_id.clone()))
         .ok_or(())
-}
-
-/// Delete (deactivate) a user account
-/// 
-/// This function performs a soft delete by marking the user as inactive instead of 
-/// permanently removing their data. Only admins or the user themselves can trigger deletion.
-/// 
-/// # Arguments
-/// * `env` - Soroban environment
-/// * `caller` - Address performing the deletion (must be admin or the user themselves)
-/// * `user_id` - Address of the user to be deactivated
-/// 
-/// # Panics
-/// * If caller authentication fails
-/// * If user doesn't exist
-/// * If caller is neither admin nor the user themselves
-/// * If user is already inactive
-/// 
-/// # Events
-/// Emits a user deactivation event upon successful deletion
-pub fn delete_user(env: Env, caller: Address, user_id: Address) -> () {
-    // Require authentication for the caller
-    caller.require_auth();
-
-    // DEPENDENCY: Validate that user exists (using user existence validation)
-    let _user_profile = validate_user_exists(&env, &user_id)
-        .unwrap_or_else(|_| handle_error(&env, Error::UserNotFound));
-
-    // Authorization: only admin or the user themselves can trigger deletion
-    let is_caller_admin = is_admin(&env, &caller);
-    let is_self_deletion = caller == user_id;
-    
-    if !is_caller_admin && !is_self_deletion {
-        handle_error(&env, Error::AccessDenied)
-    }
-
-    // Check current user status from light profile
-    let light_profile_key = DataKey::UserProfileLight(user_id.clone());
-    let mut light_profile: LightProfile = env
-        .storage()
-        .persistent()
-        .get(&light_profile_key)
-        .unwrap_or_else(|| handle_error(&env, Error::UserProfileNotFound));
-
-    // Check if user is already inactive
-    if light_profile.status == UserStatus::Inactive {
-        handle_error(&env, Error::InactiveUser)
-    }
-
-    // Perform soft delete: mark user as inactive
-    light_profile.status = UserStatus::Inactive;
-
-    // Update the light profile with new status
-    env.storage()
-        .persistent()
-        .set(&light_profile_key, &light_profile);
-
-    // Note: We keep the full UserProfile intact for potential future reactivation
-    // Only the status in LightProfile is changed to Inactive
-
-    /// Emits a user deactivation event upon successful deletion.
-    env.events()
-        .publish((EVT_USER_DEACTIVATED, &caller), user_id.clone());
 }
 
 #[cfg(test)]
@@ -205,7 +205,7 @@ mod tests {
                 .persistent()
                 .get(&DataKey::UserProfileLight(user.clone()))
                 .expect("Light profile should exist");
-            
+
             assert_eq!(light_profile.status, UserStatus::Inactive);
 
             // Verify full profile still exists (soft delete)
@@ -214,7 +214,7 @@ mod tests {
                 .persistent()
                 .get(&DataKey::UserProfile(user.clone()))
                 .expect("Full profile should still exist");
-            
+
             assert_eq!(full_profile.user, user);
         });
     }
@@ -241,7 +241,7 @@ mod tests {
                 .persistent()
                 .get(&DataKey::UserProfileLight(user.clone()))
                 .expect("Light profile should exist");
-            
+
             assert_eq!(light_profile.status, UserStatus::Inactive);
         });
     }
@@ -295,7 +295,7 @@ mod tests {
                 .persistent()
                 .get(&DataKey::UserProfileLight(user.clone()))
                 .expect("Light profile should exist");
-            
+
             light_profile.status = UserStatus::Inactive;
             env.storage()
                 .persistent()

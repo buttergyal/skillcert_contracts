@@ -5,15 +5,27 @@ use soroban_sdk::{Env, String, Vec};
 
 use crate::schema::{CourseUsers, DataKey};
 
+/// List all users who have access to a specific course.
+///
+/// This function retrieves all users who have been granted access to the
+/// specified course. If no users have access, it returns an empty CourseUsers struct.
+///
+/// # Arguments
+///
+/// * `env` - The Soroban environment
+/// * `course_id` - The unique identifier of the course to query users for
+///
+/// # Returns
+///
+/// Returns a `CourseUsers` struct containing the course ID and a list
+/// of user addresses who have access to the course. If no users are found,
+/// returns an empty list.
 pub fn course_access_list_course_access(env: Env, course_id: String) -> CourseUsers {
     let key = DataKey::CourseUsers(course_id.clone());
-    env.storage()
-        .persistent()
-        .get(&key)
-        .unwrap_or(CourseUsers {
-            course: course_id,
-            users: Vec::new(&env),
-        })
+    env.storage().persistent().get(&key).unwrap_or(CourseUsers {
+        course: course_id,
+        users: Vec::new(&env),
+    })
 }
 
 // #[cfg(test)]

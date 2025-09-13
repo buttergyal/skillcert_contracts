@@ -1,108 +1,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use crate::error::{handle_error, Error};
 use crate::schema::{AdminConfig, DataKey, LightProfile, UserRole, UserStatus};
-use crate::error::{Error, handle_error};
 use core::iter::Iterator;
 use soroban_sdk::{Address, Env, String, Vec};
 
 /// Security constants
 const MAX_PAGE_SIZE_ABSOLUTE: u32 = 1000;
-
-/// Checks whether the system is properly initialized
-fn is_system_initialized(env: &Env) -> bool {
-    if let Some(config) = env
-        .storage()
-        .persistent()
-        .get::<DataKey, AdminConfig>(&DataKey::AdminConfig)
-    {
-        config.initialized
-    } else {
-        false
-    }
-}
-
-/// Gets the admin configuration with defaults
-fn get_admin_config(env: &Env) -> AdminConfig {
-    env.storage()
-        .persistent()
-        .get::<DataKey, AdminConfig>(&DataKey::AdminConfig)
-        .unwrap_or_else(|| handle_error(&env, Error::SystemNotInitialized))
-}
-
-/// Checks whether the caller is an admin with enhanced security
-fn is_admin(env: &Env, who: &Address) -> bool {
-    // First check if system is initialized
-    if !is_system_initialized(env) {
-        return false;
-    }
-
-    let config = get_admin_config(env);
-
-    // Check if caller is the super admin
-    if &config.super_admin == who {
-        return true;
-    }
-
-    // Check if caller is in regular admin list
-    let admins: Option<Vec<Address>> = env
-        .storage()
-        .persistent()
-        .get::<DataKey, Vec<Address>>(&DataKey::Admins);
-    match admins {
-        Some(list) => list.iter().any(|a| a == *who),
-        None => false,
-    }
-}
-
-/// Checks if a profile matches the given filter criteria
-fn matches_filter(
-    profile: &LightProfile,
-    role_filter: &Option<UserRole>,
-    _country_filter: &Option<String>, // Deprecated but kept for API compatibility
-    status_filter: &Option<UserStatus>,
-) -> bool {
-    // Check role filter
-    if let Some(ref role) = role_filter {
-        if &profile.role != role {
-            return false;
-        }
-    }
-
-    // Note: Country filter was removed from the new schema as LightProfile
-    // no longer has a 'country' field. The parameter is kept for backward compatibility
-    // but the actual filtering is disabled.
-
-    // Check status filter
-    if let Some(ref status) = status_filter {
-        if &profile.status != status {
-            return false;
-        }
-    }
-
-    true
-}
-
-/// Validates and sanitizes input parameters
-fn validate_input(
-    page_size: u32,
-    _country_filter: &Option<String>, // Deprecated but kept for API compatibility
-    config: &AdminConfig,
-) -> Result<(), &'static str> {
-    // Validate page_size
-    let max_allowed = config.max_page_size.min(MAX_PAGE_SIZE_ABSOLUTE);
-    if page_size == 0 {
-        return Err("page_size must be greater than 0");
-    }
-    if page_size > max_allowed {
-        return Err("page_size exceeds maximum allowed limit");
-    }
-
-    // Country filter validation is no longer needed as it's deprecated
-    // but we keep the parameter for backward compatibility
-
-    Ok(())
-}
 
 /// Lists all registered users with pagination and filtering (admin-only).
 ///
@@ -223,6 +128,101 @@ pub fn list_all_users(
     }
 
     result
+}
+
+/// Checks whether the system is properly initialized
+fn is_system_initialized(env: &Env) -> bool {
+    if let Some(config) = env
+        .storage()
+        .persistent()
+        .get::<DataKey, AdminConfig>(&DataKey::AdminConfig)
+    {
+        config.initialized
+    } else {
+        false
+    }
+}
+
+/// Gets the admin configuration with defaults
+fn get_admin_config(env: &Env) -> AdminConfig {
+    env.storage()
+        .persistent()
+        .get::<DataKey, AdminConfig>(&DataKey::AdminConfig)
+        .unwrap_or_else(|| handle_error(&env, Error::SystemNotInitialized))
+}
+
+/// Checks whether the caller is an admin with enhanced security
+fn is_admin(env: &Env, who: &Address) -> bool {
+    // First check if system is initialized
+    if !is_system_initialized(env) {
+        return false;
+    }
+
+    let config = get_admin_config(env);
+
+    // Check if caller is the super admin
+    if &config.super_admin == who {
+        return true;
+    }
+
+    // Check if caller is in regular admin list
+    let admins: Option<Vec<Address>> = env
+        .storage()
+        .persistent()
+        .get::<DataKey, Vec<Address>>(&DataKey::Admins);
+    match admins {
+        Some(list) => list.iter().any(|a| a == *who),
+        None => false,
+    }
+}
+
+/// Checks if a profile matches the given filter criteria
+fn matches_filter(
+    profile: &LightProfile,
+    role_filter: &Option<UserRole>,
+    _country_filter: &Option<String>, // Deprecated but kept for API compatibility
+    status_filter: &Option<UserStatus>,
+) -> bool {
+    // Check role filter
+    if let Some(ref role) = role_filter {
+        if &profile.role != role {
+            return false;
+        }
+    }
+
+    // Note: Country filter was removed from the new schema as LightProfile
+    // no longer has a 'country' field. The parameter is kept for backward compatibility
+    // but the actual filtering is disabled.
+
+    // Check status filter
+    if let Some(ref status) = status_filter {
+        if &profile.status != status {
+            return false;
+        }
+    }
+
+    true
+}
+
+/// Validates and sanitizes input parameters
+fn validate_input(
+    page_size: u32,
+    _country_filter: &Option<String>, // Deprecated but kept for API compatibility
+    config: &AdminConfig,
+) -> Result<(), &'static str> {
+    // Validate page_size
+    let max_allowed = config.max_page_size.min(MAX_PAGE_SIZE_ABSOLUTE);
+    if page_size == 0 {
+        return Err("page_size must be greater than 0");
+    }
+    if page_size > max_allowed {
+        return Err("page_size exceeds maximum allowed limit");
+    }
+
+    // Country filter validation is no longer needed as it's deprecated
+    // but we keep the parameter for backward compatibility
+
+    Ok(())
 }
 
 #[cfg(test)]

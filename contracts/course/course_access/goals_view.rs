@@ -84,6 +84,7 @@ pub fn list_goals_by_course_detailed(env: Env, course_id: u128) -> Vec<Goal> {
 /// If you want to fail fast when a course doesn't exist, call this before reads.
 /// Keep it as a no-op until your Course registry is finalized.
 pub fn assert_course_exists(_env: &Env, _course_id: u128) {
+    // TODO: Implement course validation and proper error handling
     // Example (uncomment/adapt once your Course is keyed in storage):
     // if _env.storage().get::<DataKey, Course>(&DataKey::Course(_course_id)).is_none() {
     //     panic!("Course not found");

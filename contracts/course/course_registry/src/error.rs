@@ -7,8 +7,8 @@ use soroban_sdk::{contracterror, panic_with_error, Env};
 #[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
 #[repr(u32)]
 pub enum Error {
-    OnlyCreatorCanAddGoals = 1,  
-    EmptyGoalContent = 2,   
+    OnlyCreatorCanAddGoals = 1,
+    EmptyGoalContent = 2,
     CourseIdNotExist = 3,
     OnlyCreatorCanArchive = 4,
     CourseAlreadyArchived = 5,

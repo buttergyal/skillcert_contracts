@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use crate::error::{handle_error, Error};
 use crate::schema::{AdminConfig, DataKey};
-use crate::error::{Error, handle_error};
 use core::iter::Iterator;
 use soroban_sdk::{Address, Env, Vec};
 
@@ -34,6 +34,7 @@ pub fn initialize_system(
             }
             size
         }
+        // TODO: Make page size configurable through contract configuration
         None => 100, // Default
     };
 
@@ -66,7 +67,7 @@ pub fn add_admin(env: Env, caller: Address, new_admin: Address) {
         .storage()
         .persistent()
         .get::<DataKey, AdminConfig>(&DataKey::AdminConfig)
-        .unwrap_or_else(||handle_error(&env, Error::SystemNotInitialized));
+        .unwrap_or_else(|| handle_error(&env, Error::SystemNotInitialized));
 
     if !config.initialized {
         handle_error(&env, Error::SystemNotInitialized)
@@ -123,7 +124,7 @@ pub fn remove_admin(env: Env, caller: Address, admin_to_remove: Address) {
 
     // Cannot remove super admin
     if admin_to_remove == config.super_admin {
-         handle_error(&env, Error::CannotRemoveSuperAdmin)
+        handle_error(&env, Error::CannotRemoveSuperAdmin)
     }
 
     let admins: Vec<Address> = env

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use crate::schema::{Course, EditCourseParams};
-use crate::error::{Error, handle_error};
-use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 use super::utils::{to_lowercase, trim};
+use crate::error::{handle_error, Error};
+use crate::schema::{Course, EditCourseParams};
+use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const TITLE_KEY: Symbol = symbol_short!("title");
@@ -38,7 +38,7 @@ pub fn course_registry_edit_course(
         // Clone the string to avoid move issues
         let t_str = t.clone();
         let t_trim = trim(&env, &t_str);
-      
+
         if t_trim.is_empty() {
             handle_error(&env, Error::EmptyCourseTitle)
         }
@@ -49,15 +49,13 @@ pub fn course_registry_edit_course(
 
         if old_title_lc != new_title_lc {
             // uniqueness index key for the *new* title
-            let new_title_key: (Symbol, String) =
-                (TITLE_KEY, new_title_lc);
+            let new_title_key: (Symbol, String) = (TITLE_KEY, new_title_lc);
             if env.storage().persistent().has(&new_title_key) {
                 handle_error(&env, Error::DuplicateCourseTitle)
             }
 
             // remove old title index and set new one
-            let old_title_key: (Symbol, String) =
-                (TITLE_KEY, old_title_lc);
+            let old_title_key: (Symbol, String) = (TITLE_KEY, old_title_lc);
             env.storage().persistent().remove(&old_title_key);
             env.storage().persistent().set(&new_title_key, &true);
 
@@ -153,11 +151,7 @@ mod test {
             new_level: None,
             new_duration_hours: None,
         };
-        let edited_course = client.edit_course(
-            &creator,
-            &course.id,
-            &params,
-        );
+        let edited_course = client.edit_course(&creator, &course.id, &params);
 
         assert_eq!(edited_course.title, String::from_str(&env, "New Title"));
         assert_eq!(
@@ -237,11 +231,7 @@ mod test {
             new_level: None,
             new_duration_hours: None,
         };
-        client.edit_course(
-            &impostor,
-            &course.id,
-            &params,
-        );
+        client.edit_course(&impostor, &course.id, &params);
     }
 
     #[test]
@@ -267,11 +257,7 @@ mod test {
             new_level: None,
             new_duration_hours: None,
         };
-        client.edit_course(
-            &creator,
-            &fake_course_id,
-            &params,
-        );
+        client.edit_course(&creator, &fake_course_id, &params);
     }
 
     #[test]
@@ -308,11 +294,7 @@ mod test {
             new_level: None,
             new_duration_hours: None,
         };
-        client.edit_course(
-            &creator,
-            &course.id,
-            &params,
-        );
+        client.edit_course(&creator, &course.id, &params);
     }
 
     #[test]
@@ -349,11 +331,7 @@ mod test {
             new_level: None,
             new_duration_hours: None,
         };
-        client.edit_course(
-            &creator,
-            &course.id,
-            &params,
-        );
+        client.edit_course(&creator, &course.id, &params);
     }
 
     #[test]
@@ -402,11 +380,7 @@ mod test {
             new_level: None,
             new_duration_hours: None,
         };
-        client.edit_course(
-            &creator,
-            &course2.id,
-            &params,
-        );
+        client.edit_course(&creator, &course2.id, &params);
     }
 
     #[test]
@@ -443,11 +417,7 @@ mod test {
             new_level: None,
             new_duration_hours: None,
         };
-        let edited_course = client.edit_course(
-            &creator,
-            &course.id,
-            &params,
-        );
+        let edited_course = client.edit_course(&creator, &course.id, &params);
 
         assert_eq!(edited_course.title, String::from_str(&env, "New Title"));
         assert_eq!(
@@ -503,11 +473,7 @@ mod test {
             new_level: None,
             new_duration_hours: None,
         };
-        let edited_course = client.edit_course(
-            &creator,
-            &course.id,
-            &params,
-        );
+        let edited_course = client.edit_course(&creator, &course.id, &params);
 
         assert_eq!(
             edited_course.title,

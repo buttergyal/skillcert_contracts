@@ -24,8 +24,15 @@ fn test_save_profile_integration() {
     env.mock_all_auths();
 
     let profile = client.save_profile(
-        &name, &lastname, &email, &password, &confirm_password,
-        &specialization, &languages, &teaching_categories, &user
+        &name,
+        &lastname,
+        &email,
+        &password,
+        &confirm_password,
+        &specialization,
+        &languages,
+        &teaching_categories,
+        &user,
     );
 
     // Verify the returned profile
@@ -58,8 +65,15 @@ fn test_get_user_by_id_self_access() {
     env.mock_all_auths();
 
     client.save_profile(
-        &name, &lastname, &email, &password, &confirm_password,
-        &specialization, &languages, &teaching_categories, &user
+        &name,
+        &lastname,
+        &email,
+        &password,
+        &confirm_password,
+        &specialization,
+        &languages,
+        &teaching_categories,
+        &user,
     );
 
     // User retrieves their own profile (self-access)
@@ -95,8 +109,15 @@ fn test_get_user_by_id_admin_access() {
     let teaching_categories = Vec::from_array(&env, [String::from_str(&env, "Programming")]);
 
     client.save_profile(
-        &name, &lastname, &email, &password, &confirm_password,
-        &specialization, &languages, &teaching_categories, &user
+        &name,
+        &lastname,
+        &email,
+        &password,
+        &confirm_password,
+        &specialization,
+        &languages,
+        &teaching_categories,
+        &user,
     );
 
     // Admin retrieves user's profile
@@ -117,7 +138,15 @@ fn create_test_profile(
     _specialization: &str,
     languages: Vec<String>,
     teaching_categories: Vec<String>,
-) -> (String, String, String, String, String, Vec<String>, Vec<String>) {
+) -> (
+    String,
+    String,
+    String,
+    String,
+    String,
+    Vec<String>,
+    Vec<String>,
+) {
     (
         String::from_str(env, name),
         String::from_str(env, lastname),
@@ -151,13 +180,28 @@ fn test_list_all_users_basic() {
         let user: Address = Address::generate(&env);
         let languages = Vec::from_array(&env, [String::from_str(&env, "English")]);
         let categories = Vec::from_array(&env, [String::from_str(&env, specialization)]);
-        
-        let (name_str, lastname_str, email_str, password, confirm_password, _, _) = 
-            create_test_profile(&env, name, lastname, email, specialization, languages.clone(), categories.clone());
-        
+
+        let (name_str, lastname_str, email_str, password, confirm_password, _, _) =
+            create_test_profile(
+                &env,
+                name,
+                lastname,
+                email,
+                specialization,
+                languages.clone(),
+                categories.clone(),
+            );
+
         client.save_profile(
-            &name_str, &lastname_str, &email_str, &password, &confirm_password,
-            &String::from_str(&env, specialization), &languages, &categories, &user
+            &name_str,
+            &lastname_str,
+            &email_str,
+            &password,
+            &confirm_password,
+            &String::from_str(&env, specialization),
+            &languages,
+            &categories,
+            &user,
         );
     }
 
@@ -194,8 +238,15 @@ fn test_delete_user() {
     env.mock_all_auths();
 
     client.save_profile(
-        &name, &lastname, &email, &password, &confirm_password,
-        &specialization, &languages, &teaching_categories, &user
+        &name,
+        &lastname,
+        &email,
+        &password,
+        &confirm_password,
+        &specialization,
+        &languages,
+        &teaching_categories,
+        &user,
     );
 
     // Delete the user (self-deletion)

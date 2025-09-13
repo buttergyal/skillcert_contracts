@@ -245,7 +245,7 @@ fn test_get_prerequisites_by_course_id() {
 fn test_list_categories_counts() {
     let env = Env::default();
     env.mock_all_auths();
-    
+
     let contract_id = env.register(CourseRegistry, ());
     let client = CourseRegistryClient::new(&env, &contract_id);
     let creator = Address::generate(&env);
@@ -296,7 +296,7 @@ fn test_list_categories_counts() {
         if cname == String::from_str(&env, "Programming") {
             prog = c.count;
         }
-        if cname ==  String::from_str(&env, "Data") {
+        if cname == String::from_str(&env, "Data") {
             data = c.count;
         }
     }
@@ -309,7 +309,8 @@ fn test_list_categories_empty() {
     let env: Env = Env::default();
     let contract_id: Address = env.register(CourseRegistry, ());
     // No courses created, should return empty vector
-    let cats: Vec<Category> = env.as_contract(&contract_id, || course_registry_list_categories(&env));
+    let cats: Vec<Category> =
+        env.as_contract(&contract_id, || course_registry_list_categories(&env));
     assert_eq!(cats.len(), 0);
 }
 
@@ -317,7 +318,7 @@ fn test_list_categories_empty() {
 fn test_list_categories_ignores_none() {
     let env: Env = Env::default();
     env.mock_all_auths();
-    
+
     let contract_id: Address = env.register(CourseRegistry, ());
     let client = CourseRegistryClient::new(&env, &contract_id);
     let creator: Address = Address::generate(&env);
@@ -345,7 +346,7 @@ fn test_list_categories_ignores_none() {
 fn test_list_categories_with_id_gaps() {
     let env = Env::default();
     env.mock_all_auths();
-    
+
     let contract_id = env.register(CourseRegistry, ());
     let client = CourseRegistryClient::new(&env, &contract_id);
     let creator = Address::generate(&env);
