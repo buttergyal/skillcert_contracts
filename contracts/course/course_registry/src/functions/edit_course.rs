@@ -11,7 +11,7 @@ const TITLE_KEY: Symbol = symbol_short!("title");
 
 const EDIT_COURSE_EVENT: Symbol = symbol_short!("editcours");
 
-pub fn course_registry_edit_course(
+pub fn edit_course(
     env: Env,
     creator: Address,
     course_id: String,

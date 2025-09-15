@@ -5,7 +5,7 @@ use crate::error::{handle_error, Error};
 use crate::schema::CourseModule;
 use soroban_sdk::{symbol_short, Env, String};
 
-pub fn course_registry_remove_module(env: &Env, module_id: String) -> Result<(), &'static str> {
+pub fn remove_module(env: &Env, module_id: String) -> Result<(), &'static str> {
     if module_id.len() == 0 {
         handle_error(&env, Error::EmptyModuleId)
     }

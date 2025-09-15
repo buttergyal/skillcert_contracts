@@ -9,7 +9,7 @@ use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
 const GOAL_EDITED_EVENT: Symbol = symbol_short!("goaledit");
 
-pub fn course_registry_edit_goal(
+pub fn edit_goal(
     env: Env,
     creator: Address,
     course_id: String,

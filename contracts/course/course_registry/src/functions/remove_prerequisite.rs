@@ -7,7 +7,7 @@ use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
 
 const PREREQ_REMOVED_EVENT: Symbol = symbol_short!("prereqrmv");
 
-pub fn course_registry_remove_prerequisite(
+pub fn remove_prerequisite(
     env: Env,
     creator: Address,
     course_id: String,

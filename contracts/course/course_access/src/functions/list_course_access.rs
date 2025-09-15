@@ -20,7 +20,7 @@ use crate::schema::{CourseUsers, DataKey};
 /// Returns a `CourseUsers` struct containing the course ID and a list
 /// of user addresses who have access to the course. If no users are found,
 /// returns an empty list.
-pub fn course_access_list_course_access(env: Env, course_id: String) -> CourseUsers {
+pub fn list_course_access(env: Env, course_id: String) -> CourseUsers {
     let key = DataKey::CourseUsers(course_id.clone());
     env.storage().persistent().get(&key).unwrap_or(CourseUsers {
         course: course_id,
@@ -32,7 +32,7 @@ pub fn course_access_list_course_access(env: Env, course_id: String) -> CourseUs
 // mod test {
 //     use soroban_sdk::{symbol_short, testutils::Address as _, vec, Address, Env, String, Symbol};
 
-//     use crate::{course_access_list_course_access, CourseAccessContract, CourseUsers};
+//     use crate::{list_course_access, CourseAccessContract, CourseUsers};
 
 //     const COURSES_KEY: Symbol = symbol_short!("courses");
 
@@ -58,7 +58,7 @@ pub fn course_access_list_course_access(env: Env, course_id: String) -> CourseUs
 //             env.storage()
 //                 .persistent()
 //                 .set(&(COURSES_KEY, course_id.clone()), &course_users);
-//             let result: CourseUsers = course_access_list_course_access(env, course_id.clone());
+//             let result: CourseUsers = list_course_access(env, course_id.clone());
 //             assert_eq!(result, course_users);
 //         });
 //     }

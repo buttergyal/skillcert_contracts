@@ -23,7 +23,7 @@ const COURSE_ID_COUNTER: Symbol = symbol_short!("course");
 /// - Skips deleted courses (holes in the ID sequence).
 /// - Ignores courses without a category (`None`).
 /// - Uses persistent storage to retrieve each course.
-pub fn course_registry_list_categories(env: &Env) -> Vec<Category> {
+pub fn list_categories(env: &Env) -> Vec<Category> {
     // Temporary map to store category name -> count
     let mut categories_map: Map<String, u128> = Map::new(env);
 

@@ -10,7 +10,7 @@ const COURSE_KEY: Symbol = symbol_short!("course");
 const TITLE_KEY: Symbol = symbol_short!("title");
 const COURSE_ID: Symbol = symbol_short!("course");
 
-pub fn course_registry_create_course(
+pub fn create_course(
     env: Env,
     creator: Address,
     title: String,

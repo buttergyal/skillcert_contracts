@@ -15,7 +15,7 @@ use soroban_sdk::Env;
 ///
 /// Storage used:
 /// - DataKey::CourseCategory(id) -> CourseCategory
-pub fn course_registry_get_course_category(env: &Env, category_id: u128) -> Option<CourseCategory> {
+pub fn get_course_category(env: &Env, category_id: u128) -> Option<CourseCategory> {
     env.storage()
         .persistent()
         .get(&DataKey::CourseCategory(category_id))

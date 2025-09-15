@@ -191,7 +191,7 @@ pub fn get_admins(env: Env, caller: Address) -> Vec<Address> {
 }
 
 /// Check if system is initialized
-pub fn is_initialized(env: Env) -> bool {
+pub fn is_system_initialized(env: Env) -> bool {
     if let Some(config) = env
         .storage()
         .persistent()

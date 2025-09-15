@@ -7,7 +7,7 @@ use soroban_sdk::{symbol_short, Address, Env, Map, String, Symbol, Vec};
 
 const PREREQ_UPDATED_EVENT: Symbol = symbol_short!("preqedit");
 
-pub fn course_registry_edit_prerequisite(
+pub fn edit_prerequisite(
     env: Env,
     creator: Address,
     course_id: String,

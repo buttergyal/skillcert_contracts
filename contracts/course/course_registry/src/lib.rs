@@ -61,7 +61,7 @@ impl CourseRegistry {
         level: Option<CourseLevel>,
         duration_hours: Option<u32>,
     ) -> Course {
-        functions::create_course::course_registry_create_course(
+        functions::create_course::create_course(
             env,
             creator,
             title,
@@ -95,12 +95,7 @@ impl CourseRegistry {
         name: String,
         description: Option<String>,
     ) -> u128 {
-        functions::create_course_category::course_registry_create_course_category(
-            env,
-            caller,
-            name,
-            description,
-        )
+        functions::create_course_category::create_course_category(env, caller, name, description)
     }
 
     /// Retrieve a course by its ID.
@@ -116,7 +111,7 @@ impl CourseRegistry {
     ///
     /// Returns the `Course` object containing all course metadata.
     pub fn get_course(env: Env, course_id: String) -> Course {
-        functions::get_course::course_registry_get_course(&env, course_id)
+        functions::get_course::get_course(&env, course_id)
     }
 
     /// Retrieve a course category by its ID.
@@ -132,7 +127,7 @@ impl CourseRegistry {
     ///
     /// Returns `Some(CourseCategory)` if found, `None` if the category doesn't exist.
     pub fn get_course_category(env: Env, category_id: u128) -> Option<CourseCategory> {
-        functions::get_course_category::course_registry_get_course_category(&env, category_id)
+        functions::get_course_category::get_course_category(&env, category_id)
     }
 
     /// Get all courses created by a specific instructor.
@@ -148,9 +143,7 @@ impl CourseRegistry {
     ///
     /// Returns a vector of `Course` objects created by the instructor.
     pub fn get_courses_by_instructor(env: Env, instructor: Address) -> Vec<Course> {
-        functions::get_courses_by_instructor::course_registry_get_courses_by_instructor(
-            &env, instructor,
-        )
+        functions::get_courses_by_instructor::get_courses_by_instructor(&env, instructor)
     }
 
     /// Remove a module from a course.
@@ -166,8 +159,7 @@ impl CourseRegistry {
     ///
     /// Panics if the module removal fails or if the module doesn't exist.
     pub fn remove_module(env: Env, module_id: String) -> () {
-        functions::remove_module::course_registry_remove_module(&env, module_id)
-            .unwrap_or_else(|e| panic!("{}", e))
+        functions::remove_module::remove_module(&env, module_id).unwrap_or_else(|e| panic!("{}", e))
     }
 
     /// Add a new module to a course.
@@ -186,7 +178,7 @@ impl CourseRegistry {
     ///
     /// Returns the created `CourseModule` object.
     pub fn add_module(env: Env, course_id: String, position: u32, title: String) -> CourseModule {
-        functions::add_module::course_registry_add_module(env, course_id, position, title)
+        functions::add_module::add_module(env, course_id, position, title)
     }
 
     /// Delete a course from the registry.
@@ -204,7 +196,7 @@ impl CourseRegistry {
     ///
     /// Panics if the deletion fails or if the creator is not authorized.
     pub fn delete_course(env: Env, creator: Address, course_id: String) -> () {
-        functions::delete_course::course_registry_delete_course(&env, creator, course_id)
+        functions::delete_course::delete_course(&env, creator, course_id)
             .unwrap_or_else(|e| panic!("{}", e))
     }
 
@@ -246,13 +238,7 @@ impl CourseRegistry {
         goal_id: String,
         new_content: String,
     ) -> CourseGoal {
-        functions::edit_goal::course_registry_edit_goal(
-            env,
-            creator,
-            course_id,
-            goal_id,
-            new_content,
-        )
+        functions::edit_goal::edit_goal(env, creator, course_id, goal_id, new_content)
     }
 
     /// Add a new goal to a course.
@@ -270,7 +256,7 @@ impl CourseRegistry {
     ///
     /// Returns the created `CourseGoal` object.
     pub fn add_goal(env: Env, creator: Address, course_id: String, content: String) -> CourseGoal {
-        functions::add_goal::course_registry_add_goal(env, creator, course_id, content)
+        functions::add_goal::add_goal(env, creator, course_id, content)
     }
 
     /// Remove a goal from a course.
@@ -284,7 +270,7 @@ impl CourseRegistry {
     /// * `course_id` - The unique identifier of the course
     /// * `goal_id` - The unique identifier of the goal to remove
     pub fn remove_goal(env: Env, caller: Address, course_id: String, goal_id: String) -> () {
-        functions::remove_goal::course_registry_remove_goal(env, caller, course_id, goal_id)
+        functions::remove_goal::remove_goal(env, caller, course_id, goal_id)
     }
 
     /// Add prerequisites to a course.
@@ -304,7 +290,7 @@ impl CourseRegistry {
         course_id: String,
         prerequisite_course_ids: Vec<String>,
     ) {
-        functions::create_prerequisite::course_registry_add_prerequisite(
+        functions::create_prerequisite::add_prerequisite(
             env,
             creator,
             course_id,
@@ -329,7 +315,7 @@ impl CourseRegistry {
         course_id: String,
         prerequisite_course_id: String,
     ) {
-        functions::remove_prerequisite::course_registry_remove_prerequisite(
+        functions::remove_prerequisite::remove_prerequisite(
             env,
             creator,
             course_id,
@@ -354,12 +340,7 @@ impl CourseRegistry {
         course_id: String,
         new_prerequisites: Vec<String>,
     ) {
-        functions::edit_prerequisite::course_registry_edit_prerequisite(
-            env,
-            creator,
-            course_id,
-            new_prerequisites,
-        )
+        functions::edit_prerequisite::edit_prerequisite(env, creator, course_id, new_prerequisites)
     }
 
     /// Edit course information.
@@ -383,7 +364,7 @@ impl CourseRegistry {
         course_id: String,
         params: EditCourseParams,
     ) -> Course {
-        functions::edit_course::course_registry_edit_course(env, creator, course_id, params)
+        functions::edit_course::edit_course(env, creator, course_id, params)
     }
 
     /// Archive a course.
@@ -401,7 +382,7 @@ impl CourseRegistry {
     ///
     /// Returns the updated `Course` object with archived status.
     pub fn archive_course(env: &Env, creator: Address, course_id: String) -> Course {
-        functions::archive_course::course_registry_archive_course(env, creator, course_id)
+        functions::archive_course::archive_course(env, creator, course_id)
     }
 
     /// Check if a user is the creator of a specific course.
@@ -435,7 +416,7 @@ impl CourseRegistry {
     ///
     /// Returns a vector of all available `Category` objects.
     pub fn list_categories(env: Env) -> Vec<crate::schema::Category> {
-        functions::list_categories::course_registry_list_categories(&env)
+        functions::list_categories::list_categories(&env)
     }
 
     /// List courses with filtering and pagination.
@@ -459,7 +440,7 @@ impl CourseRegistry {
         limit: Option<u32>,
         offset: Option<u32>,
     ) -> Vec<Course> {
-        functions::list_courses_with_filters::course_registry_list_courses_with_filters(
+        functions::list_courses_with_filters::list_courses_with_filters(
             &env, filters, limit, offset,
         )
     }

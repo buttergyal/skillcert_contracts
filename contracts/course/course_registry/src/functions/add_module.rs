@@ -9,12 +9,7 @@ use soroban_sdk::{symbol_short, vec, Env, String, Symbol};
 const COURSE_KEY: Symbol = symbol_short!("course");
 const MODULE_KEY: Symbol = symbol_short!("module");
 
-pub fn course_registry_add_module(
-    env: Env,
-    course_id: String,
-    position: u32,
-    title: String,
-) -> CourseModule {
+pub fn add_module(env: Env, course_id: String, position: u32, title: String) -> CourseModule {
     // Verify course exists
     let course_storage_key: (Symbol, String) = (COURSE_KEY, course_id.clone());
 
@@ -110,7 +105,7 @@ mod test {
     }
 
     #[test]
-    fn test_course_registry_add_module_generates_unique_ids() {
+    fn test_add_module_generates_unique_ids() {
         let env = Env::default();
         env.mock_all_auths();
         let contract_id = env.register(CourseRegistry, {});
@@ -126,7 +121,7 @@ mod test {
     }
 
     #[test]
-    fn test_course_registry_add_module_storage_key_format() {
+    fn test_add_module_storage_key_format() {
         let env = Env::default();
         env.mock_all_auths();
         let contract_id = env.register(CourseRegistry, {});
