@@ -205,9 +205,8 @@ pub fn is_initialized(env: Env) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::{UserManagement, UserManagementClient};
-    use soroban_sdk::{testutils::Address as _, Env};
+    use soroban_sdk::{Address, testutils::Address as _, Env};
 
     #[test]
     fn test_initialize_system() {
