@@ -7,7 +7,7 @@ use soroban_sdk::{symbol_short, testutils::Address as _, Address, Env, String, V
 use crate::{
     functions::{
         get_prerequisites_by_course::get_prerequisites_by_course_id,
-        list_categories::course_registry_list_categories,
+        list_categories::list_categories,
     },
     schema::Course,
 };
@@ -309,8 +309,7 @@ fn test_list_categories_empty() {
     let env: Env = Env::default();
     let contract_id: Address = env.register(CourseRegistry, ());
     // No courses created, should return empty vector
-    let cats: Vec<Category> =
-        env.as_contract(&contract_id, || course_registry_list_categories(&env));
+    let cats: Vec<Category> = env.as_contract(&contract_id, || list_categories(&env));
     assert_eq!(cats.len(), 0);
 }
 

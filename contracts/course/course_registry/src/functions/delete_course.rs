@@ -10,11 +10,7 @@ const COURSE_KEY: Symbol = symbol_short!("course");
 const MODULE_KEY: Symbol = symbol_short!("module");
 const TITLE_KEY: Symbol = symbol_short!("title");
 
-pub fn course_registry_delete_course(
-    env: &Env,
-    creator: Address,
-    course_id: String,
-) -> Result<(), &'static str> {
+pub fn delete_course(env: &Env, creator: Address, course_id: String) -> Result<(), &'static str> {
     creator.require_auth();
 
     if course_id.is_empty() {

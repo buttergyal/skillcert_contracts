@@ -20,7 +20,7 @@ use soroban_sdk::{Address, Env, String};
 ///
 /// Returns `true` if access was successfully revoked, `false` if the user
 /// didn't have access to the course in the first place.
-pub fn course_access_revoke_access(env: Env, course_id: String, user: Address) -> bool {
+pub fn revoke_access(env: Env, course_id: String, user: Address) -> bool {
     let key: DataKey = DataKey::CourseAccess(course_id.clone(), user.clone());
 
     // Check if the CourseAccess entry exists in persistent storage

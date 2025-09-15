@@ -7,7 +7,7 @@ use soroban_sdk::{symbol_short, Address, Env, Symbol, Vec};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 
-pub fn course_registry_get_courses_by_instructor(env: &Env, instructor: Address) -> Vec<Course> {
+pub fn get_courses_by_instructor(env: &Env, instructor: Address) -> Vec<Course> {
     let mut results: Vec<Course> = Vec::new(env);
     let mut id: u128 = 1;
 

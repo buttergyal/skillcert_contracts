@@ -8,7 +8,7 @@ use crate::schema::Course;
 
 const ARCHIVED_COURSE_EVENT: Symbol = symbol_short!("akhivecus");
 
-pub fn course_registry_archive_course(env: &Env, creator: Address, course_id: String) -> Course {
+pub fn archive_course(env: &Env, creator: Address, course_id: String) -> Course {
     creator.require_auth();
 
     let key = (symbol_short!("course"), course_id.clone());

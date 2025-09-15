@@ -5,7 +5,7 @@ use soroban_sdk::{symbol_short, Env, Symbol, Vec};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 
-pub fn course_registry_list_courses_with_filters(
+pub fn list_courses_with_filters(
     env: &Env,
     filters: CourseFilters,
     limit: Option<u32>,

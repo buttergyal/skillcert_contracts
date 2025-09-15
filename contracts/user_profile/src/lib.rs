@@ -35,7 +35,7 @@ impl UserProfileContract {
     ///
     /// Returns the `UserProfile` containing the user's information.
     pub fn get_user_profile(env: Env, user_address: Address) -> UserProfile {
-        functions::get_user_profile::user_profile_get_user_profile(&env, user_address)
+        functions::get_user_profile::get_user_profile(&env, user_address)
     }
 
     /// Get a user profile with privacy controls.
@@ -58,7 +58,7 @@ impl UserProfileContract {
         user_address: Address,
         requester_address: Address,
     ) -> UserProfile {
-        functions::get_user_profile::user_profile_get_user_profile_with_privacy(
+        functions::get_user_profile::get_user_profile_with_privacy(
             &env,
             user_address,
             requester_address,

@@ -19,7 +19,7 @@ use soroban_sdk::{Address, Env, String, Vec};
 /// Storage used (replace keys if your schema differs):
 /// - ("category_seq",) -> u128                // sequence counter
 /// - (("category", id),) -> CourseCategory    // category record by id
-pub fn course_registry_create_course_category(
+pub fn create_course_category(
     env: Env,
     caller: Address,
     name: String,
