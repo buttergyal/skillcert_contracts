@@ -15,10 +15,7 @@ pub fn course_registry_add_module(
     position: u32,
     title: String,
 ) -> CourseModule {
-    // Verify course exists
     let course_storage_key: (Symbol, String) = (COURSE_KEY, course_id.clone());
-
-    // require!(env.storage().persistent().has(&course_storage_key), "Course with the specified ID does not exist");
 
     if !env.storage().persistent().has(&course_storage_key) {
         handle_error(&env, Error::CourseIdNotExist)
