@@ -75,7 +75,7 @@ fn delete_course_modules(env: &Env, course_id: &String) {
             break;
         }
         counter += 1;
-        if counter > 1000 {
+        if counter > crate::schema::MAX_LOOP_GUARD {
             break;
         }
     }

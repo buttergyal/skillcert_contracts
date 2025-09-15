@@ -25,7 +25,7 @@ pub fn course_registry_list_courses_with_filters(
 
     loop {
         // Much more aggressive safety limits for budget
-        if id > 50 || empty_checks > 10 {
+        if id > crate::schema::MAX_SCAN_ID || empty_checks > crate::schema::MAX_EMPTY_CHECKS {
             break;
         }
 
@@ -198,8 +198,8 @@ mod test {
 
         // Filter for expensive courses - should return empty
         let filters = CourseFilters {
-            min_price: Some(500),
-            max_price: Some(1000),
+            min_price: Some(crate::schema::FILTER_MIN_PRICE),
+            max_price: Some(crate::schema::DEFAULT_COURSE_PRICE),
             category: None,
             level: None,
             min_duration: None,
