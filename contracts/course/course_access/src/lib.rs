@@ -3,6 +3,9 @@
 
 #![no_std]
 
+/// Contract version for tracking deployments and upgrades
+pub const VERSION: &str = "1.0.0";
+
 mod error;
 mod functions;
 mod schema;
