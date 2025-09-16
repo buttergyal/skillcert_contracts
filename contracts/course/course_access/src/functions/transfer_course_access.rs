@@ -2,6 +2,7 @@
 // Copyright (c) 2025 SkillCert
 
 use crate::error::{handle_error, Error};
+use crate::functions::config::{TTL_BUMP, TTL_TTL};
 use crate::schema::{CourseAccess, DataKey};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
@@ -56,8 +57,8 @@ pub fn transfer_course_access(env: Env, course_id: String, from: Address, to: Ad
     // Extend the TTL for the new user's storage entry
     env.storage().persistent().extend_ttl(
         &DataKey::CourseAccess(course_id.clone(), to.clone()),
-        100,
-        1000,
+        TTL_BUMP,
+        TTL_TTL,
     );
 
     // Emits an event indicating a course access transfer between users.

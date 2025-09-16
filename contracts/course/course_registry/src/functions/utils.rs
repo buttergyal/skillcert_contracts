@@ -155,7 +155,7 @@ mod tests {
             title: String::from_str(env, "Test Course"),
             description: String::from_str(env, "Test Description"),
             creator: Address::generate(env),
-            price: 1000,
+            price: crate::schema::DEFAULT_COURSE_PRICE,
             category: None,
             language: None,
             thumbnail_url: None,

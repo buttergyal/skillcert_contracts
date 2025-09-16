@@ -26,7 +26,7 @@ pub fn get_courses_by_instructor(env: &Env, instructor: Address) -> Vec<Course> 
         }
 
         id += 1;
-        if id > 1000 {
+        if id > crate::schema::MAX_LOOP_GUARD {
             break; // safety limit
         }
     }

@@ -2,7 +2,7 @@
 // Copyright (c) 2025 SkillCert
 
 use crate::error::{handle_error, Error};
-use crate::schema::{AdminConfig, DataKey, LightProfile, UserProfile, UserStatus};
+use crate::schema::{AdminConfig, DataKey, LightProfile, UserProfile, UserStatus, DEFAULT_MAX_PAGE_SIZE};
 use core::iter::Iterator;
 use soroban_sdk::{symbol_short, Address, Env, Symbol};
 
@@ -174,7 +174,7 @@ mod tests {
             let config = AdminConfig {
                 initialized: true,
                 super_admin: admin.clone(),
-                max_page_size: 100,
+                max_page_size: DEFAULT_MAX_PAGE_SIZE,
                 total_user_count: 0,
             };
             env.storage()

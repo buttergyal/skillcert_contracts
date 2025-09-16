@@ -3,6 +3,11 @@
 
 use soroban_sdk::{contracttype, Address, String, Vec};
 
+/// Default and limit constants for user management configuration
+pub const DEFAULT_MAX_PAGE_SIZE: u32 = 100;
+pub const ABSOLUTE_MAX_PAGE_SIZE: u32 = 1000;
+pub const MAX_ADMINS: usize = 10;
+
 /// Complete user profile information.
 ///
 /// This struct contains all user data including personal information,
