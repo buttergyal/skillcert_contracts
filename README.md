@@ -105,3 +105,7 @@ stellar contract invoke \
 ```
 
 For more examples, check out the `scripts/invoke_examples.sh` file.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

@@ -10,7 +10,7 @@ const COURSE_KEY: Symbol = symbol_short!("course");
 const TITLE_KEY: Symbol = symbol_short!("title");
 const COURSE_ID: Symbol = symbol_short!("course");
 
-pub fn course_registry_create_course(
+pub fn create_course(
     env: Env,
     creator: Address,
     title: String,
@@ -153,7 +153,7 @@ mod test {
         let client = CourseRegistryClient::new(&env, &contract_id);
         let title: String = String::from_str(&env, "title");
         let description: String = String::from_str(&env, "A description");
-        let price: u128 = 1000;
+        let price: u128 = crate::schema::DEFAULT_COURSE_PRICE;
 
         let another_course_title: String = String::from_str(&env, "another title");
         let another_course_description: String = String::from_str(&env, "another description");
@@ -201,7 +201,7 @@ mod test {
         let title: String = String::from_str(&env, "title");
         let description: String = String::from_str(&env, "A description");
         let another_description: String = String::from_str(&env, "another description");
-        let price: u128 = 1000;
+        let price: u128 = crate::schema::DEFAULT_COURSE_PRICE;
 
         client.create_course(
             &Address::generate(&env),
@@ -237,7 +237,7 @@ mod test {
         let client = CourseRegistryClient::new(&env, &contract_id);
         let title: String = String::from_str(&env, "");
         let description: String = String::from_str(&env, "A description");
-        let price: u128 = 1000;
+        let price: u128 = crate::schema::DEFAULT_COURSE_PRICE;
 
         client.create_course(
             &Address::generate(&env),
@@ -285,7 +285,7 @@ mod test {
         let client = CourseRegistryClient::new(&env, &contract_id);
         let title: String = String::from_str(&env, "   ");
         let description: String = String::from_str(&env, "A description");
-        let price: u128 = 1000;
+        let price: u128 = crate::schema::DEFAULT_COURSE_PRICE;
 
         client.create_course(
             &Address::generate(&env),
@@ -310,7 +310,7 @@ mod test {
         let title1: String = String::from_str(&env, "Programming Basics");
         let title2: String = String::from_str(&env, "PROGRAMMING BASICS");
         let description: String = String::from_str(&env, "A description");
-        let price: u128 = 1000;
+        let price: u128 = crate::schema::DEFAULT_COURSE_PRICE;
 
         client.create_course(
             &Address::generate(&env),
@@ -517,7 +517,7 @@ mod test {
         env.mock_all_auths();
         let contract_id: Address = env.register(CourseRegistry, {});
         let client = CourseRegistryClient::new(&env, &contract_id);
-        let price: u128 = 1000;
+        let price: u128 = crate::schema::DEFAULT_COURSE_PRICE;
 
         let course1 = client.create_course(
             &Address::generate(&env),

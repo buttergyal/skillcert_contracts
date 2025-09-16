@@ -3,6 +3,7 @@
 
 use crate::schema::{CourseUsers, DataKey, UserCourses};
 use soroban_sdk::{Address, Env, String};
+use crate::functions::config::{TTL_BUMP, TTL_TTL};
 
 /// Revoke access for a specific user from a course.
 ///
@@ -20,7 +21,7 @@ use soroban_sdk::{Address, Env, String};
 ///
 /// Returns `true` if access was successfully revoked, `false` if the user
 /// didn't have access to the course in the first place.
-pub fn course_access_revoke_access(env: Env, course_id: String, user: Address) -> bool {
+pub fn revoke_access(env: Env, course_id: String, user: Address) -> bool {
     let key: DataKey = DataKey::CourseAccess(course_id.clone(), user.clone());
 
     // Check if the CourseAccess entry exists in persistent storage
@@ -42,7 +43,7 @@ pub fn course_access_revoke_access(env: Env, course_id: String, user: Address) -
                     .set(&user_courses_key, &user_courses);
                 env.storage()
                     .persistent()
-                    .extend_ttl(&user_courses_key, 100, 1000);
+                    .extend_ttl(&user_courses_key, TTL_BUMP, TTL_TTL);
             }
         }
 
@@ -60,7 +61,7 @@ pub fn course_access_revoke_access(env: Env, course_id: String, user: Address) -
                     .set(&course_users_key, &course_users);
                 env.storage()
                     .persistent()
-                    .extend_ttl(&course_users_key, 100, 1000);
+                    .extend_ttl(&course_users_key, TTL_BUMP, TTL_TTL);
             }
         }
 

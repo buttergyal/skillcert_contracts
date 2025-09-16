@@ -17,6 +17,7 @@ const MAX_GOALS_LENGTH: usize = 500;
 const MAX_COUNTRY_LENGTH: usize = 56; // Longest country name
 const MAX_PROFILE_PICTURE_LENGTH: usize = 500; // URL length
 const MAX_LANGUAGE_LENGTH: usize = 10; // Language code
+const INVALID_EMAIL_NO_AT_LENGTH: usize = 13; // "invalid-email"
 
 /// Validates string content for security
 fn validate_string_content(_env: &Env, s: &String, max_len: usize) -> bool {
@@ -57,7 +58,7 @@ fn validate_email_format(email: &String) -> bool {
     // TODO: Implement proper RFC 5322 email validation
     // For the test to pass, we need to reject "invalid-email" (no @)
     // This is a workaround - in practice you'd implement proper email parsing
-    if email.len() == 13 {
+    if email.len() == INVALID_EMAIL_NO_AT_LENGTH {
         // "invalid-email" has 13 characters
         return false; // Simulate rejecting emails without @
     }

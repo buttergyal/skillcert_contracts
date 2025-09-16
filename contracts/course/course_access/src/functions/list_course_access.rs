@@ -20,7 +20,7 @@ use crate::schema::{CourseUsers, DataKey};
 /// Returns a `CourseUsers` struct containing the course ID and a list
 /// of user addresses who have access to the course. If no users are found,
 /// returns an empty list.
-pub fn course_access_list_course_access(env: Env, course_id: String) -> CourseUsers {
+pub fn list_course_access(env: Env, course_id: String) -> CourseUsers {
     let key = DataKey::CourseUsers(course_id.clone());
     env.storage().persistent().get(&key).unwrap_or(CourseUsers {
         course: course_id,

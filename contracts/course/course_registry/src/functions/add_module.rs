@@ -107,7 +107,7 @@ mod test {
     }
 
     #[test]
-    fn test_course_registry_add_module_generates_unique_ids() {
+    fn test_add_module_generates_unique_ids() {
         let env = Env::default();
         env.mock_all_auths();
         let contract_id = env.register(CourseRegistry, {});
@@ -123,7 +123,7 @@ mod test {
     }
 
     #[test]
-    fn test_course_registry_add_module_storage_key_format() {
+    fn test_add_module_storage_key_format() {
         let env = Env::default();
         env.mock_all_auths();
         let contract_id = env.register(CourseRegistry, {});

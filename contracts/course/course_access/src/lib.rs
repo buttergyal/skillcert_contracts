@@ -3,6 +3,9 @@
 
 #![no_std]
 
+/// Contract version for tracking deployments and upgrades
+pub const VERSION: &str = "1.0.0";
+
 mod error;
 mod functions;
 mod schema;
@@ -58,7 +61,7 @@ impl CourseAccessContract {
     /// * `course_id` - The unique identifier of the course
     /// * `user` - The address of the user to grant access to
     pub fn grant_access(env: Env, course_id: String, user: Address) {
-        course_access_grant_access(env, course_id, user)
+        functions::grant_access::grant_access(env, course_id, user)
     }
 
     /// Revoke access for a specific user from a course.
@@ -76,7 +79,7 @@ impl CourseAccessContract {
     ///
     /// Returns `true` if access was successfully revoked, `false` otherwise.
     pub fn revoke_access(env: Env, course_id: String, user: Address) -> bool {
-        course_access_revoke_access(env, course_id, user)
+        functions::revoke_access::revoke_access(env, course_id, user)
     }
 
     /// Save or update a user's profile on-chain.
@@ -118,7 +121,7 @@ impl CourseAccessContract {
     ///
     /// Returns a `UserCourses` struct containing the list of accessible courses.
     pub fn list_user_courses(env: Env, user: Address) -> UserCourses {
-        course_access_list_user_courses(env, user)
+        functions::list_user_courses::list_user_courses(env, user)
     }
 
     /// List all users who have access to a course.
@@ -134,7 +137,7 @@ impl CourseAccessContract {
     ///
     /// Returns a `CourseUsers` struct containing the list of users with access.
     pub fn list_course_access(env: Env, course_id: String) -> CourseUsers {
-        course_access_list_course_access(env, course_id)
+        functions::list_course_access::list_course_access(env, course_id)
     }
 
     /// Revoke all user access for a course.
@@ -152,7 +155,7 @@ impl CourseAccessContract {
     ///
     /// Returns the number of users affected by the revocation and emits an event.
     pub fn revoke_all_access(env: Env, user: Address, course_id: String) -> u32 {
-        course_access_revoke_all_access(env, user, course_id)
+        functions::revoke_all_access::revoke_all_access(env, user, course_id)
     }
 
     /// Configure external contract addresses used for auth checks.
