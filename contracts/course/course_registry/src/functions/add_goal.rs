@@ -11,6 +11,9 @@ const GOAL_ADDED_EVENT: Symbol = symbol_short!("goaladd");
 pub fn add_goal(env: Env, creator: Address, course_id: String, content: String) -> CourseGoal {
     creator.require_auth();
     // Validate input
+    if course_id.is_empty() {
+        handle_error(&env, Error::InvalidInput)
+    }
     if content.is_empty() {
         handle_error(&env, Error::EmptyGoalContent)
     }

@@ -21,7 +21,16 @@ use soroban_sdk::{Address, Env, String, Vec};
 /// # Panics
 ///
 /// Panics with `Error::UserAlreadyHasAccess` if the user already has access to the course.
+ validate-input-parameter
+pub fn course_access_grant_access(env: Env, course_id: String, user: Address) {
+    // Input validation
+    if course_id.is_empty() {
+        handle_error(&env, Error::InvalidInput)
+    }
+    // Optionally, add more checks for user address validity if needed
+
 pub fn grant_access(env: Env, course_id: String, user: Address) {
+  main
     let key: DataKey = DataKey::CourseAccess(course_id.clone(), user.clone());
 
     // Check if access already exists to prevent duplicates

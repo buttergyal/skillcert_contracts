@@ -17,6 +17,12 @@ pub fn edit_goal(
 ) -> CourseGoal {
     creator.require_auth();
     // Validate input
+    if course_id.is_empty() {
+        handle_error(&env, Error::InvalidInput)
+    }
+    if goal_id.is_empty() {
+        handle_error(&env, Error::InvalidInput)
+    }
     if new_content.is_empty() {
         handle_error(&env, Error::EmptyNewGoalContent)
     }

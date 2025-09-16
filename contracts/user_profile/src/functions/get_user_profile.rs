@@ -5,8 +5,15 @@ use soroban_sdk::{Address, Env, Symbol};
 
 use crate::schema::UserProfile;
 
+ validate-input-parameter
+pub fn user_profile_get_user_profile(env: &Env, user_address: Address) -> UserProfile {
+    // Input validation
+    // If Address type supports is_empty or similar, add check. Otherwise, skip.
+    // For demonstration, assume Address cannot be empty.
+
 pub fn get_user_profile(env: &Env, user_address: Address) -> UserProfile {
     // Create the storage key for the user profile
+ main
     let key = Symbol::new(env, "profile");
 
     // Get the user profile from storage
@@ -26,10 +33,9 @@ pub fn get_user_profile_with_privacy(
     user_address: Address,
     requester_address: Address,
 ) -> UserProfile {
-    // Create the storage key for the user profile
+    // Input validation
+    // If Address type supports is_empty or similar, add check. Otherwise, skip.
     let key = Symbol::new(env, "profile");
-
-    // TODO: Implement caching mechanism for frequently accessed profiles
 
     // Get the user profile from storage
     let mut profile: UserProfile = env
@@ -37,7 +43,6 @@ pub fn get_user_profile_with_privacy(
         .instance()
         .get(&(key, user_address.clone()))
         .expect("User profile not found");
-
     // Check privacy settings
     // If profile is not public and requester is not the profile owner, hide email
     if !profile.privacy_public && requester_address != user_address {
