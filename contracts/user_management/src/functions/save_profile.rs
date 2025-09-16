@@ -15,7 +15,7 @@ const MAX_CATEGORY_LENGTH: usize = 100;
 const MAX_PASSWORD_LENGTH: usize = 128;
 const MIN_PASSWORD_LENGTH: usize = 8;
 
-pub fn user_management_save_profile(
+pub fn save_profile(
     env: Env,
     caller: Address,
     name: String,

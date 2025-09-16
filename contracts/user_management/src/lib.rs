@@ -3,6 +3,9 @@
 
 #![no_std]
 
+/// Contract version for tracking deployments and upgrades
+pub const VERSION: &str = "1.0.0";
+
 pub mod error;
 pub mod functions;
 pub mod schema;
@@ -56,7 +59,7 @@ impl UserManagement {
         teaching_categories: Vec<String>,
         user: Address,
     ) -> UserProfile {
-        functions::save_profile::user_management_save_profile(
+        functions::save_profile::save_profile(
             env,
             user,
             name,
@@ -270,6 +273,6 @@ impl UserManagement {
     /// # Returns
     /// * `bool` - True if system is initialized
     pub fn is_system_initialized(env: Env) -> bool {
-        functions::admin_management::is_initialized(env)
+        functions::admin_management::is_system_initialized(env)
     }
 }

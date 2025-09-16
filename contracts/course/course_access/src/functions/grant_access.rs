@@ -2,6 +2,7 @@
 // Copyright (c) 2025 SkillCert
 
 use crate::error::{handle_error, Error};
+use crate::functions::config::{TTL_BUMP, TTL_TTL};
 use crate::schema::{CourseAccess, CourseUsers, DataKey, UserCourses};
 use soroban_sdk::{Address, Env, String, Vec};
 
@@ -20,6 +21,7 @@ use soroban_sdk::{Address, Env, String, Vec};
 /// # Panics
 ///
 /// Panics with `Error::UserAlreadyHasAccess` if the user already has access to the course.
+ validate-input-parameter
 pub fn course_access_grant_access(env: Env, course_id: String, user: Address) {
     // Input validation
     if course_id.is_empty() {
@@ -27,6 +29,8 @@ pub fn course_access_grant_access(env: Env, course_id: String, user: Address) {
     }
     // Optionally, add more checks for user address validity if needed
 
+pub fn grant_access(env: Env, course_id: String, user: Address) {
+  main
     let key: DataKey = DataKey::CourseAccess(course_id.clone(), user.clone());
 
     // Check if access already exists to prevent duplicates
@@ -42,7 +46,9 @@ pub fn course_access_grant_access(env: Env, course_id: String, user: Address) {
 
     // Store the access entry
     env.storage().persistent().set(&key, &course_access);
-    env.storage().persistent().extend_ttl(&key, 100, 1000);
+    env.storage()
+        .persistent()
+        .extend_ttl(&key, TTL_BUMP, TTL_TTL);
 
     // Update UserCourses
     let user_courses_key = DataKey::UserCourses(user.clone());
@@ -61,7 +67,7 @@ pub fn course_access_grant_access(env: Env, course_id: String, user: Address) {
             .set(&user_courses_key, &user_courses);
         env.storage()
             .persistent()
-            .extend_ttl(&user_courses_key, 100, 1000);
+            .extend_ttl(&user_courses_key, TTL_BUMP, TTL_TTL);
     }
 
     // Update CourseUsers
@@ -81,6 +87,6 @@ pub fn course_access_grant_access(env: Env, course_id: String, user: Address) {
             .set(&course_users_key, &course_users);
         env.storage()
             .persistent()
-            .extend_ttl(&course_users_key, 100, 1000);
+            .extend_ttl(&course_users_key, TTL_BUMP, TTL_TTL);
     }
 }

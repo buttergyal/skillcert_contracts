@@ -99,3 +99,7 @@ pub fn set_contract_addrs(
     inst.set(&(KEY_USER_MGMT_ADDR,), &user_mgmt_addr);
     inst.set(&(KEY_COURSE_REG_ADDR,), &course_registry_addr);
 }
+
+/// TTL configuration constants for persistent storage entries
+pub const TTL_TTL: u32 = 1000; // time-to-live
+pub const TTL_BUMP: u32 = 100; // bump amount on access

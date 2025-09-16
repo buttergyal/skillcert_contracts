@@ -7,12 +7,7 @@ use soroban_sdk::{symbol_short, Address, Env, Map, String, Symbol, Vec};
 
 const PREREQ_CREATED_EVENT: Symbol = symbol_short!("prereqAdd");
 
-pub fn course_registry_add_prerequisite(
-    env: Env,
-    creator: Address,
-    course_id: String,
-    prerequisites: Vec<String>,
-) {
+pub fn add_prerequisite(env: Env, creator: Address, course_id: String, prerequisites: Vec<String>) {
     creator.require_auth();
 
     let course_key: (Symbol, String) = (symbol_short!("course"), course_id.clone());

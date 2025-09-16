@@ -8,12 +8,7 @@ use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
 const GOAL_ADDED_EVENT: Symbol = symbol_short!("goaladd");
 
-pub fn course_registry_add_goal(
-    env: Env,
-    creator: Address,
-    course_id: String,
-    content: String,
-) -> CourseGoal {
+pub fn add_goal(env: Env, creator: Address, course_id: String, content: String) -> CourseGoal {
     creator.require_auth();
     // Validate input
     if course_id.is_empty() {

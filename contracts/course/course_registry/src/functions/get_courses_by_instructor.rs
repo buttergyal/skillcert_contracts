@@ -7,7 +7,7 @@ use soroban_sdk::{symbol_short, Address, Env, Symbol, Vec};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 
-pub fn course_registry_get_courses_by_instructor(env: &Env, instructor: Address) -> Vec<Course> {
+pub fn get_courses_by_instructor(env: &Env, instructor: Address) -> Vec<Course> {
     let mut results: Vec<Course> = Vec::new(env);
     let mut id: u128 = 1;
 
@@ -26,7 +26,7 @@ pub fn course_registry_get_courses_by_instructor(env: &Env, instructor: Address)
         }
 
         id += 1;
-        if id > 1000 {
+        if id > crate::schema::MAX_LOOP_GUARD {
             break; // safety limit
         }
     }

@@ -21,7 +21,7 @@ use crate::schema::Course;
 ///
 /// Storage used (replace keys if your schema differs):
 /// - (("course", id),) -> Course    // course record by id
-pub fn course_registry_get_course(env: &Env, course_id: String) -> Course {
+pub fn get_course(env: &Env, course_id: String) -> Course {
     // Create the storage key for the course
     let key = Symbol::new(env, "course");
 

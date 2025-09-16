@@ -43,7 +43,7 @@ const REVOKE_ALL_EVENT: Symbol = symbol_short!("revokeall");
 /// # Panics
 ///
 /// Panics with `Error::Unauthorized` if the caller is not authorized to perform this operation.
-pub fn course_access_revoke_all_access(env: Env, caller: Address, course_id: String) -> u32 {
+pub fn revoke_all_access(env: Env, caller: Address, course_id: String) -> u32 {
     caller.require_auth();
 
     // Resolve admin via cross-contract if configured

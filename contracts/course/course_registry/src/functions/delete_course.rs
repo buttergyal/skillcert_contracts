@@ -10,11 +10,7 @@ const COURSE_KEY: Symbol = symbol_short!("course");
 const MODULE_KEY: Symbol = symbol_short!("module");
 const TITLE_KEY: Symbol = symbol_short!("title");
 
-pub fn course_registry_delete_course(
-    env: &Env,
-    creator: Address,
-    course_id: String,
-) -> Result<(), &'static str> {
+pub fn delete_course(env: &Env, creator: Address, course_id: String) -> Result<(), &'static str> {
     creator.require_auth();
 
     if course_id.is_empty() {
@@ -75,7 +71,7 @@ fn delete_course_modules(env: &Env, course_id: &String) {
             break;
         }
         counter += 1;
-        if counter > 1000 {
+        if counter > crate::schema::MAX_LOOP_GUARD {
             break;
         }
     }
