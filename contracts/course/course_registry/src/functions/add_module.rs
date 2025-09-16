@@ -9,11 +9,13 @@ use soroban_sdk::{symbol_short, vec, Env, String, Symbol};
 const COURSE_KEY: Symbol = symbol_short!("course");
 const MODULE_KEY: Symbol = symbol_short!("module");
 
-pub fn add_module(env: Env, course_id: String, position: u32, title: String) -> CourseModule {
-    // Verify course exists
+pub fn course_registry_add_module(
+    env: Env,
+    course_id: String,
+    position: u32,
+    title: String,
+) -> CourseModule {
     let course_storage_key: (Symbol, String) = (COURSE_KEY, course_id.clone());
-
-    // require!(env.storage().persistent().has(&course_storage_key), "Course with the specified ID does not exist");
 
     if !env.storage().persistent().has(&course_storage_key) {
         handle_error(&env, Error::CourseIdNotExist)
