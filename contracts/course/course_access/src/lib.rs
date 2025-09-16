@@ -10,6 +10,9 @@ mod error;
 mod functions;
 mod schema;
 
+#[cfg(test)]
+mod test;
+
 use soroban_sdk::{contract, contractimpl, Address, Env, String};
 
 pub use error::Error;
