@@ -7,6 +7,9 @@ mod functions;
 mod schema;
 mod error;
 
+#[cfg(test)]
+mod test;
+
 use soroban_sdk::{contract, contractimpl, Address, Env, String};
 
 pub use functions::*;
