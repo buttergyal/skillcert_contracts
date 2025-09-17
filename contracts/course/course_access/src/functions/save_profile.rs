@@ -27,7 +27,7 @@ use soroban_sdk::{Address, Env, String};
 /// - `Error::NameRequired` if name is empty
 /// - `Error::EmailRequired` if email is empty
 /// - `Error::CountryRequired` if country is empty
-pub fn save_profile(
+pub fn SaveUserProfile(
     env: Env,
     name: String,
     email: String,

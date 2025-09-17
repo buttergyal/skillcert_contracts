@@ -20,14 +20,14 @@ mod user_management {
 
     #[contractimpl]
     impl UserManagement {
-        pub fn is_admin(_env: Env, _who: Address) -> bool {
+        pub fn IsAdmin(_env: Env, _who: Address) -> bool {
             // For testing, always return true to simplify admin checks
             true
         }
-        pub fn save_profile(_env: Env, _user: Address, _name: String, _email: String) {
+        pub fn SaveUserProfile(_env: Env, _user: Address, _name: String, _email: String) {
             // Mock implementation
         }
-        pub fn is_course_creator(_env: Env, _course_id: String, _user: Address) -> bool {
+        pub fn IsCourseCreator(_env: Env, _course_id: String, _user: Address) -> bool {
             true
         }
     }
@@ -41,13 +41,13 @@ mod course_registry {
 
     #[contractimpl]
     impl CourseRegistry {
-        pub fn is_course_creator(_env: Env, _course_id: String, _user: Address) -> bool {
+        pub fn IsCourseCreator(_env: Env, _course_id: String, _user: Address) -> bool {
             true
         }
     }
 }
 
-fn setup_test<'a>() -> (Env, CourseAccessContractClient<'a>, Address, Address, Address) {
+fn SetupTest<'a>() -> (Env, CourseAccessContractClient<'a>, Address, Address, Address) {
     let env = Env::default();
     env.mock_all_auths();
 
@@ -62,110 +62,103 @@ fn setup_test<'a>() -> (Env, CourseAccessContractClient<'a>, Address, Address, A
     let admin = Address::generate(&env);
     
     // Initialize the contract
-    client.initialize(&admin, &user_mgmt_id, &course_registry_id);
+    client.Initialize(&admin, &user_mgmt_id, &course_registry_id);
 
     (env, client, admin, user_mgmt_id, course_registry_id)
 }
 
 #[test]
-fn test_basic_functionality() {
-    let (env, client, _admin, _, _) = setup_test();
+fn TestBasicFunctionality() {
+    let (env, client, _admin, _, _) = SetupTest();
     let user = Address::generate(&env);
     let course_id = String::from_str(&env, "course-1");
 
     // Test grant access
-    client.grant_access(&course_id, &user);
+    client.GrantAccess(&course_id, &user);
     
     // Verify access was granted
-    let user_courses = client.list_user_courses(&user);
+    let user_courses = client.ListUserCourses(&user);
     assert!(user_courses.courses.contains(&course_id));
     
-    let course_access = client.list_course_access(&course_id);
+    let course_access = client.ListCourseAccess(&course_id);
     assert!(course_access.users.contains(&user));
 
     // Test revoke access
-    let result = client.revoke_access(&course_id, &user);
+    let result = client.RevokeAccess(&course_id, &user);
     assert!(result);
     
     // Verify access was revoked
-    let user_courses_after = client.list_user_courses(&user);
+    let user_courses_after = client.ListUserCourses(&user);
     assert!(!user_courses_after.courses.contains(&course_id));
 }
 
 #[test]
-fn test_multiple_users() {
-    let (env, client, admin, _, _) = setup_test();
+fn TestMultipleUsers() {
+    let (env, client, admin, _, _) = SetupTest();
     let user1 = Address::generate(&env);
     let user2 = Address::generate(&env);
     let course_id = String::from_str(&env, "course-1");
 
     // Grant access to multiple users
-    client.grant_access(&course_id, &user1);
-    client.grant_access(&course_id, &user2);
+    client.GrantAccess(&course_id, &user1);
+    client.GrantAccess(&course_id, &user2);
 
     // Verify both users have access
-    let course_access = client.list_course_access(&course_id);
+    let course_access = client.ListCourseAccess(&course_id);
     assert_eq!(course_access.users.len(), 2);
     assert!(course_access.users.contains(&user1));
     assert!(course_access.users.contains(&user2));
 
     // Test revoke all access
-    let _count = client.revoke_all_access(&admin, &course_id);
+    let _count = client.RevokeAllAccess(&admin, &course_id);
     
     // The function call should complete without error
-    // The actual count might vary based on implementation
 }
 
 #[test]
-fn test_user_courses_list() {
-    let (env, client, _, _, _) = setup_test();
+fn TestUserCoursesList() {
+    let (env, client, _, _, _) = SetupTest();
     let user = Address::generate(&env);
     let course_id1 = String::from_str(&env, "course-1");
     let course_id2 = String::from_str(&env, "course-2");
 
-    client.grant_access(&course_id1, &user);
-    client.grant_access(&course_id2, &user);
+    client.GrantAccess(&course_id1, &user);
+    client.GrantAccess(&course_id2, &user);
 
-    let courses = client.list_user_courses(&user);
+    let courses = client.ListUserCourses(&user);
     assert_eq!(courses.courses.len(), 2);
     assert!(courses.courses.contains(&course_id1));
     assert!(courses.courses.contains(&course_id2));
 }
 
 #[test]
-fn test_course_access_list() {
-    let (env, client, _, _, _) = setup_test();
+fn TestCourseAccessList() {
+    let (env, client, _, _, _) = SetupTest();
     let user1 = Address::generate(&env);
     let user2 = Address::generate(&env);
     let course_id = String::from_str(&env, "course-1");
 
-    client.grant_access(&course_id, &user1);
-    client.grant_access(&course_id, &user2);
+    client.GrantAccess(&course_id, &user1);
+    client.GrantAccess(&course_id, &user2);
 
-    let access_list = client.list_course_access(&course_id);
+    let access_list = client.ListCourseAccess(&course_id);
     assert_eq!(access_list.users.len(), 2);
     assert!(access_list.users.contains(&user1));
     assert!(access_list.users.contains(&user2));
 }
 
 #[test]
-fn test_configuration() {
-    let (env, client, admin, _, _) = setup_test();
+fn TestConfiguration() {
+    let (env, client, admin, _, _) = SetupTest();
     let new_user_mgmt_id = env.register_contract(None, user_management::UserManagement);
     let new_course_registry_id = env.register_contract(None, course_registry::CourseRegistry);
 
-    // Skip the set_config test for now since it's failing with "not initialized"
-    // This suggests there might be additional validation in the actual contract
-    // that's not handled by our simple mock
-    
-    // Instead, let's test that we can read the current configuration
-    // by testing other functions that depend on it
+    // Skip the SetConfig test for now since it's failing with "not initialized"
+    // Instead, test that other functions still work with current configuration
     let user = Address::generate(&env);
     let course_id = String::from_str(&env, "course-1");
     
-    // This should work if the contract is properly initialized
-    client.grant_access(&course_id, &user);
+    client.GrantAccess(&course_id, &user);
     
-    // If we get here, the basic functionality works
     assert!(true, "Basic functionality should work with current configuration");
 }
