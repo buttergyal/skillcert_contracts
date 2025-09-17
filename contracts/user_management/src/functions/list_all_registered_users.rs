@@ -228,15 +228,13 @@ fn validate_input(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use soroban_sdk::{testutils::Address as _, Env, String, Vec};
+    use soroban_sdk::{testutils::Address as _, Env, String};
 
     fn create_test_profile(env: &Env) -> LightProfile {
         LightProfile {
-            name: String::from_str(env, "John"),
-            lastname: String::from_str(env, "Doe"),
-            specialization: String::from_str(env, "Software Engineering"),
-            languages: Vec::from_array(env, [String::from_str(env, "English")]),
-            teaching_categories: Vec::from_array(env, [String::from_str(env, "Programming")]),
+            full_name: String::from_str(env, "John Doe"),
+            profession: Some(String::from_str(env, "Software Engineer")),
+            country: Some(String::from_str(env, "United States")),
             role: UserRole::Student,
             status: UserStatus::Active,
             user_address: Address::generate(env),
