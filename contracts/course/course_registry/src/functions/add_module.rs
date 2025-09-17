@@ -4,17 +4,21 @@
 use super::utils::{concat_strings, u32_to_string};
 use crate::error::{handle_error, Error};
 pub use crate::schema::{Course, CourseModule};
-use soroban_sdk::{symbol_short, vec, Env, String, Symbol};
+use soroban_sdk::{symbol_short, vec, Address, Env, String, Symbol};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const MODULE_KEY: Symbol = symbol_short!("module");
 
 pub fn course_registry_add_module(
     env: Env,
+    caller: Address,
     course_id: String,
     position: u32,
     title: String,
 ) -> CourseModule {
+    // Verify caller has proper authorization
+    super::access_control::require_course_management_auth(&env, &caller, &course_id);
+
     let course_storage_key: (Symbol, String) = (COURSE_KEY, course_id.clone());
 
     if !env.storage().persistent().has(&course_storage_key) {
@@ -74,17 +78,29 @@ mod test {
         )
     }
 
-    #[test]
-    fn test_add_module_success() {
+    fn setup_test_env() -> (Env, Address, Address, CourseRegistryClient) {
         let env = Env::default();
         env.mock_all_auths();
         let contract_id = env.register(CourseRegistry, {});
         let client = CourseRegistryClient::new(&env, &contract_id);
 
+        // Setup admin
+        let admin = Address::generate(&env);
+        let user_mgmt = Address::generate(&env);
+        env.as_contract(&contract_id, || {
+            super::access_control::initialize(&env, &admin, &user_mgmt);
+        });
+
+        (env, contract_id, admin, client)
+    }
+
+    #[test]
+    fn test_add_module_success_course_creator() {
+        let (env, _, _, client) = setup_test_env();
         let creator = Address::generate(&env);
         let course = create_course(&client, &creator);
 
-        let module = client.add_module(&course.id, &1, &String::from_str(&env, "Module 1"));
+        let module = client.add_module(&creator, &course.id, &1, &String::from_str(&env, "Module 1"));
 
         assert_eq!(module.course_id, course.id);
         assert_eq!(module.position, 1);
@@ -92,14 +108,43 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "HostError: Error(Contract, #3)")]
+    fn test_add_module_success_admin() {
+        let (env, _, admin, client) = setup_test_env();
+        let creator = Address::generate(&env);
+        let course = create_course(&client, &creator);
+
+        // Admin should be able to add modules
+        let module = client.add_module(&admin, &course.id, &1, &String::from_str(&env, "Module 1"));
+
+        assert_eq!(module.course_id, course.id);
+        assert_eq!(module.position, 1);
+        assert_eq!(module.title, String::from_str(&env, "Module 1"));
+    }
+
+    #[test]
+    #[should_panic(expected = "Error(Contract, #401)")] // Unauthorized error
+    fn test_add_module_unauthorized() {
+        let (env, _, _, client) = setup_test_env();
+        let creator = Address::generate(&env);
+        let unauthorized_user = Address::generate(&env);
+        let course = create_course(&client, &creator);
+
+        // Unauthorized user should not be able to add modules
+        client.add_module(
+            &unauthorized_user,
+            &course.id,
+            &1,
+            &String::from_str(&env, "Module 1"),
+        );
+    }
+
+    #[test]
+    #[should_panic(expected = "Error(Contract, #3)")] // CourseIdNotExist error
     fn test_add_module_invalid_course() {
-        let env = Env::default();
-        env.mock_all_auths();
-        let contract_id = env.register(CourseRegistry, {});
-        let client = CourseRegistryClient::new(&env, &contract_id);
+        let (env, _, admin, client) = setup_test_env();
 
         client.add_module(
+            &admin,
             &String::from_str(&env, "invalid_course"),
             &1,
             &String::from_str(&env, "Module 1"),
@@ -108,31 +153,23 @@ mod test {
 
     #[test]
     fn test_add_module_generates_unique_ids() {
-        let env = Env::default();
-        env.mock_all_auths();
-        let contract_id = env.register(CourseRegistry, {});
-        let client = CourseRegistryClient::new(&env, &contract_id);
-
+        let (env, _, admin, client) = setup_test_env();
         let creator = Address::generate(&env);
         let course = create_course(&client, &creator);
 
-        let module1 = client.add_module(&course.id, &1, &String::from_str(&env, "Module 1"));
-        let module2 = client.add_module(&course.id, &2, &String::from_str(&env, "Module 2"));
+        let module1 = client.add_module(&admin, &course.id, &1, &String::from_str(&env, "Module 1"));
+        let module2 = client.add_module(&admin, &course.id, &2, &String::from_str(&env, "Module 2"));
 
         assert_ne!(module1.id, module2.id);
     }
 
     #[test]
     fn test_add_module_storage_key_format() {
-        let env = Env::default();
-        env.mock_all_auths();
-        let contract_id = env.register(CourseRegistry, {});
-        let client = CourseRegistryClient::new(&env, &contract_id);
-
+        let (env, contract_id, admin, client) = setup_test_env();
         let creator = Address::generate(&env);
         let course = create_course(&client, &creator);
 
-        let module = client.add_module(&course.id, &1, &String::from_str(&env, "Module 1"));
+        let module = client.add_module(&admin, &course.id, &1, &String::from_str(&env, "Module 1"));
 
         let exists: bool = env.as_contract(&contract_id, || {
             env.storage()
@@ -141,5 +178,49 @@ mod test {
         });
 
         assert!(exists);
+    }
+
+    #[test]
+    fn test_add_module_different_course_creator() {
+        let (env, _, _, client) = setup_test_env();
+        let creator1 = Address::generate(&env);
+        let creator2 = Address::generate(&env);
+        
+        let course1 = create_course(&client, &creator1);
+        
+        // Creator2 should not be able to add module to Creator1's course
+        let result = std::panic::catch_unwind(|| {
+            client.add_module(&creator2, &course1.id, &1, &String::from_str(&env, "Module 1"))
+        });
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_add_module_empty_title() {
+        let (env, _, admin, client) = setup_test_env();
+        let creator = Address::generate(&env);
+        let course = create_course(&client, &creator);
+
+        // Should panic with validation error for empty title
+        let result = std::panic::catch_unwind(|| {
+            client.add_module(&admin, &course.id, &1, &String::from_str(&env, ""))
+        });
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_add_module_duplicate_position() {
+        let (env, _, admin, client) = setup_test_env();
+        let creator = Address::generate(&env);
+        let course = create_course(&client, &creator);
+
+        // Add first module at position 1
+        client.add_module(&admin, &course.id, &1, &String::from_str(&env, "Module 1"));
+
+        // Try to add another module at the same position
+        let result = std::panic::catch_unwind(|| {
+            client.add_module(&admin, &course.id, &1, &String::from_str(&env, "Module 2"))
+        });
+        assert!(result.is_err());
     }
 }
