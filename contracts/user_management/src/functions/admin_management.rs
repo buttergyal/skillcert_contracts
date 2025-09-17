@@ -95,7 +95,7 @@ pub fn add_admin(env: Env, caller: Address, new_admin: Address) {
     }
 
     // Limit number of admins for security
-    if admins.len() >= MAX_ADMINS {
+    if admins.len() >= MAX_ADMINS as u32 {
         handle_error(&env, Error::MaxAdminsReached)
     }
 

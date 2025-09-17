@@ -120,38 +120,19 @@ mod tests {
     }
 
     fn create_test_user(env: &Env, contract_id: &Address, user: &Address) -> UserProfile {
-        let name = String::from_str(env, "Test");
-        let lastname = String::from_str(env, "User");
-        let email = String::from_str(env, "test@example.com");
-        let specialization = String::from_str(env, "Testing");
-        let languages = soroban_sdk::Vec::from_array(env, [String::from_str(env, "English")]);
-        let teaching_categories = soroban_sdk::Vec::from_array(env, [String::from_str(env, "QA")]);
-
         // Create user profile directly in storage for testing
         let user_profile = UserProfile {
-            name: name.clone(),
-            lastname: lastname.clone(),
-            email,
-            role: UserRole::Student, // Default role
-            country: String::from_str(env, ""),
-            profession: None,
-            goals: None,
-            profile_picture: None,
-            language: String::from_str(env, "en"),
-            password: String::from_str(env, "password123"),
-            confirm_password: String::from_str(env, "password123"),
-            specialization: specialization.clone(),
-            languages: languages.clone(),
-            teaching_categories: teaching_categories.clone(),
-            user: user.clone(),
+            full_name: String::from_str(env, "Test User"),
+            contact_email: String::from_str(env, "test@example.com"),
+            profession: Some(String::from_str(env, "Software Tester")),
+            country: Some(String::from_str(env, "United States")),
+            purpose: Some(String::from_str(env, "Learn testing methodologies")),
         };
 
         let light_profile = LightProfile {
-            name,
-            lastname,
-            specialization,
-            languages,
-            teaching_categories,
+            full_name: String::from_str(env, "Test User"),
+            profession: Some(String::from_str(env, "Software Tester")),
+            country: Some(String::from_str(env, "United States")),
             role: UserRole::Student,
             status: UserStatus::Active,
             user_address: user.clone(),
@@ -215,7 +196,8 @@ mod tests {
                 .get(&DataKey::UserProfile(user.clone()))
                 .expect("Full profile should still exist");
 
-            assert_eq!(full_profile.user, user);
+            // Profile should still exist with the same data
+            assert_eq!(full_profile.full_name, String::from_str(&env, "Test User"));
         });
     }
 
