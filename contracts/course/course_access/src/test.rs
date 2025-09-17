@@ -157,7 +157,6 @@ fn test_configuration() {
     // Skip the set_config test for now since it's failing with "not initialized"
     // This suggests there might be additional validation in the actual contract
     // that's not handled by our simple mock
-    // println!("Skipping set_config test due to initialization issues");
     
     // Instead, let's test that we can read the current configuration
     // by testing other functions that depend on it
