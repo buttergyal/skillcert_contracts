@@ -28,8 +28,8 @@ const COURSE_TRANSFER_EVENT: Symbol = symbol_short!("transfer");
 /// # Panics
 ///
 /// Panics with `Error::UserNoAccessCourse` if the source user doesn't have access to the course.
-pub fn transfer_course_access(env: Env, course_id: String, from: Address, to: Address) {
-    // Create the storage key for this course and current  user combination
+pub fn TransferCourseAccess(env: Env, course_id: String, from: Address, to: Address) {
+    // Create the storage key for this course and current user combination
     let key: DataKey = DataKey::CourseAccess(course_id.clone(), from.clone());
 
     // Check if access exists to transfer

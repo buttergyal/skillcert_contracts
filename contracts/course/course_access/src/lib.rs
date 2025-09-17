@@ -15,7 +15,7 @@ mod test;
 
 use soroban_sdk::{contract, contractimpl, Address, Env, String};
 
-pub use error::Error;
+pub use error::CourseAccessError;
 pub use functions::*;
 pub use schema::{CourseUsers, UserCourses};
 
@@ -44,13 +44,13 @@ impl CourseAccessContract {
     /// # Panics
     ///
     /// Fails if the contract has already been initialized.
-    pub fn initialize(
+    pub fn Initialize(
         env: Env,
         caller: Address,
         user_mgmt_addr: Address,
         course_registry_addr: Address,
     ) {
-        functions::config::initialize(env, caller, user_mgmt_addr, course_registry_addr)
+        functions::config::Initialize(env, caller, user_mgmt_addr, course_registry_addr)
     }
 
     /// Grant access to a specific user for a given course.
@@ -63,8 +63,8 @@ impl CourseAccessContract {
     /// * `env` - The Soroban environment
     /// * `course_id` - The unique identifier of the course
     /// * `user` - The address of the user to grant access to
-    pub fn grant_access(env: Env, course_id: String, user: Address) {
-        functions::grant_access::grant_access(env, course_id, user)
+    pub fn GrantAccess(env: Env, course_id: String, user: Address) {
+        functions::grant_access::CourseAccessGrantAccess(env, course_id, user)
     }
 
     /// Revoke access for a specific user from a course.
@@ -81,8 +81,8 @@ impl CourseAccessContract {
     /// # Returns
     ///
     /// Returns `true` if access was successfully revoked, `false` otherwise.
-    pub fn revoke_access(env: Env, course_id: String, user: Address) -> bool {
-        functions::revoke_access::revoke_access(env, course_id, user)
+    pub fn RevokeAccess(env: Env, course_id: String, user: Address) -> bool {
+        functions::revoke_access::CourseAccessRevokeAccess(env, course_id, user)
     }
 
     /// Save or update a user's profile on-chain.
@@ -98,7 +98,7 @@ impl CourseAccessContract {
     /// * `profession` - Optional profession/job title
     /// * `goals` - Optional learning goals or objectives
     /// * `country` - The user's country of residence
-    pub fn save_profile(
+    pub fn SaveUserProfile(
         env: Env,
         name: String,
         email: String,
@@ -107,7 +107,7 @@ impl CourseAccessContract {
         country: String,
     ) {
         let user = env.current_contract_address();
-        save_profile(env, name, email, profession, goals, country, user);
+        SaveUserProfile(env, name, email, profession, goals, country, user);
     }
 
     /// List all courses a user has access to.
@@ -123,8 +123,8 @@ impl CourseAccessContract {
     /// # Returns
     ///
     /// Returns a `UserCourses` struct containing the list of accessible courses.
-    pub fn list_user_courses(env: Env, user: Address) -> UserCourses {
-        functions::list_user_courses::list_user_courses(env, user)
+    pub fn ListUserCourses(env: Env, user: Address) -> UserCourses {
+        functions::list_user_courses::ListUserCourses(env, user)
     }
 
     /// List all users who have access to a course.
@@ -139,8 +139,8 @@ impl CourseAccessContract {
     /// # Returns
     ///
     /// Returns a `CourseUsers` struct containing the list of users with access.
-    pub fn list_course_access(env: Env, course_id: String) -> CourseUsers {
-        functions::list_course_access::list_course_access(env, course_id)
+    pub fn ListCourseAccess(env: Env, course_id: String) -> CourseUsers {
+        functions::list_course_access::ListCourseAccess(env, course_id)
     }
 
     /// Revoke all user access for a course.
@@ -157,8 +157,8 @@ impl CourseAccessContract {
     /// # Returns
     ///
     /// Returns the number of users affected by the revocation and emits an event.
-    pub fn revoke_all_access(env: Env, user: Address, course_id: String) -> u32 {
-        functions::revoke_all_access::revoke_all_access(env, user, course_id)
+    pub fn RevokeAllAccess(env: Env, user: Address, course_id: String) -> u32 {
+        functions::revoke_all_access::RevokeAllAccess(env, user, course_id)
     }
 
     /// Configure external contract addresses used for auth checks.
@@ -176,12 +176,12 @@ impl CourseAccessContract {
     /// # Storage
     ///
     /// Stores the addresses in instance storage keys: ("user_mgmt_addr",) and ("course_registry_addr",)
-    pub fn set_config(
+    pub fn SetConfig(
         env: Env,
         caller: Address,
         user_mgmt_addr: Address,
         course_registry_addr: Address,
     ) {
-        functions::config::set_contract_addrs(env, caller, user_mgmt_addr, course_registry_addr)
+        functions::config::SetContractAddrs(env, caller, user_mgmt_addr, course_registry_addr)
     }
 }

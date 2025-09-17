@@ -21,7 +21,7 @@ use crate::schema::{DataKey, UserCourses};
 /// Returns a `UserCourses` struct containing the user's address and a list
 /// of course IDs they have access to. If no courses are found, returns
 /// an empty list.
-pub fn list_user_courses(env: Env, user: Address) -> UserCourses {
+pub fn ListUserCourses(env: Env, user: Address) -> UserCourses {
     let key = DataKey::UserCourses(user.clone());
     env.storage().persistent().get(&key).unwrap_or(UserCourses {
         user,
@@ -32,11 +32,11 @@ pub fn list_user_courses(env: Env, user: Address) -> UserCourses {
 #[cfg(test)]
 mod test {
     use soroban_sdk::{testutils::Address as _, vec, Address, Env, String};
-    use crate::schema::{DataKey};
-    use crate::{course_access_list_user_courses, CourseAccessContract, UserCourses};
+    use crate::schema::DataKey;
+    use crate::{ListUserCourses, CourseAccessContract, UserCourses};
 
     #[test]
-    fn test() {
+    fn Test() {
         let env: Env = Env::default();
 
         let contract_id: Address = env.register(CourseAccessContract, {});
@@ -58,7 +58,7 @@ mod test {
                 .persistent()
                 .set(&(key), &user_courses);
 
-            let result: UserCourses = course_access_list_user_courses(env, user.clone());
+            let result: UserCourses = ListUserCourses(env, user.clone());
             assert_eq!(result, user_courses);
         });
     }

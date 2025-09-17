@@ -43,7 +43,7 @@ const REVOKE_ALL_EVENT: Symbol = symbol_short!("revokeall");
 /// # Panics
 ///
 /// Panics with `Error::Unauthorized` if the caller is not authorized to perform this operation.
-pub fn revoke_all_access(env: Env, caller: Address, course_id: String) -> u32 {
+pub fn RevokeAllAccess(env: Env, caller: Address, course_id: String) -> u32 {
     caller.require_auth();
 
     // Resolve admin via cross-contract if configured
@@ -79,9 +79,6 @@ pub fn revoke_all_access(env: Env, caller: Address, course_id: String) -> u32 {
     let course_key: (Symbol, String) = (COURSES_KEY, course_id.clone());
     let affected_users: Vec<Address> = match env.storage().persistent().get(&course_key) {
         Some(course_users) => {
-            // CourseUsers { users, course } serialized as struct; we only need users list here.
-            // To avoid cross-struct dependency, read vector directly if stored that way; otherwise, try to extract.
-            // Prefer reading as Vec<Address> if that's what was stored; else fallback by mapping.
             let cu: crate::schema::CourseUsers = course_users;
             cu.users
         }
@@ -90,7 +87,6 @@ pub fn revoke_all_access(env: Env, caller: Address, course_id: String) -> u32 {
 
     let count = affected_users.len();
     if count == 0 {
-        // Emits an event indicating that no users had their access revoked.
         env.events()
             .publish((REVOKE_ALL_EVENT, course_id.clone()), count);
         return 0;
@@ -100,20 +96,17 @@ pub fn revoke_all_access(env: Env, caller: Address, course_id: String) -> u32 {
     let mut i = 0u32;
     while i < count {
         if let Some(user) = affected_users.get(i) {
-            // Remove composite access key
             let access_key: DataKey = DataKey::CourseAccess(course_id.clone(), user.clone());
             if env.storage().persistent().has(&access_key) {
                 env.storage().persistent().remove(&access_key);
             }
 
-            // Update per-user courses index if present: (USER_KEY, user.to_string()) -> UserCourses
             let user_key = (USER_KEY, user.to_string());
             if let Some(mut uc) = env
                 .storage()
                 .persistent()
                 .get::<_, crate::schema::UserCourses>(&user_key)
             {
-                // Remove course_id from the list
                 let mut new_courses: Vec<String> = Vec::new(&env);
                 let mut j = 0u32;
                 let total = uc.courses.len();
@@ -132,7 +125,7 @@ pub fn revoke_all_access(env: Env, caller: Address, course_id: String) -> u32 {
         i = i.saturating_add(1);
     }
 
-    // Clear course -> users index: set empty or remove key
+    // Clear course -> users index
     let empty = Vec::new(&env);
     if env.storage().persistent().has(&course_key) {
         let mut cu: crate::schema::CourseUsers =
@@ -141,7 +134,6 @@ pub fn revoke_all_access(env: Env, caller: Address, course_id: String) -> u32 {
         env.storage().persistent().set(&course_key, &cu);
     }
 
-    // Emits an event with the number of users whose access was revoked.
     env.events()
         .publish((REVOKE_ALL_EVENT, course_id.clone()), count);
 
