@@ -64,7 +64,7 @@ impl CourseAccessContract {
     /// * `course_id` - The unique identifier of the course
     /// * `user` - The address of the user to grant access to
     pub fn grant_access(env: Env, course_id: String, user: Address) {
-        functions::grant_access::grant_access(env, course_id, user)
+        functions::grant_access::course_access_grant_access(env, course_id, user)
     }
 
     /// Revoke access for a specific user from a course.
@@ -82,7 +82,7 @@ impl CourseAccessContract {
     ///
     /// Returns `true` if access was successfully revoked, `false` otherwise.
     pub fn revoke_access(env: Env, course_id: String, user: Address) -> bool {
-        functions::revoke_access::revoke_access(env, course_id, user)
+        functions::revoke_access::course_access_revoke_access(env, course_id, user)
     }
 
     /// Save or update a user's profile on-chain.

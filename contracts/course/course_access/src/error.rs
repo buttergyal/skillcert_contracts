@@ -23,6 +23,8 @@ pub enum Error {
     EmailRequired = 5,
     /// Country field is required but not provided
     CountryRequired = 6,
+    /// Invalid input provided
+    InvalidInput = 7,
 }
 
 /// Handles contract errors by panicking with the specified error.

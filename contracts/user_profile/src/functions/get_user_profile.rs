@@ -5,15 +5,12 @@ use soroban_sdk::{Address, Env, Symbol};
 
 use crate::schema::UserProfile;
 
- validate-input-parameter
 pub fn user_profile_get_user_profile(env: &Env, user_address: Address) -> UserProfile {
     // Input validation
     // If Address type supports is_empty or similar, add check. Otherwise, skip.
     // For demonstration, assume Address cannot be empty.
 
-pub fn get_user_profile(env: &Env, user_address: Address) -> UserProfile {
     // Create the storage key for the user profile
- main
     let key = Symbol::new(env, "profile");
 
     // Get the user profile from storage

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use crate::functions::config::{TTL_BUMP, TTL_TTL};
 use crate::schema::{CourseUsers, DataKey, UserCourses};
 use soroban_sdk::{Address, Env, String};
-use crate::functions::config::{TTL_BUMP, TTL_TTL};
 
 /// Revoke access for a specific user from a course.
 ///
@@ -21,17 +21,12 @@ use crate::functions::config::{TTL_BUMP, TTL_TTL};
 ///
 /// Returns `true` if access was successfully revoked, `false` if the user
 /// didn't have access to the course in the first place.
-validate-input-parameter
 pub fn course_access_revoke_access(env: Env, course_id: String, user: Address) -> bool {
     // Input validation
     if course_id.is_empty() {
         return false;
     }
     // Optionally, add more checks for user address validity if needed
-
-
-pub fn revoke_access(env: Env, course_id: String, user: Address) -> bool {
- main
     let key: DataKey = DataKey::CourseAccess(course_id.clone(), user.clone());
 
     // Check if the CourseAccess entry exists in persistent storage

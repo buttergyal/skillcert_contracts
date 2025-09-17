@@ -30,10 +30,10 @@ pub fn list_course_access(env: Env, course_id: String) -> CourseUsers {
 
 #[cfg(test)]
 mod test {
-    use crate::schema::{DataKey};
+    use crate::schema::DataKey;
     use soroban_sdk::{testutils::Address as _, vec, Address, Env, String};
 
-    use crate::{course_access_list_course_access, CourseAccessContract, CourseUsers};
+    use crate::{CourseAccessContract, CourseUsers};
 
     #[test]
     fn test() {
@@ -57,11 +57,10 @@ mod test {
 
         // Set up initial course data and perform test within contract context
         env.clone().as_contract(&contract_id, || {
-            env.storage()
-                .persistent()
-                .set(&(key), &course_users);
+            env.storage().persistent().set(&(key), &course_users);
 
-            let result: CourseUsers = course_access_list_course_access(env, course_id.clone());
+            let result: CourseUsers =
+                CourseAccessContract::list_course_access(env, course_id.clone());
 
             assert_eq!(result, course_users);
         });
