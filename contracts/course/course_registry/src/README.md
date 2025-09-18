@@ -52,13 +52,3 @@ src/
 4. Prerequisites: Use create_prerequisite, edit_prerequisite for course dependencies
 5. Categories: Use create_course_category (admin), list_categories for organization
 6. Search: Use list_courses_with_filters for advanced course discovery
-
-## Adding New Functionality
-
-1. Create new function file in functions/ directory
-2. Add to functions/mod.rs and lib.rs exports
-3. Add new data structures to schema.rs if needed
-4. Add new error types to error.rs for specific failures
-5. Include comprehensive tests in test.rs
-6. Update this README with new functionality
-
