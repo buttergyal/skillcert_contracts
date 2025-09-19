@@ -21,7 +21,7 @@ fn validate_string_content(_env: &Env, s: &String, max_len: usize) -> bool {
     if s.len() > max_len as u32 {
         return false;
     }
-
+    
     true
 }
 
@@ -152,3 +152,173 @@ pub fn edit_user_profile(
     profile
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::schema::{ProfileUpdateParams, UserProfile};
+    use crate::{UserManagement, UserManagementClient};
+    use soroban_sdk::{testutils::Address as _, Address, Env, String};
+
+    fn setup_test_env() -> (Env, Address, UserManagementClient<'static>) {
+        let env = Env::default();
+        let contract_id = env.register(UserManagement, {});
+        let client = UserManagementClient::new(&env, &contract_id);
+        (env, contract_id, client)
+    }
+
+    fn create_test_user(
+        env: &Env,
+        client: &UserManagementClient,
+        user: &Address,
+    ) -> UserProfile {
+        let profile = UserProfile {
+            full_name: String::from_str(env, "John Doe"),
+            contact_email: String::from_str(env, "john@example.com"),
+            profession: Some(String::from_str(env, "Software Engineer")),
+            country: Some(String::from_str(env, "United States")),
+            purpose: Some(String::from_str(env, "Learn blockchain development")),
+        };
+
+        env.mock_all_auths();
+        client.create_user_profile(user, &profile)
+    }
+
+    #[test]
+    fn test_edit_user_profile_by_self() {
+        let (env, _contract_id, client) = setup_test_env();
+        let user = Address::generate(&env);
+
+        // Create user first
+        create_test_user(&env, &client, &user);
+
+        // Prepare updates
+        let updates = ProfileUpdateParams {
+            full_name: Some(String::from_str(&env, "Jane Doe")),
+            profession: Some(String::from_str(&env, "Data Scientist")),
+            country: Some(String::from_str(&env, "Canada")),
+            purpose: Some(String::from_str(&env, "Master AI and ML")),
+        };
+
+        env.mock_all_auths();
+
+        // Edit profile
+        let updated_profile = client.edit_user_profile(&user, &user, &updates);
+
+        // Verify updates
+        assert_eq!(updated_profile.full_name, String::from_str(&env, "Jane Doe"));
+        assert_eq!(
+            updated_profile.profession,
+            Some(String::from_str(&env, "Data Scientist"))
+        );
+        assert_eq!(
+            updated_profile.country,
+            Some(String::from_str(&env, "Canada"))
+        );
+        assert_eq!(
+            updated_profile.purpose,
+            Some(String::from_str(&env, "Master AI and ML"))
+        );
+
+        // Email should remain unchanged
+        assert_eq!(
+            updated_profile.contact_email,
+            String::from_str(&env, "john@example.com")
+        );
+    }
+
+    #[test]
+    fn test_edit_user_profile_partial_update() {
+        let (env, _contract_id, client) = setup_test_env();
+        let user = Address::generate(&env);
+
+        // Create user first
+        let original_profile = create_test_user(&env, &client, &user);
+
+        // Prepare partial updates (only name and country)
+        let updates = ProfileUpdateParams {
+            full_name: Some(String::from_str(&env, "Updated Name")),
+            profession: None,
+            country: Some(String::from_str(&env, "Germany")),
+            purpose: None,
+        };
+
+        env.mock_all_auths();
+
+        // Edit profile
+        let updated_profile = client.edit_user_profile(&user, &user, &updates);
+
+        // Verify only specified fields were updated
+        assert_eq!(updated_profile.full_name, String::from_str(&env, "Updated Name"));
+        assert_eq!(updated_profile.country, Some(String::from_str(&env, "Germany")));
+
+        // Unchanged fields should retain original values
+        assert_eq!(updated_profile.profession, original_profile.profession);
+        assert_eq!(updated_profile.purpose, original_profile.purpose);
+        assert_eq!(updated_profile.contact_email, original_profile.contact_email);
+    }
+
+    #[test]
+    #[should_panic(expected = "HostError: Error(Contract, #21)")]
+    fn test_edit_user_profile_nonexistent_user() {
+        let (env, _contract_id, client) = setup_test_env();
+        let user = Address::generate(&env);
+        let caller = Address::generate(&env);
+
+        let updates = ProfileUpdateParams {
+            full_name: Some(String::from_str(&env, "New Name")),
+            profession: None,
+            country: None,
+            purpose: None,
+        };
+
+        env.mock_all_auths();
+
+        // Try to edit non-existent user profile
+        client.edit_user_profile(&caller, &user, &updates);
+    }
+
+    #[test]
+    #[should_panic(expected = "HostError: Error(Contract, #4)")]
+    fn test_edit_user_profile_unauthorized() {
+        let (env, _contract_id, client) = setup_test_env();
+        let user = Address::generate(&env);
+        let unauthorized_caller = Address::generate(&env);
+
+        // Create user first
+        create_test_user(&env, &client, &user);
+
+        let updates = ProfileUpdateParams {
+            full_name: Some(String::from_str(&env, "Hacker Name")),
+            profession: None,
+            country: None,
+            purpose: None,
+        };
+
+        env.mock_all_auths();
+
+        // Try to edit another user's profile without admin privileges
+        client.edit_user_profile(&unauthorized_caller, &user, &updates);
+    }
+
+    #[test]
+    #[should_panic(expected = "HostError: Error(Contract, #10)")]
+    fn test_edit_user_profile_empty_name() {
+        let (env, _contract_id, client) = setup_test_env();
+        let user = Address::generate(&env);
+
+        // Create user first
+        create_test_user(&env, &client, &user);
+
+        let updates = ProfileUpdateParams {
+            full_name: Some(String::from_str(&env, "")), // Empty name
+            profession: None,
+            country: None,
+            purpose: None,
+        };
+
+        env.mock_all_auths();
+
+        // Try to set empty name
+        client.edit_user_profile(&user, &user, &updates);
+    }
+}
