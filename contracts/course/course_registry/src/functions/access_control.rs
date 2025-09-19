@@ -2,8 +2,8 @@
 // Copyright (c) 2025 SkillCert
 
 use crate::error::{handle_error, Error};
-use crate::schema::{Course, CourseId};
-use soroban_sdk::{symbol_short, Address, Env, String, Symbol, IntoVal, Vec};
+use crate::schema::Course;
+use soroban_sdk::{symbol_short, Address, Env, String, Symbol, IntoVal};
 
 const KEY_USER_MGMT_ADDR: &str = "user_mgmt_addr";
 const KEY_OWNER: &str = "owner";

@@ -23,7 +23,8 @@ pub fn edit_goal(
     if goal_id.is_empty() {
         handle_error(&env, Error::InvalidInput)
     }
-    if new_content.is_empty() {
+    // Validate goal content - prevent empty or whitespace-only content
+    if new_content.is_empty() || new_content.trim().is_empty() {
         handle_error(&env, Error::EmptyNewGoalContent)
     }
 

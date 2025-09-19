@@ -1,4 +1,5 @@
 use crate::functions::utils::u32_to_string;
+use crate::error::{handle_error, Error};
 
 use crate::schema::{Course, CourseFilters};
 use soroban_sdk::{symbol_short, Env, Symbol, Vec};
@@ -11,6 +12,18 @@ pub fn list_courses_with_filters(
     limit: Option<u32>,
     offset: Option<u32>,
 ) -> Vec<Course> {
+    // Validate pagination parameters to prevent abuse
+    if let Some(l) = limit {
+        if l > 100 { // Prevent excessively large limits
+            handle_error(env, Error::InvalidInput)
+        }
+    }
+    if let Some(o) = offset {
+        if o > 10000 { // Prevent excessively large offsets
+            handle_error(env, Error::InvalidInput)
+        }
+    }
+
     let mut results: Vec<Course> = Vec::new(env);
     let mut id: u128 = 1;
     let mut count: u32 = 0;

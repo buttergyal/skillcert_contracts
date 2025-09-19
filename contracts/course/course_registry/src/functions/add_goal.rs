@@ -14,7 +14,8 @@ pub fn add_goal(env: Env, creator: Address, course_id: String, content: String) 
     if course_id.is_empty() {
         handle_error(&env, Error::InvalidInput)
     }
-    if content.is_empty() {
+    // Validate goal content - prevent empty or whitespace-only content
+    if content.is_empty() || content.trim().is_empty() {
         handle_error(&env, Error::EmptyGoalContent)
     }
 

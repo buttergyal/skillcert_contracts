@@ -35,6 +35,13 @@ pub fn create_course(
         handle_error(&env, Error::InvalidPrice)
     }
 
+    // validate duration hours if provided (prevent zero or excessive values)
+    if let Some(hours) = duration_hours {
+        if hours == 0 || hours > 8760 { // 8760 hours = 1 year, reasonable maximum
+            handle_error(&env, Error::InvalidInput)
+        }
+    }
+
     let lowercase_title = to_lowercase(&env, &title);
 
     // to avoid duplicate title,
