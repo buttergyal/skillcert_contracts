@@ -1,48 +1,36 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use crate::schema::UserProfile;
 use crate::{UserManagement, UserManagementClient};
-use soroban_sdk::{testutils::Address as _, Address, Env, String, Vec};
+use soroban_sdk::{testutils::Address as _, Address, Env, String};
 
 #[test]
-fn test_save_profile_integration() {
+fn test_create_user_profile_integration() {
     let env = Env::default();
     let contract_id: Address = env.register(UserManagement, {});
     let client = UserManagementClient::new(&env, &contract_id);
     let user: Address = Address::generate(&env);
 
-    let name: String = String::from_str(&env, "Alice");
-    let lastname: String = String::from_str(&env, "Johnson");
-    let email: String = String::from_str(&env, "alice@example.com");
-    let password: String = String::from_str(&env, "securepassword123");
-    let confirm_password: String = String::from_str(&env, "securepassword123");
-    let specialization: String = String::from_str(&env, "Data Science");
-    let languages = Vec::from_array(&env, [String::from_str(&env, "English")]);
-    let teaching_categories = Vec::from_array(&env, [String::from_str(&env, "Analytics")]);
+    let profile = UserProfile {
+        full_name: String::from_str(&env, "Alice Johnson"),
+        contact_email: String::from_str(&env, "alice@example.com"),
+        profession: Some(String::from_str(&env, "Data Scientist")),
+        country: Some(String::from_str(&env, "United States")),
+        purpose: Some(String::from_str(&env, "Learn machine learning")),
+    };
 
     // Mock authentication
     env.mock_all_auths();
 
-    let profile = client.save_profile(
-        &name,
-        &lastname,
-        &email,
-        &password,
-        &confirm_password,
-        &specialization,
-        &languages,
-        &teaching_categories,
-        &user,
-    );
+    let created_profile = client.create_user_profile(&user, &profile);
 
     // Verify the returned profile
-    assert_eq!(profile.name, name);
-    assert_eq!(profile.lastname, lastname);
-    assert_eq!(profile.email, email);
-    assert_eq!(profile.specialization, specialization);
-    assert_eq!(profile.languages, languages);
-    assert_eq!(profile.teaching_categories, teaching_categories);
-    assert_eq!(profile.user, user);
+    assert_eq!(created_profile.full_name, profile.full_name);
+    assert_eq!(created_profile.contact_email, profile.contact_email);
+    assert_eq!(created_profile.profession, profile.profession);
+    assert_eq!(created_profile.country, profile.country);
+    assert_eq!(created_profile.purpose, profile.purpose);
 }
 
 #[test]
@@ -53,36 +41,26 @@ fn test_get_user_by_id_self_access() {
     let user: Address = Address::generate(&env);
 
     // First create a profile
-    let name: String = String::from_str(&env, "Bob");
-    let lastname: String = String::from_str(&env, "Wilson");
-    let email: String = String::from_str(&env, "bob@example.com");
-    let password: String = String::from_str(&env, "password123");
-    let confirm_password: String = String::from_str(&env, "password123");
-    let specialization: String = String::from_str(&env, "Software Engineering");
-    let languages = Vec::from_array(&env, [String::from_str(&env, "Spanish")]);
-    let teaching_categories = Vec::from_array(&env, [String::from_str(&env, "Programming")]);
+    let profile = UserProfile {
+        full_name: String::from_str(&env, "Bob Wilson"),
+        contact_email: String::from_str(&env, "bob@example.com"),
+        profession: Some(String::from_str(&env, "Software Engineer")),
+        country: Some(String::from_str(&env, "Canada")),
+        purpose: Some(String::from_str(&env, "Improve coding skills")),
+    };
 
     env.mock_all_auths();
 
-    client.save_profile(
-        &name,
-        &lastname,
-        &email,
-        &password,
-        &confirm_password,
-        &specialization,
-        &languages,
-        &teaching_categories,
-        &user,
-    );
+    client.create_user_profile(&user, &profile);
 
     // User retrieves their own profile (self-access)
     let retrieved_profile = client.get_user_by_id(&user, &user);
 
-    assert_eq!(retrieved_profile.name, name);
-    assert_eq!(retrieved_profile.lastname, lastname);
-    assert_eq!(retrieved_profile.email, email);
-    assert_eq!(retrieved_profile.specialization, specialization);
+    assert_eq!(retrieved_profile.full_name, profile.full_name);
+    assert_eq!(retrieved_profile.contact_email, profile.contact_email);
+    assert_eq!(retrieved_profile.profession, profile.profession);
+    assert_eq!(retrieved_profile.country, profile.country);
+    assert_eq!(retrieved_profile.purpose, profile.purpose);
 }
 
 #[test]
@@ -99,63 +77,24 @@ fn test_get_user_by_id_admin_access() {
     client.initialize_system(&admin, &admin, &None);
 
     // First create a profile
-    let name: String = String::from_str(&env, "Bob");
-    let lastname: String = String::from_str(&env, "Wilson");
-    let email: String = String::from_str(&env, "bob@example.com");
-    let password: String = String::from_str(&env, "password123");
-    let confirm_password: String = String::from_str(&env, "password123");
-    let specialization: String = String::from_str(&env, "Software Engineering");
-    let languages = Vec::from_array(&env, [String::from_str(&env, "Spanish")]);
-    let teaching_categories = Vec::from_array(&env, [String::from_str(&env, "Programming")]);
+    let profile = UserProfile {
+        full_name: String::from_str(&env, "Bob Wilson"),
+        contact_email: String::from_str(&env, "bob@example.com"),
+        profession: Some(String::from_str(&env, "Software Engineer")),
+        country: Some(String::from_str(&env, "Canada")),
+        purpose: Some(String::from_str(&env, "Improve coding skills")),
+    };
 
-    client.save_profile(
-        &name,
-        &lastname,
-        &email,
-        &password,
-        &confirm_password,
-        &specialization,
-        &languages,
-        &teaching_categories,
-        &user,
-    );
+    client.create_user_profile(&user, &profile);
 
     // Admin retrieves user's profile
     let retrieved_profile = client.get_user_by_id(&admin, &user);
 
-    assert_eq!(retrieved_profile.name, name);
-    assert_eq!(retrieved_profile.lastname, lastname);
-    assert_eq!(retrieved_profile.email, email);
-    assert_eq!(retrieved_profile.specialization, specialization);
-}
-
-/// Helper function to create test profile data
-fn create_test_profile(
-    env: &Env,
-    name: &str,
-    lastname: &str,
-    email: &str,
-    _specialization: &str,
-    languages: Vec<String>,
-    teaching_categories: Vec<String>,
-) -> (
-    String,
-    String,
-    String,
-    String,
-    String,
-    Vec<String>,
-    Vec<String>,
-) {
-    (
-        String::from_str(env, name),
-        String::from_str(env, lastname),
-        String::from_str(env, email),
-        String::from_str(env, "password123"),
-        String::from_str(env, "password123"),
-        languages,
-        teaching_categories,
-    )
+    assert_eq!(retrieved_profile.full_name, profile.full_name);
+    assert_eq!(retrieved_profile.contact_email, profile.contact_email);
+    assert_eq!(retrieved_profile.profession, profile.profession);
+    assert_eq!(retrieved_profile.country, profile.country);
+    assert_eq!(retrieved_profile.purpose, profile.purpose);
 }
 
 #[test]
@@ -171,38 +110,22 @@ fn test_list_all_users_basic() {
 
     // Create some test users
     let test_data = [
-        ("John", "Doe", "john@example.com", "Engineering"),
-        ("Jane", "Smith", "jane@example.com", "Science"),
-        ("Bob", "Johnson", "bob@example.com", "Mathematics"),
+        ("John Doe", "john@example.com", "Engineer"),
+        ("Jane Smith", "jane@example.com", "Scientist"),
+        ("Bob Johnson", "bob@example.com", "Teacher"),
     ];
 
-    for (name, lastname, email, specialization) in test_data.iter() {
+    for (name, email, profession) in test_data.iter() {
         let user: Address = Address::generate(&env);
-        let languages = Vec::from_array(&env, [String::from_str(&env, "English")]);
-        let categories = Vec::from_array(&env, [String::from_str(&env, specialization)]);
+        let profile = UserProfile {
+            full_name: String::from_str(&env, name),
+            contact_email: String::from_str(&env, email),
+            profession: Some(String::from_str(&env, profession)),
+            country: Some(String::from_str(&env, "United States")),
+            purpose: Some(String::from_str(&env, "Learn new skills")),
+        };
 
-        let (name_str, lastname_str, email_str, password, confirm_password, _, _) =
-            create_test_profile(
-                &env,
-                name,
-                lastname,
-                email,
-                specialization,
-                languages.clone(),
-                categories.clone(),
-            );
-
-        client.save_profile(
-            &name_str,
-            &lastname_str,
-            &email_str,
-            &password,
-            &confirm_password,
-            &String::from_str(&env, specialization),
-            &languages,
-            &categories,
-            &user,
-        );
+        client.create_user_profile(&user, &profile);
     }
 
     // Test basic listing
@@ -211,7 +134,7 @@ fn test_list_all_users_basic() {
         &0,    // page
         &10,   // page_size
         &None, // role_filter
-        &None, // country_filter (removed from new schema)
+        &None, // country_filter
         &None, // status_filter
     );
 
@@ -226,28 +149,17 @@ fn test_delete_user() {
     let user: Address = Address::generate(&env);
 
     // Create a profile first
-    let name: String = String::from_str(&env, "Test");
-    let lastname: String = String::from_str(&env, "User");
-    let email: String = String::from_str(&env, "test@example.com");
-    let password: String = String::from_str(&env, "password123");
-    let confirm_password: String = String::from_str(&env, "password123");
-    let specialization: String = String::from_str(&env, "Testing");
-    let languages = Vec::from_array(&env, [String::from_str(&env, "English")]);
-    let teaching_categories = Vec::from_array(&env, [String::from_str(&env, "QA")]);
+    let profile = UserProfile {
+        full_name: String::from_str(&env, "Test User"),
+        contact_email: String::from_str(&env, "test@example.com"),
+        profession: Some(String::from_str(&env, "Tester")),
+        country: Some(String::from_str(&env, "United States")),
+        purpose: Some(String::from_str(&env, "Learn testing")),
+    };
 
     env.mock_all_auths();
 
-    client.save_profile(
-        &name,
-        &lastname,
-        &email,
-        &password,
-        &confirm_password,
-        &specialization,
-        &languages,
-        &teaching_categories,
-        &user,
-    );
+    client.create_user_profile(&user, &profile);
 
     // Delete the user (self-deletion)
     client.delete_user(&user, &user);

@@ -1,50 +1,30 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use soroban_sdk::{contracttype, Address, String, Vec};
+use soroban_sdk::{contracttype, Address, String};
 
 /// Default and limit constants for user management configuration
 pub const DEFAULT_MAX_PAGE_SIZE: u32 = 100;
 pub const ABSOLUTE_MAX_PAGE_SIZE: u32 = 1000;
 pub const MAX_ADMINS: u32 = 10;
 
-/// Complete user profile information.
+/// User profile information matching UI definition.
 ///
-/// This struct contains all user data including personal information,
-/// credentials, preferences, and platform-specific details.
+/// This struct contains user profile data with required and optional fields
+/// as defined by the user interface requirements.
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]
 pub struct UserProfile {
-    /// User's first name
-    pub name: String,
-    /// User's last name
-    pub lastname: String,
-    /// User's email address (must be unique)
-    pub email: String,
-    /// User's role in the platform
-    pub role: UserRole,
-    /// User's country of residence
-    pub country: String,
-    /// Optional profession or job title
+    /// User's full name (required)
+    pub full_name: String,
+    /// User's contact email address (required, must be unique)
+    pub contact_email: String,
+    /// User's profession or job title (optional)
     pub profession: Option<String>,
-    /// Optional learning goals or objectives
-    pub goals: Option<String>,
-    /// Optional URL to profile picture
-    pub profile_picture: Option<String>,
-    /// User's preferred language
-    pub language: String,
-    /// User's password (hashed)
-    pub password: String,
-    /// Password confirmation (for validation)
-    pub confirm_password: String,
-    /// User's area of specialization
-    pub specialization: String,
-    /// Languages the user speaks
-    pub languages: Vec<String>,
-    /// Categories the user can teach (for instructors)
-    pub teaching_categories: Vec<String>,
-    /// User's blockchain address
-    pub user: Address,
+    /// User's country of residence (optional)
+    pub country: Option<String>,
+    /// User's learning goals or purpose (optional)
+    pub purpose: Option<String>,
 }
 
 /// User roles in the SkillCert platform.
@@ -90,21 +70,16 @@ pub struct UserFilter {
 
 /// Lightweight user profile for listing operations.
 ///
-/// Contains essential user information without sensitive data like passwords.
-/// Used for efficient querying and display in user lists.
+/// Contains essential user information for efficient querying and display in user lists.
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]
 pub struct LightProfile {
-    /// User's first name
-    pub name: String,
-    /// User's last name
-    pub lastname: String,
-    /// User's area of specialization
-    pub specialization: String,
-    /// Languages the user speaks
-    pub languages: Vec<String>,
-    /// Categories the user can teach
-    pub teaching_categories: Vec<String>,
+    /// User's full name
+    pub full_name: String,
+    /// User's profession or job title
+    pub profession: Option<String>,
+    /// User's country of residence
+    pub country: Option<String>,
     /// User's role in the platform
     pub role: UserRole,
     /// User's account status

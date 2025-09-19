@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
-
 use crate::error::{handle_error, Error};
 use crate::functions::config::{TTL_BUMP, TTL_TTL};
 use crate::schema::{CourseAccess, CourseUsers, DataKey, UserCourses};
@@ -27,25 +26,26 @@ pub fn course_access_grant_access(env: Env, course_id: String, user: Address) {
         handle_error(&env, Error::InvalidInput)
     }
     // Optionally, add more checks for user address validity if needed
-    let key: DataKey = DataKey::CourseAccess(course_id.clone(), user.clone());
 
+    let key: DataKey = DataKey::CourseAccess(course_id.clone(), user.clone());
+    
     // Check if access already exists to prevent duplicates
     if env.storage().persistent().has(&key) {
         handle_error(&env, Error::UserAlreadyHasAccess)
     }
-
+    
     // Create the course access entry
     let course_access: CourseAccess = CourseAccess {
         course_id: course_id.clone(),
         user: user.clone(),
     };
-
+    
     // Store the access entry
     env.storage().persistent().set(&key, &course_access);
     env.storage()
         .persistent()
         .extend_ttl(&key, TTL_BUMP, TTL_TTL);
-
+    
     // Update UserCourses
     let user_courses_key = DataKey::UserCourses(user.clone());
     let mut user_courses: UserCourses = env
@@ -65,7 +65,7 @@ pub fn course_access_grant_access(env: Env, course_id: String, user: Address) {
             .persistent()
             .extend_ttl(&user_courses_key, TTL_BUMP, TTL_TTL);
     }
-
+    
     // Update CourseUsers
     let course_users_key = DataKey::CourseUsers(course_id.clone());
     let mut course_users: CourseUsers = env
