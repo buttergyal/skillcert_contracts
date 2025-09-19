@@ -17,14 +17,14 @@ mod user_management {
 
     #[contractimpl]
     impl UserManagement {
-        pub fn IsAdmin(_env: Env, _who: Address) -> bool {
+        pub fn is_admin(_env: Env, _who: Address) -> bool {
             // For testing, always return true to simplify admin checks
             true
         }
-        pub fn SaveUserProfile(_env: Env, _user: Address, _name: String, _email: String) {
+        pub fn save_user_profile(_env: Env, _user: Address, _name: String, _email: String) {
             // Mock implementation
         }
-        pub fn IsCourseCreator(_env: Env, _course_id: String, _user: Address) -> bool {
+        pub fn is_course_creator(_env: Env, _course_id: String, _user: Address) -> bool {
             true
         }
     }
@@ -38,7 +38,7 @@ mod course_registry {
 
     #[contractimpl]
     impl CourseRegistry {
-        pub fn IsCourseCreator(_env: Env, _course_id: String, _user: Address) -> bool {
+        pub fn is_course_creator(_env: Env, _course_id: String, _user: Address) -> bool {
             true
         }
     }
@@ -65,7 +65,7 @@ fn setup_test<'a>() -> (
     let admin = Address::generate(&env);
 
     // Initialize the contract
-    client.Initialize(&admin, &user_mgmt_id, &course_registry_id);
+    client.initialize(&admin, &user_mgmt_id, &course_registry_id);
 
     (env, client, admin, user_mgmt_id, course_registry_id)
 }
@@ -113,7 +113,7 @@ fn test_multiple_users() {
     assert!(course_access.users.contains(&user2));
 
     // Test revoke all access
-    let _count = client.RevokeAllAccess(&admin, &course_id);
+    let _count = client.revoke_all_access(&admin, &course_id);
 
     // The function call should complete without error
 }

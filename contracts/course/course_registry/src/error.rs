@@ -36,6 +36,7 @@ pub enum Error {
     EmptyModuleId = 22,
     PrereqNotInList = 23,
     InvalidInput = 24,
+    AlreadyInitialized = 25,
 }
 
 pub fn handle_error(env: &Env, error: Error) -> ! {

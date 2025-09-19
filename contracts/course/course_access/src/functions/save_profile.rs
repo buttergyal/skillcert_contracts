@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use crate::error::{handle_error, Error};
+use crate::error::{handle_error, CourseAccessError};
 use crate::schema::{DataKey, UserProfile};
 use soroban_sdk::{Address, Env, String};
 
@@ -27,7 +27,7 @@ use soroban_sdk::{Address, Env, String};
 /// - `Error::NameRequired` if name is empty
 /// - `Error::EmailRequired` if email is empty
 /// - `Error::CountryRequired` if country is empty
-pub fn SaveUserProfile(
+pub fn save_user_profile(
     env: Env,
     name: String,
     email: String,
@@ -38,14 +38,14 @@ pub fn SaveUserProfile(
 ) {
     // Validate required fields
     if name.is_empty() {
-        handle_error(&env, Error::NameRequired)
+        handle_error(&env, CourseAccessError::NameRequired)
     }
     // TODO: Implement full email validation according to RFC 5322 standard
     if email.is_empty() {
-        handle_error(&env, Error::EmailRequired)
+        handle_error(&env, CourseAccessError::EmailRequired)
     }
     if country.is_empty() {
-        handle_error(&env, Error::CountryRequired)
+        handle_error(&env, CourseAccessError::CountryRequired)
     }
 
     let profile = UserProfile {

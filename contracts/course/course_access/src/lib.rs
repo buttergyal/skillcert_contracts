@@ -44,13 +44,13 @@ impl CourseAccessContract {
     /// # Panics
     ///
     /// Fails if the contract has already been initialized.
-    pub fn Initialize(
+    pub fn initialize(
         env: Env,
         caller: Address,
         user_mgmt_addr: Address,
         course_registry_addr: Address,
     ) {
-        functions::config::Initialize(env, caller, user_mgmt_addr, course_registry_addr)
+        functions::config::initialize(env, caller, user_mgmt_addr, course_registry_addr)
     }
 
     /// Grant access to a specific user for a given course.
@@ -98,7 +98,7 @@ impl CourseAccessContract {
     /// * `profession` - Optional profession/job title
     /// * `goals` - Optional learning goals or objectives
     /// * `country` - The user's country of residence
-    pub fn SaveUserProfile(
+    pub fn save_user_profile(
         env: Env,
         name: String,
         email: String,
@@ -107,7 +107,7 @@ impl CourseAccessContract {
         country: String,
     ) {
         let user = env.current_contract_address();
-        SaveUserProfile(env, name, email, profession, goals, country, user);
+        functions::save_profile::save_user_profile(env, name, email, profession, goals, country, user);
     }
 
     /// List all courses a user has access to.
@@ -157,8 +157,8 @@ impl CourseAccessContract {
     /// # Returns
     ///
     /// Returns the number of users affected by the revocation and emits an event.
-    pub fn RevokeAllAccess(env: Env, user: Address, course_id: String) -> u32 {
-        functions::revoke_all_access::RevokeAllAccess(env, user, course_id)
+    pub fn revoke_all_access(env: Env, user: Address, course_id: String) -> u32 {
+        functions::revoke_all_access::revoke_all_access(env, user, course_id)
     }
 
     /// Configure external contract addresses used for auth checks.
@@ -176,12 +176,12 @@ impl CourseAccessContract {
     /// # Storage
     ///
     /// Stores the addresses in instance storage keys: ("user_mgmt_addr",) and ("course_registry_addr",)
-    pub fn SetConfig(
+    pub fn set_config(
         env: Env,
         caller: Address,
         user_mgmt_addr: Address,
         course_registry_addr: Address,
     ) {
-        functions::config::SetContractAddrs(env, caller, user_mgmt_addr, course_registry_addr)
+        functions::config::set_contract_addrs(env, caller, user_mgmt_addr, course_registry_addr)
     }
 }

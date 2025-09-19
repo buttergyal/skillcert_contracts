@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
-use crate::error::{handle_error, Error};
+use crate::error::{handle_error, CourseAccessError};
 use crate::functions::config::{TTL_BUMP, TTL_TTL};
 use crate::schema::{CourseAccess, CourseUsers, DataKey, UserCourses};
 use soroban_sdk::{Address, Env, String, Vec};
@@ -22,16 +22,16 @@ use soroban_sdk::{Address, Env, String, Vec};
 /// Panics with `Error::UserAlreadyHasAccess` if the user already has access to the course.
 pub fn course_access_grant_access(env: Env, course_id: String, user: Address) {
     // Input validation
-    if course_id.is_empty() {
-        handle_error(&env, Error::InvalidInput)
-    }
+        if course_id.is_empty() {
+            handle_error(&env, CourseAccessError::InvalidInput)
+        }
     // Optionally, add more checks for user address validity if needed
 
     let key: DataKey = DataKey::CourseAccess(course_id.clone(), user.clone());
     
     // Check if access already exists to prevent duplicates
     if env.storage().persistent().has(&key) {
-        handle_error(&env, Error::UserAlreadyHasAccess)
+        handle_error(&env, CourseAccessError::UserAlreadyHasAccess)
     }
     
     // Create the course access entry

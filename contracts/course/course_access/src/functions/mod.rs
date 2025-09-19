@@ -18,4 +18,3 @@ pub use list_user_courses::*;
 pub use revoke_access::*;
 pub use revoke_all_access::*;
 pub use save_profile::*;
-pub use transfer_course_access::*;

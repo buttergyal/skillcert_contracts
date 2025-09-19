@@ -15,8 +15,6 @@ const MAX_EMAIL_LENGTH: usize = 320; // RFC 5321 standard
 const MAX_PROFESSION_LENGTH: usize = 100;
 const MAX_PURPOSE_LENGTH: usize = 500;
 const MAX_COUNTRY_LENGTH: usize = 56; // Longest country name
-const MAX_PROFILE_PICTURE_LENGTH: usize = 500; // URL length
-const MAX_LANGUAGE_LENGTH: usize = 10; // Language code
 const INVALID_EMAIL_NO_AT_LENGTH: u32 = 13; // "invalid-email"
 
 /// Validates string content for security

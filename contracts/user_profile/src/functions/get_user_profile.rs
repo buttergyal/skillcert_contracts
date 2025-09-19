@@ -42,8 +42,6 @@ pub fn get_user_profile_with_privacy(
     if !profile.privacy_public && requester_address != user_address {
         profile.email = None;
         // Add more privacy filters as needed
-        profile.phone = None;
-        profile.address_details = None;
     }
     profile
 }

@@ -25,7 +25,7 @@ const KEY_OWNER: &str = "owner";
 /// # Panics
 ///
 /// Panics if the contract has already been initialized.
-pub fn Initialize(
+pub fn initialize(
     env: Env,
     caller: Address,
     user_mgmt_addr: Address,
@@ -67,7 +67,7 @@ pub fn Initialize(
 /// # Panics
 ///
 /// Panics if the contract is not initialized or if the caller is not the owner.
-pub fn SetContractAddrs(
+pub fn set_contract_addrs(
     env: Env,
     caller: Address,
     user_mgmt_addr: Address,
