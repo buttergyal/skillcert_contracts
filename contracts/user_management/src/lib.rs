@@ -13,7 +13,7 @@ pub mod schema;
 #[cfg(test)]
 mod test;
 
-use crate::schema::{AdminConfig, LightProfile, UserProfile, UserRole, UserStatus};
+use crate::schema::{AdminConfig, LightProfile, ProfileUpdateParams, UserProfile, UserRole, UserStatus};
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
 
 /// User Management Contract
@@ -63,6 +63,39 @@ impl UserManagement {
     /// Emits a user creation event upon successful creation
     pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> UserProfile {
         functions::create_user_profile::create_user_profile(env, user, profile)
+    }
+
+    /// Edit an existing user profile
+    ///
+    /// Updates an existing user profile with new values for allowed fields.
+    /// Only the user themselves or administrators can perform updates.
+    /// Email and role fields cannot be updated through this function.
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `caller` - Address of the user performing the update
+    /// * `user_id` - Address of the user whose profile is being updated
+    /// * `updates` - ProfileUpdateParams containing fields to update
+    ///
+    /// # Returns
+    /// * `UserProfile` - The updated user profile
+    ///
+    /// # Panics
+    /// * If caller authentication fails
+    /// * If user profile doesn't exist
+    /// * If caller lacks permission to edit
+    /// * If any field validation fails
+    /// * If user is inactive
+    ///
+    /// # Events
+    /// Emits a user update event upon successful profile update
+    pub fn edit_user_profile(
+        env: Env,
+        caller: Address,
+        user_id: Address,
+        updates: ProfileUpdateParams,
+    ) -> UserProfile {
+        functions::edit_user_profile::edit_user_profile(env, caller, user_id, updates)
     }
 
     /// Check if an address has admin privileges.

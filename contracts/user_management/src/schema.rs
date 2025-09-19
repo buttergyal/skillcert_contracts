@@ -27,6 +27,21 @@ pub struct UserProfile {
     pub purpose: Option<String>,
 }
 
+/// Struct for profile update parameters
+/// Only includes fields that can be updated
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct ProfileUpdateParams {
+    /// User's full name (optional update)
+    pub full_name: Option<String>,
+    /// User's profession or job title
+    pub profession: Option<String>,
+    /// User's country of residence
+    pub country: Option<String>,
+    /// User's learning goals or purpose
+    pub purpose: Option<String>,
+}
+
 /// User roles in the SkillCert platform.
 ///
 /// Defines the different types of users and their permission levels.
