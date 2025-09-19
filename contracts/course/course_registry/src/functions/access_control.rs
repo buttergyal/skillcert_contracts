@@ -89,12 +89,11 @@ pub fn update_user_mgmt_address(env: &Env, caller: &Address, new_addr: &Address)
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use soroban_sdk::testutils::Address as _;
-
     // Note: These tests are commented out due to complex storage access issues
     // The access control functionality is working as evidenced by other passing tests
     /*
+    use super::*;
+    use soroban_sdk::testutils::Address as _;
     #[test]
     fn test_course_creator_authorization() {
         // Simplified test - just verify the function exists

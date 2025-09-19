@@ -34,8 +34,8 @@ pub fn course_registry_add_module(
         handle_error(&env, Error::InvalidModuleTitle);
     }
     
-    // Validate position is reasonable (not zero, not extremely large)
-    if position == 0 || position > 10000 {
+    // Validate position is reasonable (not extremely large)
+    if position > 10000 {
         handle_error(&env, Error::InvalidModulePosition);
     }
 

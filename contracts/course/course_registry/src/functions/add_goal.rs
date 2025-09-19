@@ -2,7 +2,7 @@
 // Copyright (c) 2025 SkillCert
 
 use crate::error::{handle_error, Error};
-use crate::functions::utils;
+use crate::functions::utils::{self, trim};
 use crate::schema::{Course, CourseGoal, DataKey};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
@@ -17,7 +17,7 @@ pub fn add_goal(env: Env, creator: Address, course_id: String, content: String) 
     }
     
     // Validate goal content - prevent empty or whitespace-only content
-    if content.is_empty() || content.trim().is_empty() {
+    if content.is_empty() || trim(&env, &content).is_empty() {
         handle_error(&env, Error::EmptyGoalContent);
     }
     

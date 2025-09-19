@@ -35,11 +35,7 @@ pub fn create_course(
         handle_error(&env, Error::InvalidInput);
     }
 
-    // Validate description
-    if description.is_empty() {
-        handle_error(&env, Error::InvalidCourseDescription);
-    }
-    
+    // Validate description - only check length, allow empty
     if description.len() > 2000 {
         handle_error(&env, Error::InvalidCourseDescription);
     }
@@ -47,11 +43,6 @@ pub fn create_course(
     // ensure the price is greater than 0
     if price == 0 {
         handle_error(&env, Error::InvalidPrice);
-    }
-    
-    // Add reasonable upper bound for price to prevent overflow issues
-    if price > u128::MAX / 100 {
-        handle_error(&env, Error::InvalidPrice100);
     }
     
     // Validate optional parameters

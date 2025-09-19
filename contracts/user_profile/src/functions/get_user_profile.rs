@@ -31,27 +31,10 @@ pub fn get_user_profile_with_privacy(
     user_address: Address,
     requester_address: Address,
 ) -> UserProfile {
-<<<<<<< HEAD
     // Reuse the optimized get_user_profile function
     let mut profile = user_profile_get_user_profile(env, user_address.clone());
-    // Apply privacy filters without additional storage reads
-=======
-    // Create the storage key for the user profile
-    let key = Symbol::new(env, "profile");
     
-    // Get the user profile from storage with proper error handling
-    let mut profile: UserProfile = match env
-        .storage()
-        .instance()
-        .get::<(Symbol, Address), UserProfile>(&(key, user_address.clone()))
-    {
-        Some(profile) => profile,
-        None => handle_error(env, Error::UserProfileNotFound),
-    };
-    
-    // Check privacy settings
-    // If profile is not public and requester is not the profile owner, hide email
->>>>>>> 4979d22190ae74ab8873cc67c3f058a07a31e831
+    // Check privacy settings and apply privacy filters without additional storage reads
     if !profile.privacy_public && requester_address != user_address {
         profile.email = None;
         // Add more privacy filters as needed
