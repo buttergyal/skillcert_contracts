@@ -71,7 +71,7 @@ pub fn edit_course(
     // --- Price (>0) ---
     if let Some(p) = params.new_price {
         if p == 0 {
-            handle_error(&env, Error::InvalidPrice)
+            handle_error(&env, Error::InvalidPrice);
         }
         course.price = p;
     }

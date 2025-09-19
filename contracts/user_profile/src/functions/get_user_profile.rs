@@ -2,6 +2,7 @@
 // Copyright (c) 2025 SkillCert
 use soroban_sdk::{Address, Env, Symbol};
 use crate::schema::UserProfile;
+use crate::error::{Error, handle_error};
 
 pub fn user_profile_get_user_profile(env: &Env, user_address: Address) -> UserProfile {
     // Input validation
@@ -12,21 +13,15 @@ pub fn user_profile_get_user_profile(env: &Env, user_address: Address) -> UserPr
     let key = Symbol::new(env, "profile");
     let storage_key = (key, user_address.clone());
     
-    // Try temporary storage first for frequently accessed profiles
-    if let Some(profile) = env.storage().temporary().get(&storage_key) {
-        return profile;
-    }
-    // Get from instance storage if not cached
-    let profile: UserProfile = env
+    // Get the user profile from storage with proper error handling
+    match env
         .storage()
         .instance()
-        .get(&storage_key)
-        .expect("User profile not found");
-    // Cache in temporary storage for subsequent requests
-    env.storage().temporary().set(&storage_key, &profile);
-    // Cache for 15 minutes
-    env.storage().temporary().extend_ttl(&storage_key, 0, 900);
-    profile
+        .get::<(Symbol, Address), UserProfile>(&(key, user_address.clone()))
+    {
+        Some(profile) => profile,
+        None => handle_error(env, Error::UserProfileNotFound),
+    }
 }
 
 // Function to get user profile with privacy check
@@ -38,7 +33,8 @@ pub fn get_user_profile_with_privacy(
 ) -> UserProfile {
     // Reuse the optimized get_user_profile function
     let mut profile = user_profile_get_user_profile(env, user_address.clone());
-    // Apply privacy filters without additional storage reads
+    
+    // Check privacy settings and apply privacy filters without additional storage reads
     if !profile.privacy_public && requester_address != user_address {
         profile.email = None;
         // Add more privacy filters as needed

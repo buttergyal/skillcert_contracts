@@ -7,17 +7,9 @@ use soroban_sdk::{contracterror, panic_with_error, Env};
 #[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
 #[repr(u32)]
 pub enum Error {
-    UserAlreadyHasAccess = 1,  
-    UserNoAccessCourse = 2,   
-    Unauthorized = 3,
-    NameRequired = 4,
-    EmailRequired = 5,
-    CountryRequired = 6,
-    InvalidCourseId = 7,
-    InvalidUser = 8,
-    EmptyCourseId = 9,
-    InvalidInput = 10,
-    SameUserTransfer = 11,
+    UserProfileNotFound = 1,
+    InvalidInput = 2,
+    UnauthorizedAccess = 3,
 }
 
 pub fn handle_error(env: &Env, error: Error) -> ! {

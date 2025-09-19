@@ -2,7 +2,7 @@
 // Copyright (c) 2025 SkillCert
 
 use crate::error::{handle_error, Error};
-use crate::functions::utils;
+use crate::functions::utils::{self, trim};
 use crate::schema::{Course, CourseGoal, DataKey};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
@@ -10,12 +10,24 @@ const GOAL_ADDED_EVENT: Symbol = symbol_short!("goaladd");
 
 pub fn add_goal(env: Env, creator: Address, course_id: String, content: String) -> CourseGoal {
     creator.require_auth();
-    // Validate input
+    
+    // Validate input parameters
     if course_id.is_empty() {
-        handle_error(&env, Error::InvalidInput)
+        handle_error(&env, Error::EmptyCourseId);
     }
-    if content.is_empty() {
-        handle_error(&env, Error::EmptyGoalContent)
+    
+    // Validate goal content - prevent empty or whitespace-only content
+    if content.is_empty() || trim(&env, &content).is_empty() {
+        handle_error(&env, Error::EmptyGoalContent);
+    }
+    
+    // Check string lengths to prevent extremely long values
+    if course_id.len() > 100 {
+        handle_error(&env, Error::InvalidInput);
+    }
+    
+    if content.len() > 1000 {
+        handle_error(&env, Error::InvalidInput);
     }
 
     // Load course

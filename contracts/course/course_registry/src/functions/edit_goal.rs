@@ -3,6 +3,7 @@
 
 use super::is_course_creator::is_course_creator;
 use crate::error::{handle_error, Error};
+use crate::functions::utils::trim;
 use crate::schema::{Course, CourseGoal, DataKey};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
@@ -23,8 +24,9 @@ pub fn edit_goal(
     if goal_id.is_empty() {
         handle_error(&env, Error::InvalidInput)
     }
-    if new_content.is_empty() {
-        handle_error(&env, Error::EmptyNewGoalContent)
+    // Validate goal content - prevent empty or whitespace-only content
+    if new_content.is_empty() || trim(&env, &new_content).is_empty() {
+        handle_error(&env, Error::EmptyNewGoalContent);
     }
 
     // Load course

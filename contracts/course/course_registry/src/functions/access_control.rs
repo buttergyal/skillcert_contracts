@@ -2,8 +2,8 @@
 // Copyright (c) 2025 SkillCert
 
 use crate::error::{handle_error, Error};
-use crate::schema::{Course, CourseId};
-use soroban_sdk::{symbol_short, Address, Env, String, Symbol, IntoVal, Vec};
+use crate::schema::Course;
+use soroban_sdk::{symbol_short, Address, Env, String, Symbol, IntoVal};
 
 const KEY_USER_MGMT_ADDR: &str = "user_mgmt_addr";
 const KEY_OWNER: &str = "owner";
@@ -89,12 +89,11 @@ pub fn update_user_mgmt_address(env: &Env, caller: &Address, new_addr: &Address)
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use soroban_sdk::testutils::Address as _;
-
     // Note: These tests are commented out due to complex storage access issues
     // The access control functionality is working as evidenced by other passing tests
     /*
+    use super::*;
+    use soroban_sdk::testutils::Address as _;
     #[test]
     fn test_course_creator_authorization() {
         // Simplified test - just verify the function exists
