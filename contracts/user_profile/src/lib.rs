@@ -7,6 +7,7 @@
 pub const VERSION: &str = "1.0.0";
 
 pub mod functions;
+pub mod error;
 pub mod schema;
 
 #[cfg(test)]
