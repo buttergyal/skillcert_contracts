@@ -6,7 +6,7 @@ use soroban_sdk::{contracttype, Address, String};
 /// Default and limit constants for user management configuration
 pub const DEFAULT_MAX_PAGE_SIZE: u32 = 100;
 pub const ABSOLUTE_MAX_PAGE_SIZE: u32 = 1000;
-pub const MAX_ADMINS: usize = 10;
+pub const MAX_ADMINS: u32 = 10;
 
 /// User profile information matching UI definition.
 ///

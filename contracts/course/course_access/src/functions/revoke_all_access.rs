@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use crate::error::{handle_error, Error};
+use crate::error::{handle_error, CourseAccessError};
 use crate::schema::{DataKey, KEY_COURSE_REG_ADDR, KEY_USER_MGMT_ADDR};
 use soroban_sdk::{symbol_short, Address, Env, IntoVal, String, Symbol, Vec};
 
@@ -43,7 +43,7 @@ const REVOKE_ALL_EVENT: Symbol = symbol_short!("revokeall");
 /// # Panics
 ///
 /// Panics with `Error::Unauthorized` if the caller is not authorized to perform this operation.
-pub fn RevokeAllAccess(env: Env, caller: Address, course_id: String) -> u32 {
+pub fn revoke_all_access(env: Env, caller: Address, course_id: String) -> u32 {
     caller.require_auth();
 
     // Resolve admin via cross-contract if configured
@@ -72,7 +72,7 @@ pub fn RevokeAllAccess(env: Env, caller: Address, course_id: String) -> u32 {
 
     // Authorization: only admin or course creator
     if !(is_admin || is_creator) {
-        handle_error(&env, Error::Unauthorized)
+        handle_error(&env, CourseAccessError::Unauthorized)
     }
 
     // Fetch all users with access to this course

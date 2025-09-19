@@ -2,7 +2,7 @@
 // Copyright (c) 2025 SkillCert
 
 use crate::error::{handle_error, Error};
-use crate::schema::{AdminConfig, DataKey, LightProfile, UserProfile, UserStatus, DEFAULT_MAX_PAGE_SIZE};
+use crate::schema::{AdminConfig, DataKey, LightProfile, UserProfile, UserStatus};
 use core::iter::Iterator;
 use soroban_sdk::{symbol_short, Address, Env, Symbol};
 
@@ -151,11 +151,12 @@ mod tests {
     }
 
     fn setup_admin(env: &Env, contract_id: &Address, admin: &Address) {
+        let max_page_size = 100; // DEFAULT_MAX_PAGE_SIZE
         env.as_contract(contract_id, || {
             let config = AdminConfig {
                 initialized: true,
                 super_admin: admin.clone(),
-                max_page_size: DEFAULT_MAX_PAGE_SIZE,
+                max_page_size,
                 total_user_count: 0,
             };
             env.storage()

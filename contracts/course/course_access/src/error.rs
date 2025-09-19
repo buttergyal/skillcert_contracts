@@ -23,6 +23,8 @@ pub enum CourseAccessError {
     EmailRequired = 5,
     /// Country field is required but not provided
     CountryRequired = 6,
+    /// Invalid input provided
+    InvalidInput = 7,
 }
 
 /// Handles contract errors by panicking with the specified error.
@@ -39,6 +41,6 @@ pub enum CourseAccessError {
 ///
 /// This function always panics with the provided error, which is the intended behavior
 /// for error handling in Soroban contracts.
-pub fn HandleError(env: &Env, error: CourseAccessError) -> ! {
+pub fn handle_error(env: &Env, error: CourseAccessError) -> ! {
     panic_with_error!(env, error);
 }

@@ -177,8 +177,8 @@ impl CourseRegistry {
     /// # Returns
     ///
     /// Returns the created `CourseModule` object.
-    pub fn add_module(env: Env, course_id: String, position: u32, title: String) -> CourseModule {
-        functions::add_module::add_module(env, course_id, position, title)
+    pub fn add_module(env: Env, caller: Address, course_id: String, position: u32, title: String) -> CourseModule {
+        functions::add_module::course_registry_add_module(env, caller, course_id, position, title)
     }
 
     /// Delete a course from the registry.

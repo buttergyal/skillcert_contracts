@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
-
+use crate::functions::config::{TTL_BUMP, TTL_TTL};
 use crate::schema::{CourseUsers, DataKey, UserCourses};
 use soroban_sdk::{Address, Env, String};
-use crate::functions::config::{TTL_BUMP, TTL_TTL};
 
 /// Revoke access for a specific user from a course.
 ///
@@ -21,19 +20,20 @@ use crate::functions::config::{TTL_BUMP, TTL_TTL};
 ///
 /// Returns `true` if access was successfully revoked, `false` if the user
 /// didn't have access to the course in the first place.
-pub fn CourseAccessRevokeAccess(env: Env, course_id: String, user: Address) -> bool {
+pub fn course_access_revoke_access(env: Env, course_id: String, user: Address) -> bool {
     // Input validation
     if course_id.is_empty() {
         return false;
     }
+    // Optionally, add more checks for user address validity if needed
 
     let key: DataKey = DataKey::CourseAccess(course_id.clone(), user.clone());
-
+    
     // Check if the CourseAccess entry exists in persistent storage
     if env.storage().persistent().has(&key) {
         // Remove the CourseAccess entry
         env.storage().persistent().remove(&key);
-
+        
         // Update UserCourses
         let user_courses_key = DataKey::UserCourses(user.clone());
         if let Some(mut user_courses) = env
@@ -51,7 +51,7 @@ pub fn CourseAccessRevokeAccess(env: Env, course_id: String, user: Address) -> b
                     .extend_ttl(&user_courses_key, TTL_BUMP, TTL_TTL);
             }
         }
-
+        
         // Update CourseUsers
         let course_users_key = DataKey::CourseUsers(course_id.clone());
         if let Some(mut course_users) = env
@@ -69,7 +69,7 @@ pub fn CourseAccessRevokeAccess(env: Env, course_id: String, user: Address) -> b
                     .extend_ttl(&course_users_key, TTL_BUMP, TTL_TTL);
             }
         }
-
+        
         true
     } else {
         false

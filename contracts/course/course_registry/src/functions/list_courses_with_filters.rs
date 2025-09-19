@@ -25,7 +25,9 @@ pub fn list_courses_with_filters(
 
     loop {
         // Much more aggressive safety limits for budget
-        if id > crate::schema::MAX_SCAN_ID || empty_checks > crate::schema::MAX_EMPTY_CHECKS {
+        if id > crate::schema::MAX_SCAN_ID as u128
+            || empty_checks > crate::schema::MAX_EMPTY_CHECKS as u32
+        {
             break;
         }
 

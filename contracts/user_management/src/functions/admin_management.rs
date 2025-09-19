@@ -2,7 +2,9 @@
 // Copyright (c) 2025 SkillCert
 
 use crate::error::{handle_error, Error};
-use crate::schema::{AdminConfig, DataKey, ABSOLUTE_MAX_PAGE_SIZE, DEFAULT_MAX_PAGE_SIZE, MAX_ADMINS};
+use crate::schema::{
+    AdminConfig, DataKey, ABSOLUTE_MAX_PAGE_SIZE, DEFAULT_MAX_PAGE_SIZE, MAX_ADMINS,
+};
 use core::iter::Iterator;
 use soroban_sdk::{Address, Env, Vec};
 
@@ -95,7 +97,7 @@ pub fn add_admin(env: Env, caller: Address, new_admin: Address) {
     }
 
     // Limit number of admins for security
-    if admins.len() >= MAX_ADMINS as u32 {
+    if (admins.len() as u32) >= MAX_ADMINS {
         handle_error(&env, Error::MaxAdminsReached)
     }
 
@@ -206,7 +208,7 @@ pub fn is_system_initialized(env: Env) -> bool {
 #[cfg(test)]
 mod tests {
     use crate::{UserManagement, UserManagementClient};
-    use soroban_sdk::{Address, testutils::Address as _, Env};
+    use soroban_sdk::{testutils::Address as _, Address, Env};
 
     #[test]
     fn test_initialize_system() {
@@ -219,7 +221,8 @@ mod tests {
         let super_admin = Address::generate(&env);
 
         const TEST_MAX_PAGE_SIZE: u32 = 50;
-        let config = client.initialize_system(&initializer, &super_admin, &Some(TEST_MAX_PAGE_SIZE));
+        let config =
+            client.initialize_system(&initializer, &super_admin, &Some(TEST_MAX_PAGE_SIZE));
 
         assert!(config.initialized);
         assert_eq!(config.super_admin, super_admin);

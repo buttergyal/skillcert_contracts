@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+pub mod access_control;
 pub mod add_goal;
 pub mod add_module;
 pub mod archive_course;

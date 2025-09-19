@@ -38,13 +38,43 @@ mod tests {
     use crate::{schema::Course, CourseRegistry, CourseRegistryClient};
     use soroban_sdk::{testutils::Address as _, Address, Env};
 
-    #[test]
-    fn test_remove_module_success() {
+    // Mock UserManagement contract for testing
+    mod mock_user_management {
+        use soroban_sdk::{contract, contractimpl, Address, Env};
+
+        #[contract]
+        pub struct UserManagement;
+
+        #[contractimpl]
+        impl UserManagement {
+            pub fn is_admin(_env: Env, _who: Address) -> bool {
+                true
+            }
+        }
+    }
+
+    fn setup_test_env() -> (Env, Address, CourseRegistryClient<'static>) {
         let env = Env::default();
         env.mock_all_auths();
-
-        let contract_id = env.register(CourseRegistry, {});
+        
+        // Register mock user management contract
+        let user_mgmt_id = env.register(mock_user_management::UserManagement, ());
+        
+        let contract_id = env.register(CourseRegistry, ());
         let client = CourseRegistryClient::new(&env, &contract_id);
+
+        // Setup admin
+        let admin = Address::generate(&env);
+        env.as_contract(&contract_id, || {
+            crate::functions::access_control::initialize(&env, &admin, &user_mgmt_id);
+        });
+
+        (env, contract_id, client)
+    }
+
+    #[test]
+    fn test_remove_module_success() {
+        let (env, contract_id, client) = setup_test_env();
 
         let creator = Address::generate(&env);
         let course: Course = client.create_course(
@@ -58,7 +88,7 @@ mod tests {
             &None,
             &None,
         );
-        let new_module = client.add_module(&course.id, &0, &String::from_str(&env, "Module Title"));
+        let new_module = client.add_module(&creator, &course.id, &0, &String::from_str(&env, "Module Title"));
 
         let exists: bool = env.as_contract(&contract_id, || {
             env.storage()
