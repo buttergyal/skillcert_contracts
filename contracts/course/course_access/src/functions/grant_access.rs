@@ -7,6 +7,16 @@ use crate::error::{Error, handle_error};
 
 /// Grant access to a specific user for a given course
 pub fn course_access_grant_access(env: Env, course_id: String, user: Address) {
+    // Validate input parameters
+    if course_id.is_empty() {
+        handle_error(&env, Error::EmptyCourseId);
+    }
+    
+    // Check course_id length to prevent extremely long IDs
+    if course_id.len() > 100 {
+        handle_error(&env, Error::InvalidCourseId);
+    }
+
     let key: DataKey = DataKey::CourseAccess(course_id.clone(), user.clone());
 
     // Check if access already exists to prevent duplicates

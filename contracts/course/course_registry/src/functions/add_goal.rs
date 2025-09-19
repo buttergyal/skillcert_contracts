@@ -15,10 +15,23 @@ pub fn course_registry_add_goal(
     content: String,
 ) -> CourseGoal {
     creator.require_auth();
-    // Validate input
+    
+    // Validate input parameters
+    if course_id.is_empty() {
+        handle_error(&env, Error::EmptyCourseId);
+    }
+    
     if content.is_empty() {
-        handle_error(&env, Error::EmptyGoalContent)
-
+        handle_error(&env, Error::EmptyGoalContent);
+    }
+    
+    // Check string lengths to prevent extremely long values
+    if course_id.len() > 100 {
+        handle_error(&env, Error::EmptyCourseId);
+    }
+    
+    if content.len() > 1000 {
+        handle_error(&env, Error::EmptyGoalContent);
     }
 
     // Load course

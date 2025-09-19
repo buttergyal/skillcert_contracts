@@ -3,6 +3,7 @@
 
 use soroban_sdk::{Address, Env, String};
 use crate::schema::{DataKey, UserCourses, CourseUsers};
+use crate::error::{Error, handle_error};
 
 // pub fn course_access_revoke_access(env: Env, course_id: String, user: Address) -> bool {
 //     // Create storage key
@@ -21,6 +22,16 @@ use crate::schema::{DataKey, UserCourses, CourseUsers};
 
 /// Revoke access for a specific user from a course
 pub fn course_access_revoke_access(env: Env, course_id: String, user: Address) -> bool {
+    // Validate input parameters
+    if course_id.is_empty() {
+        handle_error(&env, Error::EmptyCourseId);
+    }
+    
+    // Check course_id length to prevent extremely long IDs
+    if course_id.len() > 100 {
+        handle_error(&env, Error::InvalidCourseId);
+    }
+    
     let key: DataKey = DataKey::CourseAccess(course_id.clone(), user.clone());
 
     // Check if the CourseAccess entry exists in persistent storage

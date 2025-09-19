@@ -14,6 +14,41 @@ pub fn course_registry_add_prerequisite(
     prerequisites: Vec<String>,
 ) {
     creator.require_auth();
+    
+    // Validate input parameters
+    if course_id.is_empty() {
+        handle_error(&env, Error::EmptyCourseId);
+    }
+    
+    if course_id.len() > 100 {
+        handle_error(&env, Error::EmptyCourseId);
+    }
+    
+    // Validate prerequisites list
+    if prerequisites.is_empty() {
+        handle_error(&env, Error::InvalidInput);
+    }
+    
+    // Check for reasonable limit on number of prerequisites
+    if prerequisites.len() > 20 {
+        handle_error(&env, Error::InvalidInput);
+    }
+    
+    // Validate each prerequisite ID
+    for prerequisite_id in prerequisites.iter() {
+        if prerequisite_id.is_empty() {
+            handle_error(&env, Error::InvalidInput);
+        }
+        
+        if prerequisite_id.len() > 100 {
+            handle_error(&env, Error::InvalidInput);
+        }
+        
+        // Check for self-prerequisite
+        if prerequisite_id == course_id {
+            handle_error(&env, Error::SelfPrerequisite);
+        }
+    }
 
     let course_key: (Symbol, String) = (symbol_short!("course"), course_id.clone());
     let course: Course = env

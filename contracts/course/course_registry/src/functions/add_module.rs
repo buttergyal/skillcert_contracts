@@ -15,6 +15,29 @@ pub fn course_registry_add_module(
     position: u32,
     title: String,
 ) -> CourseModule {
+    // Validate input parameters
+    if course_id.is_empty() {
+        handle_error(&env, Error::EmptyCourseId);
+    }
+    
+    if title.is_empty() {
+        handle_error(&env, Error::InvalidModuleTitle);
+    }
+    
+    // Check string lengths to prevent extremely long values
+    if course_id.len() > 100 {
+        handle_error(&env, Error::EmptyCourseId);
+    }
+    
+    if title.len() > 500 {
+        handle_error(&env, Error::InvalidModuleTitle);
+    }
+    
+    // Validate position is reasonable (not zero, not extremely large)
+    if position == 0 || position > 10000 {
+        handle_error(&env, Error::InvalidModulePosition);
+    }
+
     // Verify course exists
     let course_storage_key: (Symbol, String) = (COURSE_KEY, course_id.clone());
 

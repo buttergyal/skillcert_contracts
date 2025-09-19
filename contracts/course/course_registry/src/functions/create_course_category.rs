@@ -56,6 +56,18 @@ pub fn course_registry_create_course_category(
     if name.is_empty() {
         handle_error(&env, Error::NameRequired)
     }
+    
+    // Additional validation for category names
+    if name.len() > 100 {
+        handle_error(&env, Error::InvalidCategoryName);
+    }
+    
+    // Validate description if provided
+    if let Some(ref desc) = description {
+        if desc.len() > 500 {
+            handle_error(&env, Error::InvalidCategoryName);
+        }
+    }
 
     // Generate a new category ID
     let id = next_category_id(&env);

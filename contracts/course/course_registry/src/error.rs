@@ -30,6 +30,13 @@ pub enum Error {
     ModuleNotFound = 21,
     EmptyModuleId = 22,
     PrereqNotInList = 23,
+    InvalidModulePosition = 24,
+    InvalidModuleTitle = 25,
+    InvalidCourseDescription = 26,
+    InvalidCategoryName = 27,
+    EmptyCategory = 28,
+    InvalidInput = 29,
+    InvalidPrice100 = 30,
 }
 
 pub fn handle_error(env: &Env, error: Error) -> ! {
