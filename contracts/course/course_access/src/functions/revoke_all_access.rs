@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use crate::error::{handle_error, CourseAccessError};
+use crate::error::{handle_error, Error};
 use crate::schema::{DataKey, KEY_COURSE_REG_ADDR, KEY_USER_MGMT_ADDR};
 use soroban_sdk::{symbol_short, Address, Env, IntoVal, String, Symbol, Vec};
 
@@ -82,7 +82,7 @@ pub fn revoke_all_access(env: Env, caller: Address, course_id: String) -> u32 {
 
     // Authorization: only admin or course creator
     if !(is_admin || is_creator) {
-        handle_error(&env, CourseAccessError::Unauthorized)
+        handle_error(&env, Error::Unauthorized)
     }
 
     // Fetch all users with access to this course

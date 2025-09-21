@@ -11,7 +11,6 @@ pub fn user_profile_get_user_profile(env: &Env, user_address: Address) -> UserPr
     
     // Create the storage key for the user profile
     let key = Symbol::new(env, "profile");
-    let storage_key = (key, user_address.clone());
     
     // Get the user profile from storage with proper error handling
     match env

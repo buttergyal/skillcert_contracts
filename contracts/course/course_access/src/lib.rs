@@ -15,7 +15,7 @@ mod test;
 
 use soroban_sdk::{contract, contractimpl, Address, Env, String};
 
-pub use error::CourseAccessError;
+pub use error::Error;
 pub use functions::*;
 pub use schema::{CourseUsers, UserCourses};
 
@@ -140,7 +140,7 @@ impl CourseAccessContract {
     ///
     /// Returns a `CourseUsers` struct containing the list of users with access.
     pub fn list_course_access(env: Env, course_id: String) -> CourseUsers {
-        functions::list_course_access::list_course_access(env, course_id)
+        functions::list_course_access::course_access_list_course_access(env, course_id)
     }
 
     /// Revoke all user access for a course.
