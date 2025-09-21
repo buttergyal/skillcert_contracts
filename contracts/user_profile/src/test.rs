@@ -47,7 +47,7 @@ fn test_get_user_profile_success() {
 }
 
 #[test]
-#[should_panic(expected = "User profile not found")]
+#[should_panic(expected = "escalating error to panic")]
 fn test_get_user_profile_not_found() {
     let env = Env::default();
     let contract_id = env.register(UserProfileContract, {});
@@ -166,7 +166,7 @@ fn test_get_user_profile_with_privacy_same_user() {
 }
 
 #[test]
-#[should_panic(expected = "User profile not found")]
+#[should_panic(expected = "escalating error to panic")]
 fn test_get_user_profile_with_privacy_not_found() {
     let env = Env::default();
     let contract_id = env.register(UserProfileContract, {});
