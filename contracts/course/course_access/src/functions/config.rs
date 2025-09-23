@@ -2,7 +2,10 @@
 // Copyright (c) 2025 SkillCert
 
 use crate::schema::{KEY_COURSE_REG_ADDR, KEY_USER_MGMT_ADDR};
-use soroban_sdk::{Address, Env};
+use soroban_sdk::{Address, Env, Symbol, symbol_short};
+
+const INIT_EVENT: Symbol = symbol_short!("initial");
+const UPDATE_ADDRESS_EVENT: Symbol = symbol_short!("upd_addr");
 
 /// Storage key for initialization flag
 const KEY_INIT: &str = "init";
@@ -49,6 +52,9 @@ pub fn initialize(
     inst.set(&(KEY_USER_MGMT_ADDR,), &user_mgmt_addr);
     inst.set(&(KEY_COURSE_REG_ADDR,), &course_registry_addr);
     inst.set(&(KEY_INIT,), &true);
+
+    env.events()
+        .publish((INIT_EVENT,), (caller, user_mgmt_addr, course_registry_addr));
 }
 
 /// Update external contract addresses.
@@ -98,6 +104,8 @@ pub fn set_contract_addrs(
     let inst = env.storage().instance();
     inst.set(&(KEY_USER_MGMT_ADDR,), &user_mgmt_addr);
     inst.set(&(KEY_COURSE_REG_ADDR,), &course_registry_addr);
+    env.events()
+        .publish((UPDATE_ADDRESS_EVENT,), (caller, user_mgmt_addr, course_registry_addr));
 }
 
 /// TTL configuration constants for persistent storage entries
