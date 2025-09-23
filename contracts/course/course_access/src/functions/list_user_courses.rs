@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
-use soroban_sdk::{Address, Env, Vec};
+use soroban_sdk::{Address, Env, Vec, Symbol, symbol_short};
 use crate::schema::{DataKey, UserCourses};
+
+const LIST_USER_COURSES_EVENT: Symbol = symbol_short!("lst_u_crs");
 
 /// List all courses that a specific user has access to.
 ///
@@ -20,11 +22,14 @@ use crate::schema::{DataKey, UserCourses};
 /// of course IDs they have access to. If no courses are found, returns
 /// an empty list.
 pub fn list_user_courses(env: Env, user: Address) -> UserCourses {
-    let key = DataKey::UserCourses(user.clone());
-    env.storage().persistent().get(&key).unwrap_or(UserCourses {
-        user,
+    let key: DataKey = DataKey::UserCourses(user.clone());
+    let res: UserCourses = env.storage().persistent().get(&key).unwrap_or(UserCourses {
+        user: user.clone(),
         courses: Vec::new(&env),
-    })
+    });
+    env.events()
+        .publish((LIST_USER_COURSES_EVENT,), user);
+    return res
 }
 
 #[cfg(test)]

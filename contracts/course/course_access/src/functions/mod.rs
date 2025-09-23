@@ -3,7 +3,6 @@
 
 pub mod config;
 pub mod grant_access;
-pub mod has_access;
 pub mod list_course_access;
 pub mod list_user_courses;
 pub mod revoke_access;

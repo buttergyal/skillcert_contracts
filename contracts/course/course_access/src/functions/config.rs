@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use crate::schema::{KEY_COURSE_REG_ADDR, KEY_USER_MGMT_ADDR};
 use soroban_sdk::{Address, Env, Symbol, symbol_short};
+
+use crate::schema::{KEY_COURSE_REG_ADDR, KEY_USER_MGMT_ADDR};
 
 const INIT_EVENT: Symbol = symbol_short!("initial");
 const UPDATE_ADDRESS_EVENT: Symbol = symbol_short!("upd_addr");
