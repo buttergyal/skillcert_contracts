@@ -186,9 +186,17 @@ pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> Use
     // Add to users index
     add_to_users_index(&env, &user);
 
-    // Emit user creation event
-    env.events()
-        .publish((EVT_USER_CREATED, &user), user.clone());
+    // Emit user creation audit event with detailed information
+    env.events().publish(
+        (EVT_USER_CREATED, &user),
+        (
+            user.clone(),
+            profile.full_name.clone(),
+            profile.contact_email.clone(),
+            profile.profession.clone(),
+            profile.country.clone(),
+        ),
+    );
 
     profile
 }
