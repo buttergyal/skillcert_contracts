@@ -1,12 +1,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use soroban_sdk::{contracttype, Address, String};
+use soroban_sdk::{contracttype, Address, String, Vec};
 
 /// Default and limit constants for user management configuration
 pub const DEFAULT_MAX_PAGE_SIZE: u32 = 100;
 pub const ABSOLUTE_MAX_PAGE_SIZE: u32 = 1000;
 pub const MAX_ADMINS: u32 = 10;
+
+/// Array limits constants for user profile validation
+pub const MAX_LANGUAGES: u32 = 10;
+pub const MAX_TEACHING_CATEGORIES: u32 = 15;
+pub const MAX_PREREQUISITES: u32 = 20;
 
 /// User profile information matching UI definition.
 ///
@@ -15,16 +20,32 @@ pub const MAX_ADMINS: u32 = 10;
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]
 pub struct UserProfile {
-    /// User's full name (required)
-    pub full_name: String,
+    /// User's blockchain address
+    pub address: Address,
+    /// User's first name (required)
+    pub name: String,
+    /// User's last name (required)
+    pub lastname: String,
     /// User's contact email address (required, must be unique)
-    pub contact_email: String,
-    /// User's profession or job title (optional)
-    pub profession: Option<String>,
-    /// User's country of residence (optional)
-    pub country: Option<String>,
-    /// User's learning goals or purpose (optional)
-    pub purpose: Option<String>,
+    pub email: String,
+    /// Hashed password for authentication
+    pub password_hash: String,
+    /// User's specialization or area of expertise
+    pub specialization: String,
+    /// Array of languages the user speaks (max 10)
+    pub languages: Vec<String>,
+    /// Array of categories the user can teach (max 15)
+    pub teaching_categories: Vec<String>,
+    /// User's role in the platform
+    pub role: UserRole,
+    /// User's account status
+    pub status: UserStatus,
+    /// User's country of residence
+    pub country: String,
+    /// Timestamp when the profile was created
+    pub created_at: u64,
+    /// Timestamp when the profile was last updated
+    pub updated_at: u64,
 }
 
 /// Struct for profile update parameters
