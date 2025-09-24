@@ -15,7 +15,6 @@ const EVT_USER_CREATED: Symbol = symbol_short!("usr_cr8d");
 const MAX_NAME_LENGTH: usize = 100;
 const MAX_EMAIL_LENGTH: usize = 320; // RFC 5321 standard
 const MAX_PROFESSION_LENGTH: usize = 100;
-const MAX_PURPOSE_LENGTH: usize = 500;
 const MAX_COUNTRY_LENGTH: usize = 56; // Longest country name
 const INVALID_EMAIL_NO_AT_LENGTH: u32 = 13; // "invalid-email"
 
@@ -145,22 +144,17 @@ pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> Use
         handle_error(&env, Error::EmailAlreadyExists)
     }
 
-    // Validate optional fields
-    if let Some(ref prof) = profile.profession {
-        if !prof.is_empty() && !validate_string_content(&env, prof, MAX_PROFESSION_LENGTH) {
+    // Validate profession field if provided
+    if let Some(ref profession) = profile.profession {
+        if !profession.is_empty() && !validate_string_content(&env, profession, MAX_PROFESSION_LENGTH) {
             handle_error(&env, Error::InvalidProfession)
         }
     }
 
+    // Validate country field if provided
     if let Some(ref country) = profile.country {
         if !country.is_empty() && !validate_string_content(&env, country, MAX_COUNTRY_LENGTH) {
             handle_error(&env, Error::InvalidCountry)
-        }
-    }
-
-    if let Some(ref purpose) = profile.purpose {
-        if !purpose.is_empty() && !validate_string_content(&env, purpose, MAX_PURPOSE_LENGTH) {
-            handle_error(&env, Error::InvalidGoals)
         }
     }
 
@@ -213,7 +207,7 @@ pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> Use
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::schema::UserStatus;
+    use crate::schema::{UserStatus};
     use crate::{UserManagement, UserManagementClient};
     use soroban_sdk::{testutils::Address as _, Address, Env, String};
 
@@ -248,7 +242,6 @@ mod tests {
         assert_eq!(created_profile.contact_email, profile.contact_email);
         assert_eq!(created_profile.profession, profile.profession);
         assert_eq!(created_profile.country, profile.country);
-        assert_eq!(created_profile.purpose, profile.purpose);
 
         // Verify storage
         env.as_contract(&contract_id, || {
@@ -277,7 +270,7 @@ mod tests {
                 .get(&light_key)
                 .expect("Light profile should exist");
             assert_eq!(light_profile.status, UserStatus::Active);
-            assert_eq!(light_profile.full_name, profile.full_name);
+            assert_eq!(light_profile.full_name, String::from_str(&env, "John Doe"));
         });
     }
 
@@ -303,7 +296,6 @@ mod tests {
         // Verify minimal profile
         assert_eq!(created_profile.profession, None);
         assert_eq!(created_profile.country, None);
-        assert_eq!(created_profile.purpose, None);
     }
 
     #[test]
