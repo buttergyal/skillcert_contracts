@@ -234,6 +234,7 @@ fn test_complete_user_lifecycle() {
         profession: Some(String::from_str(&env, "Software Engineer")),
         country: Some(String::from_str(&env, "United States")),
         purpose: Some(String::from_str(&env, "Learn blockchain development")),
+        profile_picture_url: None,
     };
 
     let created_profile = client.create_user_profile(&user, &initial_profile);
@@ -245,6 +246,7 @@ fn test_complete_user_lifecycle() {
         profession: Some(String::from_str(&env, "Senior Software Engineer")),
         country: Some(String::from_str(&env, "Canada")),
         purpose: Some(String::from_str(&env, "Master blockchain development")),
+        profile_picture_url: None,
     };
 
     let updated_profile = client.edit_user_profile(&user, &user, &update_params);
@@ -305,6 +307,7 @@ fn test_multi_user_admin_workflow() {
             profession: Some(String::from_str(&env, profession)),
             country: Some(String::from_str(&env, country)),
             purpose: Some(String::from_str(&env, "Learn new skills")),
+            profile_picture_url: None,
         };
         client.create_user_profile(&user, &profile);
     }
@@ -367,6 +370,7 @@ fn test_user_profile_validation_workflow() {
         profession: None,
         country: None,
         purpose: None,
+        profile_picture_url: None,
     };
 
     let created = client.create_user_profile(&user, &minimal_profile);
@@ -379,6 +383,7 @@ fn test_user_profile_validation_workflow() {
         profession: Some(String::from_str(&env, "Developer")),
         country: Some(String::from_str(&env, "Mexico")),
         purpose: Some(String::from_str(&env, "Learn Rust")),
+        profile_picture_url: None,
     };
 
     let updated = client.edit_user_profile(&user, &user, &update_params);
@@ -423,6 +428,7 @@ fn test_pagination_and_filtering_integration() {
             profession: Some(String::from_str(&env, profession)),
             country: Some(String::from_str(&env, country)),
             purpose: Some(String::from_str(&env, "Learning")),
+            profile_picture_url: None,
         };
         client.create_user_profile(&user, &profile);
     }
@@ -488,6 +494,7 @@ fn test_error_handling_and_edge_cases() {
         profession: Some(String::from_str(&env, "Tester")),
         country: Some(String::from_str(&env, "Test Country")),
         purpose: Some(String::from_str(&env, "Test purpose")),
+        profile_picture_url: None,
     };
 
     client.create_user_profile(&user, &profile);
@@ -507,6 +514,7 @@ fn test_error_handling_and_edge_cases() {
         profession: Some(String::from_str(&env, "New Profession")),
         country: Some(String::from_str(&env, "New Country")),
         purpose: Some(String::from_str(&env, "New Purpose")),
+        profile_picture_url: None,
     };
 
     let created = client.create_user_profile(&new_user, &new_profile);

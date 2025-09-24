@@ -43,7 +43,26 @@ impl CourseAccessContract {
     ///
     /// # Panics
     ///
-    /// Fails if the contract has already been initialized.
+    /// * Fails if the contract has already been initialized
+    /// * If any of the provided addresses are invalid
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// // Initialize contract during deployment
+    /// contract.initialize(
+    ///     env.clone(),
+    ///     deployer_address,
+    ///     user_mgmt_contract_address,
+    ///     course_registry_contract_address
+    /// );
+    /// ```
+    ///
+    /// # Edge Cases
+    ///
+    /// * **Double initialization**: Will panic if called more than once
+    /// * **Invalid addresses**: Contract addresses must be valid
+    /// * **Deployment only**: Should only be called during contract deployment
     pub fn initialize(
         env: Env,
         caller: Address,
@@ -63,6 +82,37 @@ impl CourseAccessContract {
     /// * `env` - The Soroban environment
     /// * `course_id` - The unique identifier of the course
     /// * `user` - The address of the user to grant access to
+    ///
+    /// # Panics
+    ///
+    /// * If course doesn't exist
+    /// * If caller is not authorized (not course creator or admin)
+    /// * If user already has access
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// // Course creator granting access
+    /// contract.grant_access(
+    ///     env.clone(),
+    ///     "course_123".try_into().unwrap(),
+    ///     student_address
+    /// );
+    /// 
+    /// // Admin granting access
+    /// contract.grant_access(
+    ///     env.clone(),
+    ///     "course_456".try_into().unwrap(),
+    ///     student_address
+    /// );
+    /// ```
+    ///
+    /// # Edge Cases
+    ///
+    /// * **Already has access**: Will panic if user already has access
+    /// * **Non-existent course**: Will panic if course doesn't exist
+    /// * **Permission denied**: Only course creators and admins can grant access
+    /// * **User validation**: User address must be valid
     pub fn grant_access(env: Env, course_id: String, user: Address) {
         functions::grant_access::course_access_grant_access(env, course_id, user)
     }
@@ -81,6 +131,35 @@ impl CourseAccessContract {
     /// # Returns
     ///
     /// Returns `true` if access was successfully revoked, `false` otherwise.
+    ///
+    /// # Panics
+    ///
+    /// * If course doesn't exist
+    /// * If caller is not authorized (not course creator or admin)
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// // Revoke access from a user
+    /// let success = contract.revoke_access(
+    ///     env.clone(),
+    ///     "course_123".try_into().unwrap(),
+    ///     student_address
+    /// );
+    /// 
+    /// if success {
+    ///     println!("Access revoked successfully");
+    /// } else {
+    ///     println!("User didn't have access");
+    /// }
+    /// ```
+    ///
+    /// # Edge Cases
+    ///
+    /// * **No access to revoke**: Returns `false` if user didn't have access
+    /// * **Non-existent course**: Will panic if course doesn't exist
+    /// * **Permission denied**: Only course creators and admins can revoke access
+    /// * **Idempotent**: Safe to call multiple times
     pub fn revoke_access(env: Env, course_id: String, user: Address) -> bool {
         functions::revoke_access::course_access_revoke_access(env, course_id, user)
     }
@@ -98,6 +177,42 @@ impl CourseAccessContract {
     /// * `profession` - Optional profession/job title
     /// * `goals` - Optional learning goals or objectives
     /// * `country` - The user's country of residence
+    ///
+    /// # Panics
+    ///
+    /// * If name, email, or country are empty
+    /// * If email format is invalid
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// // Save user profile
+    /// contract.save_user_profile(
+    ///     env.clone(),
+    ///     "John Doe".try_into().unwrap(),
+    ///     "john@example.com".try_into().unwrap(),
+    ///     Some("Software Developer".try_into().unwrap()),
+    ///     Some("Learn Rust programming".try_into().unwrap()),
+    ///     "US".try_into().unwrap()
+    /// );
+    /// 
+    /// // Save minimal profile
+    /// contract.save_user_profile(
+    ///     env.clone(),
+    ///     "Jane Smith".try_into().unwrap(),
+    ///     "jane@example.com".try_into().unwrap(),
+    ///     None,
+    ///     None,
+    ///     "CA".try_into().unwrap()
+    /// );
+    /// ```
+    ///
+    /// # Edge Cases
+    ///
+    /// * **Empty required fields**: Name, email, and country cannot be empty
+    /// * **Invalid email**: Email must be in valid format
+    /// * **Profile updates**: Overwrites existing profile data
+    /// * **Optional fields**: Profession and goals can be None
     pub fn save_user_profile(
         env: Env,
         name: String,
@@ -123,6 +238,24 @@ impl CourseAccessContract {
     /// # Returns
     ///
     /// Returns a `UserCourses` struct containing the list of accessible courses.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// // Get user's accessible courses
+    /// let user_courses = contract.list_user_courses(env.clone(), user_address);
+    /// 
+    /// for course_id in user_courses.course_ids {
+    ///     println!("User has access to course: {}", course_id);
+    /// }
+    /// ```
+    ///
+    /// # Edge Cases
+    ///
+    /// * **No access**: Returns empty list if user has no course access
+    /// * **Non-existent user**: Returns empty list for non-existent users
+    /// * **Public access**: Anyone can query user courses
+    /// * **Revoked courses**: Only includes currently accessible courses
     pub fn list_user_courses(env: Env, user: Address) -> UserCourses {
         functions::list_user_courses::list_user_courses(env, user)
     }
@@ -139,6 +272,24 @@ impl CourseAccessContract {
     /// # Returns
     ///
     /// Returns a `CourseUsers` struct containing the list of users with access.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// // Get all users with access to a course
+    /// let course_users = contract.list_course_access(env.clone(), "course_123".try_into().unwrap());
+    /// 
+    /// for user in course_users.users {
+    ///     println!("User with access: {}", user);
+    /// }
+    /// ```
+    ///
+    /// # Edge Cases
+    ///
+    /// * **No users**: Returns empty list if no users have access
+    /// * **Non-existent course**: Returns empty list for non-existent courses
+    /// * **Public access**: Anyone can query course access
+    /// * **Real-time data**: Always returns current access status
     pub fn list_course_access(env: Env, course_id: String) -> CourseUsers {
         functions::list_course_access::course_access_list_course_access(env, course_id)
     }
@@ -157,6 +308,31 @@ impl CourseAccessContract {
     /// # Returns
     ///
     /// Returns the number of users affected by the revocation and emits an event.
+    ///
+    /// # Panics
+    ///
+    /// * If course doesn't exist
+    /// * If caller is not authorized (not course creator or admin)
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// // Revoke all access for a course
+    /// let affected_users = contract.revoke_all_access(
+    ///     env.clone(),
+    ///     admin_address,
+    ///     "course_123".try_into().unwrap()
+    /// );
+    /// 
+    /// println!("Revoked access for {} users", affected_users);
+    /// ```
+    ///
+    /// # Edge Cases
+    ///
+    /// * **No users**: Returns 0 if no users had access
+    /// * **Non-existent course**: Will panic if course doesn't exist
+    /// * **Permission denied**: Only course creators and admins can perform this
+    /// * **Bulk operation**: Efficiently removes all access in one transaction
     pub fn revoke_all_access(env: Env, user: Address, course_id: String) -> u32 {
         functions::revoke_all_access::revoke_all_access(env, user, course_id)
     }
@@ -173,9 +349,33 @@ impl CourseAccessContract {
     /// * `user_mgmt_addr` - Address of the user management contract
     /// * `course_registry_addr` - Address of the course registry contract
     ///
+    /// # Panics
+    ///
+    /// * If caller is not the contract owner
+    /// * If any of the provided addresses are invalid
+    ///
     /// # Storage
     ///
     /// Stores the addresses in instance storage keys: ("user_mgmt_addr",) and ("course_registry_addr",)
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// // Update contract addresses
+    /// contract.set_config(
+    ///     env.clone(),
+    ///     contract_owner_address,
+    ///     new_user_mgmt_address,
+    ///     new_course_registry_address
+    /// );
+    /// ```
+    ///
+    /// # Edge Cases
+    ///
+    /// * **Owner only**: Only contract owner can update addresses
+    /// * **Invalid addresses**: Will panic if addresses are invalid
+    /// * **Runtime updates**: Can be called after contract deployment
+    /// * **Immediate effect**: Changes take effect immediately
     pub fn set_config(
         env: Env,
         caller: Address,
