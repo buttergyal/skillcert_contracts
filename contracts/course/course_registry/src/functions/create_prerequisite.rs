@@ -21,22 +21,22 @@ pub fn add_prerequisite(env: Env, creator: Address, course_id: String, prerequis
     
     // Validate prerequisites list
     if prerequisites.is_empty() {
-        handle_error(&env, Error::InvalidInput);
+        handle_error(&env, Error::EmptyPrerequisiteList);
     }
     
     // Check for reasonable limit on number of prerequisites
     if prerequisites.len() > 20 {
-        handle_error(&env, Error::InvalidInput);
+        handle_error(&env, Error::TooManyPrerequisites);
     }
     
     // Validate each prerequisite ID
     for prerequisite_id in prerequisites.iter() {
         if prerequisite_id.is_empty() {
-            handle_error(&env, Error::InvalidInput);
+            handle_error(&env, Error::EmptyPrerequisiteId);
         }
         
         if prerequisite_id.len() > 100 {
-            handle_error(&env, Error::InvalidInput);
+            handle_error(&env, Error::InvalidPrerequisiteId);
         }
         
         // Check for self-prerequisite
