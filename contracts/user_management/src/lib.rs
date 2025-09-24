@@ -231,4 +231,44 @@ impl UserManagement {
     pub fn is_system_initialized(env: Env) -> bool {
         functions::admin_management::is_system_initialized(env)
     }
+
+    /// Export all user data for backup purposes (admin only)
+    ///
+    /// This function exports all user profiles and administrative data
+    /// for backup and recovery purposes. Only admins can perform this operation.
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `caller` - Address performing the export (must be admin)
+    ///
+    /// # Returns
+    /// * `UserBackupData` - Complete backup data structure
+    ///
+    /// # Panics
+    /// * If caller is not an admin
+    /// * If system is not initialized
+    pub fn export_user_data(env: Env, caller: Address) -> crate::schema::UserBackupData {
+        functions::backup_recovery::export_user_data(env, caller)
+    }
+
+    /// Import user data from backup (admin only)
+    ///
+    /// This function imports user data from a backup structure.
+    /// Only admins can perform this operation. This will overwrite existing data.
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `caller` - Address performing the import (must be admin)
+    /// * `backup_data` - Backup data structure to import
+    ///
+    /// # Returns
+    /// * `u32` - Number of users imported
+    ///
+    /// # Panics
+    /// * If caller is not an admin
+    /// * If backup data is invalid
+    /// * If import operation fails
+    pub fn import_user_data(env: Env, caller: Address, backup_data: crate::schema::UserBackupData) -> u32 {
+        functions::backup_recovery::import_user_data(env, caller, backup_data)
+    }
 }
