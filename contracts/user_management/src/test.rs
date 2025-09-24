@@ -3,7 +3,7 @@
 
 use crate::schema::UserProfile;
 use crate::{UserManagement, UserManagementClient};
-use soroban_sdk::{testutils::Address as _, Address, Env, String};
+use soroban_sdk::{testutils::Address as _, Address, Env, String, Vec};
 
 #[test]
 fn test_create_user_profile_integration() {
@@ -13,11 +13,19 @@ fn test_create_user_profile_integration() {
     let user: Address = Address::generate(&env);
 
     let profile = UserProfile {
-        full_name: String::from_str(&env, "Alice Johnson"),
-        contact_email: String::from_str(&env, "alice@example.com"),
-        profession: Some(String::from_str(&env, "Data Scientist")),
-        country: Some(String::from_str(&env, "United States")),
-        purpose: Some(String::from_str(&env, "Learn machine learning")),
+        address: user.clone(),
+        name: String::from_str(&env, "Alice"),
+        lastname: String::from_str(&env, "Johnson"),
+        email: String::from_str(&env, "alice@example.com"),
+        password_hash: String::from_str(&env, "hashed_password"),
+        specialization: String::from_str(&env, "Data Scientist"),
+        languages: Vec::new(&env),
+        teaching_categories: Vec::new(&env),
+        role: crate::schema::UserRole::Student,
+        status: crate::schema::UserStatus::Active,
+        country: String::from_str(&env, "United States"),
+        created_at: 0,
+        updated_at: 0,
     };
 
     // Mock authentication
@@ -26,11 +34,11 @@ fn test_create_user_profile_integration() {
     let created_profile = client.create_user_profile(&user, &profile);
 
     // Verify the returned profile
-    assert_eq!(created_profile.full_name, profile.full_name);
-    assert_eq!(created_profile.contact_email, profile.contact_email);
-    assert_eq!(created_profile.profession, profile.profession);
+    assert_eq!(created_profile.name, profile.name);
+    assert_eq!(created_profile.lastname, profile.lastname);
+    assert_eq!(created_profile.email, profile.email);
+    assert_eq!(created_profile.specialization, profile.specialization);
     assert_eq!(created_profile.country, profile.country);
-    assert_eq!(created_profile.purpose, profile.purpose);
 }
 
 #[test]
@@ -42,11 +50,19 @@ fn test_get_user_by_id_self_access() {
 
     // First create a profile
     let profile = UserProfile {
-        full_name: String::from_str(&env, "Bob Wilson"),
-        contact_email: String::from_str(&env, "bob@example.com"),
-        profession: Some(String::from_str(&env, "Software Engineer")),
-        country: Some(String::from_str(&env, "Canada")),
-        purpose: Some(String::from_str(&env, "Improve coding skills")),
+        address: user.clone(),
+        name: String::from_str(&env, "Bob"),
+        lastname: String::from_str(&env, "Wilson"),
+        email: String::from_str(&env, "bob@example.com"),
+        password_hash: String::from_str(&env, "hashed_password"),
+        specialization: String::from_str(&env, "Software Engineer"),
+        languages: Vec::new(&env),
+        teaching_categories: Vec::new(&env),
+        role: crate::schema::UserRole::Student,
+        status: crate::schema::UserStatus::Active,
+        country: String::from_str(&env, "Canada"),
+        created_at: 0,
+        updated_at: 0,
     };
 
     env.mock_all_auths();
@@ -56,11 +72,11 @@ fn test_get_user_by_id_self_access() {
     // User retrieves their own profile (self-access)
     let retrieved_profile = client.get_user_by_id(&user, &user);
 
-    assert_eq!(retrieved_profile.full_name, profile.full_name);
-    assert_eq!(retrieved_profile.contact_email, profile.contact_email);
-    assert_eq!(retrieved_profile.profession, profile.profession);
+    assert_eq!(retrieved_profile.name, profile.name);
+    assert_eq!(retrieved_profile.lastname, profile.lastname);
+    assert_eq!(retrieved_profile.email, profile.email);
+    assert_eq!(retrieved_profile.specialization, profile.specialization);
     assert_eq!(retrieved_profile.country, profile.country);
-    assert_eq!(retrieved_profile.purpose, profile.purpose);
 }
 
 #[test]
@@ -78,11 +94,19 @@ fn test_get_user_by_id_admin_access() {
 
     // First create a profile
     let profile = UserProfile {
-        full_name: String::from_str(&env, "Bob Wilson"),
-        contact_email: String::from_str(&env, "bob@example.com"),
-        profession: Some(String::from_str(&env, "Software Engineer")),
-        country: Some(String::from_str(&env, "Canada")),
-        purpose: Some(String::from_str(&env, "Improve coding skills")),
+        address: user.clone(),
+        name: String::from_str(&env, "Bob"),
+        lastname: String::from_str(&env, "Wilson"),
+        email: String::from_str(&env, "bob@example.com"),
+        password_hash: String::from_str(&env, "hashed_password"),
+        specialization: String::from_str(&env, "Software Engineer"),
+        languages: Vec::new(&env),
+        teaching_categories: Vec::new(&env),
+        role: crate::schema::UserRole::Student,
+        status: crate::schema::UserStatus::Active,
+        country: String::from_str(&env, "Canada"),
+        created_at: 0,
+        updated_at: 0,
     };
 
     client.create_user_profile(&user, &profile);
@@ -90,11 +114,11 @@ fn test_get_user_by_id_admin_access() {
     // Admin retrieves user's profile
     let retrieved_profile = client.get_user_by_id(&admin, &user);
 
-    assert_eq!(retrieved_profile.full_name, profile.full_name);
-    assert_eq!(retrieved_profile.contact_email, profile.contact_email);
-    assert_eq!(retrieved_profile.profession, profile.profession);
+    assert_eq!(retrieved_profile.name, profile.name);
+    assert_eq!(retrieved_profile.lastname, profile.lastname);
+    assert_eq!(retrieved_profile.email, profile.email);
+    assert_eq!(retrieved_profile.specialization, profile.specialization);
     assert_eq!(retrieved_profile.country, profile.country);
-    assert_eq!(retrieved_profile.purpose, profile.purpose);
 }
 
 #[test]
@@ -118,11 +142,19 @@ fn test_list_all_users_basic() {
     for (name, email, profession) in test_data.iter() {
         let user: Address = Address::generate(&env);
         let profile = UserProfile {
-            full_name: String::from_str(&env, name),
-            contact_email: String::from_str(&env, email),
-            profession: Some(String::from_str(&env, profession)),
-            country: Some(String::from_str(&env, "United States")),
-            purpose: Some(String::from_str(&env, "Learn new skills")),
+            address: user.clone(),
+            name: String::from_str(&env, name),
+            lastname: String::from_str(&env, "User"),
+            email: String::from_str(&env, email),
+            password_hash: String::from_str(&env, "hashed_password"),
+            specialization: String::from_str(&env, profession),
+            languages: Vec::new(&env),
+            teaching_categories: Vec::new(&env),
+            role: crate::schema::UserRole::Student,
+            status: crate::schema::UserStatus::Active,
+            country: String::from_str(&env, "United States"),
+            created_at: 0,
+            updated_at: 0,
         };
 
         client.create_user_profile(&user, &profile);
@@ -150,11 +182,19 @@ fn test_delete_user() {
 
     // Create a profile first
     let profile = UserProfile {
-        full_name: String::from_str(&env, "Test User"),
-        contact_email: String::from_str(&env, "test@example.com"),
-        profession: Some(String::from_str(&env, "Tester")),
-        country: Some(String::from_str(&env, "United States")),
-        purpose: Some(String::from_str(&env, "Learn testing")),
+        address: user.clone(),
+        name: String::from_str(&env, "Test"),
+        lastname: String::from_str(&env, "User"),
+        email: String::from_str(&env, "test@example.com"),
+        password_hash: String::from_str(&env, "hashed_password"),
+        specialization: String::from_str(&env, "Tester"),
+        languages: Vec::new(&env),
+        teaching_categories: Vec::new(&env),
+        role: crate::schema::UserRole::Student,
+        status: crate::schema::UserStatus::Active,
+        country: String::from_str(&env, "United States"),
+        created_at: 0,
+        updated_at: 0,
     };
 
     env.mock_all_auths();
