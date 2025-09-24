@@ -2,7 +2,7 @@
 // Copyright (c) 2025 SkillCert
 
 use crate::error::{handle_error, Error};
-use crate::schema::{DataKey, LightProfile, UserProfile, UserRole, UserStatus};
+use crate::schema::{DataKey, LightProfile, UserProfile};
 use core::iter::Iterator;
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
 
@@ -13,7 +13,6 @@ const EVT_USER_CREATED: Symbol = symbol_short!("usr_cr8d");
 const MAX_NAME_LENGTH: usize = 100;
 const MAX_EMAIL_LENGTH: usize = 320; // RFC 5321 standard
 const MAX_PROFESSION_LENGTH: usize = 100;
-const MAX_PURPOSE_LENGTH: usize = 500;
 const MAX_COUNTRY_LENGTH: usize = 56; // Longest country name
 const INVALID_EMAIL_NO_AT_LENGTH: u32 = 13; // "invalid-email"
 
@@ -120,61 +119,52 @@ pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> Use
     }
 
     // Validate mandatory fields
-    if profile.full_name.is_empty() {
+    if profile.name.is_empty() {
         handle_error(&env, Error::NameRequired)
     }
 
-    if profile.contact_email.is_empty() {
+    if profile.email.is_empty() {
         handle_error(&env, Error::EmailRequired)
     }
 
     // Validate field lengths and content
-    if !validate_string_content(&env, &profile.full_name, MAX_NAME_LENGTH) {
+    if !validate_string_content(&env, &profile.name, MAX_NAME_LENGTH) {
         handle_error(&env, Error::InvalidName)
     }
 
     // Validate email format
-    if !validate_email_format(&profile.contact_email) {
+    if !validate_email_format(&profile.email) {
         handle_error(&env, Error::InvalidEmailFormat)
     }
 
     // Ensure email uniqueness
-    if !is_email_unique(&env, &profile.contact_email) {
+    if !is_email_unique(&env, &profile.email) {
         handle_error(&env, Error::EmailAlreadyExists)
     }
 
-    // Validate optional fields
-    if let Some(ref prof) = profile.profession {
-        if !prof.is_empty() && !validate_string_content(&env, prof, MAX_PROFESSION_LENGTH) {
-            handle_error(&env, Error::InvalidProfession)
-        }
+    // Validate specialization field
+    if !profile.specialization.is_empty() && !validate_string_content(&env, &profile.specialization, MAX_PROFESSION_LENGTH) {
+        handle_error(&env, Error::InvalidProfession)
     }
 
-    if let Some(ref country) = profile.country {
-        if !country.is_empty() && !validate_string_content(&env, country, MAX_COUNTRY_LENGTH) {
-            handle_error(&env, Error::InvalidCountry)
-        }
-    }
-
-    if let Some(ref purpose) = profile.purpose {
-        if !purpose.is_empty() && !validate_string_content(&env, purpose, MAX_PURPOSE_LENGTH) {
-            handle_error(&env, Error::InvalidGoals)
-        }
+    // Validate country field
+    if !profile.country.is_empty() && !validate_string_content(&env, &profile.country, MAX_COUNTRY_LENGTH) {
+        handle_error(&env, Error::InvalidCountry)
     }
 
     // Store the profile using persistent storage
     env.storage().persistent().set(&storage_key, &profile);
 
     // Register email for uniqueness checking
-    register_email(&env, &profile.contact_email, &user);
+    register_email(&env, &profile.email, &user);
 
     // Create and store lightweight profile for listing
     let light_profile = LightProfile {
-        full_name: profile.full_name.clone(),
-        profession: profile.profession.clone(),
-        country: profile.country.clone(),
-        role: UserRole::Student, // Default role
-        status: UserStatus::Active, // Default status
+        full_name: String::from_str(&env, "User Profile"), // Simplified for now
+        profession: Some(profile.specialization.clone()),
+        country: Some(profile.country.clone()),
+        role: profile.role.clone(),
+        status: profile.status.clone(),
         user_address: user.clone(),
     };
 
@@ -196,7 +186,7 @@ pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> Use
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::schema::UserStatus;
+    use crate::schema::{UserRole, UserStatus};
     use crate::{UserManagement, UserManagementClient};
     use soroban_sdk::{testutils::Address as _, Address, Env, String};
 
@@ -213,11 +203,19 @@ mod tests {
         let user = Address::generate(&env);
 
         let profile = UserProfile {
-            full_name: String::from_str(&env, "John Doe"),
-            contact_email: String::from_str(&env, "john@example.com"),
-            profession: Some(String::from_str(&env, "Software Engineer")),
-            country: Some(String::from_str(&env, "United States")),
-            purpose: Some(String::from_str(&env, "Learn blockchain development")),
+            address: user.clone(),
+            name: String::from_str(&env, "John"),
+            lastname: String::from_str(&env, "Doe"),
+            email: String::from_str(&env, "john@example.com"),
+            password_hash: String::from_str(&env, "hashed_password"),
+            specialization: String::from_str(&env, "Software Engineer"),
+            languages: Vec::new(&env),
+            teaching_categories: Vec::new(&env),
+            role: UserRole::Student,
+            status: UserStatus::Active,
+            country: String::from_str(&env, "United States"),
+            created_at: 0,
+            updated_at: 0,
         };
 
         env.mock_all_auths();
@@ -226,11 +224,11 @@ mod tests {
         let created_profile = client.create_user_profile(&user, &profile);
 
         // Verify profile creation
-        assert_eq!(created_profile.full_name, profile.full_name);
-        assert_eq!(created_profile.contact_email, profile.contact_email);
-        assert_eq!(created_profile.profession, profile.profession);
+        assert_eq!(created_profile.name, profile.name);
+        assert_eq!(created_profile.lastname, profile.lastname);
+        assert_eq!(created_profile.email, profile.email);
+        assert_eq!(created_profile.specialization, profile.specialization);
         assert_eq!(created_profile.country, profile.country);
-        assert_eq!(created_profile.purpose, profile.purpose);
 
         // Verify storage
         env.as_contract(&contract_id, || {
@@ -243,7 +241,7 @@ mod tests {
             assert_eq!(stored_profile, created_profile);
 
             // Verify email index
-            let email_key = DataKey::EmailIndex(profile.contact_email.clone());
+            let email_key = DataKey::EmailIndex(profile.email.clone());
             let stored_address: Address = env
                 .storage()
                 .persistent()
@@ -259,7 +257,7 @@ mod tests {
                 .get(&light_key)
                 .expect("Light profile should exist");
             assert_eq!(light_profile.status, UserStatus::Active);
-            assert_eq!(light_profile.full_name, profile.full_name);
+            assert_eq!(light_profile.full_name, String::from_str(&env, "User Profile"));
         });
     }
 
@@ -269,11 +267,19 @@ mod tests {
         let user = Address::generate(&env);
 
         let profile = UserProfile {
-            full_name: String::from_str(&env, "Jane Smith"),
-            contact_email: String::from_str(&env, "jane@example.com"),
-            profession: None,
-            country: None,
-            purpose: None,
+            address: user.clone(),
+            name: String::from_str(&env, "Jane"),
+            lastname: String::from_str(&env, "Smith"),
+            email: String::from_str(&env, "jane@example.com"),
+            password_hash: String::from_str(&env, "hashed_password"),
+            specialization: String::from_str(&env, ""),
+            languages: Vec::new(&env),
+            teaching_categories: Vec::new(&env),
+            role: UserRole::Student,
+            status: UserStatus::Active,
+            country: String::from_str(&env, ""),
+            created_at: 0,
+            updated_at: 0,
         };
 
         env.mock_all_auths();
@@ -282,9 +288,8 @@ mod tests {
         let created_profile = client.create_user_profile(&user, &profile);
 
         // Verify minimal profile
-        assert_eq!(created_profile.profession, None);
-        assert_eq!(created_profile.country, None);
-        assert_eq!(created_profile.purpose, None);
+        assert_eq!(created_profile.specialization, String::from_str(&env, ""));
+        assert_eq!(created_profile.country, String::from_str(&env, ""));
     }
 
     #[test]
@@ -295,19 +300,35 @@ mod tests {
         let user2 = Address::generate(&env);
 
         let profile1 = UserProfile {
-            full_name: String::from_str(&env, "User One"),
-            contact_email: String::from_str(&env, "same@example.com"),
-            profession: None,
-            country: None,
-            purpose: None,
+            address: user1.clone(),
+            name: String::from_str(&env, "User"),
+            lastname: String::from_str(&env, "One"),
+            email: String::from_str(&env, "same@example.com"),
+            password_hash: String::from_str(&env, "hashed_password"),
+            specialization: String::from_str(&env, ""),
+            languages: Vec::new(&env),
+            teaching_categories: Vec::new(&env),
+            role: UserRole::Student,
+            status: UserStatus::Active,
+            country: String::from_str(&env, ""),
+            created_at: 0,
+            updated_at: 0,
         };
 
         let profile2 = UserProfile {
-            full_name: String::from_str(&env, "User Two"),
-            contact_email: String::from_str(&env, "same@example.com"), // Same email
-            profession: None,
-            country: None,
-            purpose: None,
+            address: user2.clone(),
+            name: String::from_str(&env, "User"),
+            lastname: String::from_str(&env, "Two"),
+            email: String::from_str(&env, "same@example.com"), // Same email
+            password_hash: String::from_str(&env, "hashed_password"),
+            specialization: String::from_str(&env, ""),
+            languages: Vec::new(&env),
+            teaching_categories: Vec::new(&env),
+            role: UserRole::Student,
+            status: UserStatus::Active,
+            country: String::from_str(&env, ""),
+            created_at: 0,
+            updated_at: 0,
         };
 
         env.mock_all_auths();
@@ -326,19 +347,35 @@ mod tests {
         let user = Address::generate(&env);
 
         let profile1 = UserProfile {
-            full_name: String::from_str(&env, "John Doe"),
-            contact_email: String::from_str(&env, "john1@example.com"),
-            profession: None,
-            country: None,
-            purpose: None,
+            address: user.clone(),
+            name: String::from_str(&env, "John"),
+            lastname: String::from_str(&env, "Doe"),
+            email: String::from_str(&env, "john1@example.com"),
+            password_hash: String::from_str(&env, "hashed_password"),
+            specialization: String::from_str(&env, ""),
+            languages: Vec::new(&env),
+            teaching_categories: Vec::new(&env),
+            role: UserRole::Student,
+            status: UserStatus::Active,
+            country: String::from_str(&env, ""),
+            created_at: 0,
+            updated_at: 0,
         };
 
         let profile2 = UserProfile {
-            full_name: String::from_str(&env, "John Doe"),
-            contact_email: String::from_str(&env, "john2@example.com"),
-            profession: None,
-            country: None,
-            purpose: None,
+            address: user.clone(),
+            name: String::from_str(&env, "John"),
+            lastname: String::from_str(&env, "Doe"),
+            email: String::from_str(&env, "john2@example.com"),
+            password_hash: String::from_str(&env, "hashed_password"),
+            specialization: String::from_str(&env, ""),
+            languages: Vec::new(&env),
+            teaching_categories: Vec::new(&env),
+            role: UserRole::Student,
+            status: UserStatus::Active,
+            country: String::from_str(&env, ""),
+            created_at: 0,
+            updated_at: 0,
         };
 
         env.mock_all_auths();
@@ -357,11 +394,19 @@ mod tests {
         let user = Address::generate(&env);
 
         let profile = UserProfile {
-            full_name: String::from_str(&env, "John Doe"),
-            contact_email: String::from_str(&env, "invalid-email"), // No @
-            profession: None,
-            country: None,
-            purpose: None,
+            address: user.clone(),
+            name: String::from_str(&env, "John"),
+            lastname: String::from_str(&env, "Doe"),
+            email: String::from_str(&env, "invalid-email"), // No @
+            password_hash: String::from_str(&env, "hashed_password"),
+            specialization: String::from_str(&env, ""),
+            languages: Vec::new(&env),
+            teaching_categories: Vec::new(&env),
+            role: UserRole::Student,
+            status: UserStatus::Active,
+            country: String::from_str(&env, ""),
+            created_at: 0,
+            updated_at: 0,
         };
 
         env.mock_all_auths();
@@ -376,11 +421,19 @@ mod tests {
         let user = Address::generate(&env);
 
         let profile = UserProfile {
-            full_name: String::from_str(&env, ""),
-            contact_email: String::from_str(&env, "test@example.com"),
-            profession: None,
-            country: None,
-            purpose: None,
+            address: user.clone(),
+            name: String::from_str(&env, ""),
+            lastname: String::from_str(&env, "Doe"),
+            email: String::from_str(&env, "test@example.com"),
+            password_hash: String::from_str(&env, "hashed_password"),
+            specialization: String::from_str(&env, ""),
+            languages: Vec::new(&env),
+            teaching_categories: Vec::new(&env),
+            role: UserRole::Student,
+            status: UserStatus::Active,
+            country: String::from_str(&env, ""),
+            created_at: 0,
+            updated_at: 0,
         };
 
         env.mock_all_auths();
