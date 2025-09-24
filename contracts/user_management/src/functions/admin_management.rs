@@ -6,7 +6,12 @@ use crate::schema::{
     AdminConfig, DataKey, ABSOLUTE_MAX_PAGE_SIZE, DEFAULT_MAX_PAGE_SIZE, MAX_ADMINS,
 };
 use core::iter::Iterator;
-use soroban_sdk::{Address, Env, Vec};
+use soroban_sdk::{symbol_short, Address, Env, Symbol, Vec};
+
+// Audit event symbols for admin operations
+const EVT_SYSTEM_INITIALIZED: Symbol = symbol_short!("sys_init");
+const EVT_ADMIN_ADDED: Symbol = symbol_short!("adm_add");
+const EVT_ADMIN_REMOVED: Symbol = symbol_short!("adm_rmv");
 
 /// Initialize the admin system - can only be called once
 pub fn initialize_system(
@@ -42,7 +47,7 @@ pub fn initialize_system(
 
     let config = AdminConfig {
         initialized: true,
-        super_admin,
+        super_admin: super_admin.clone(),
         max_page_size: validated_max_page_size,
         total_user_count: 0,
     };
@@ -57,6 +62,12 @@ pub fn initialize_system(
     env.storage()
         .persistent()
         .set(&DataKey::Admins, &empty_admins);
+
+    // Emit system initialization audit event
+    env.events().publish(
+        (EVT_SYSTEM_INITIALIZED, &initializer),
+        (super_admin.clone(), validated_max_page_size),
+    );
 
     config
 }
@@ -97,12 +108,18 @@ pub fn add_admin(env: Env, caller: Address, new_admin: Address) {
     }
 
     // Limit number of admins for security
-    if (admins.len() as u32) >= MAX_ADMINS {
+    if admins.len() >= MAX_ADMINS {
         handle_error(&env, Error::MaxAdminsReached)
     }
 
-    admins.push_back(new_admin);
+    admins.push_back(new_admin.clone());
     env.storage().persistent().set(&DataKey::Admins, &admins);
+
+    // Emit admin addition audit event
+    env.events().publish(
+        (EVT_ADMIN_ADDED, &caller),
+        (new_admin, admins.len()),
+    );
 }
 
 /// Remove an admin (super admin only)
@@ -152,6 +169,12 @@ pub fn remove_admin(env: Env, caller: Address, admin_to_remove: Address) {
     env.storage()
         .persistent()
         .set(&DataKey::Admins, &new_admins);
+
+    // Emit admin removal audit event
+    env.events().publish(
+        (EVT_ADMIN_REMOVED, &caller),
+        (admin_to_remove, new_admins.len()),
+    );
 }
 
 /// Get list of all admins (admin only)

@@ -43,6 +43,7 @@ pub enum Error {
     InvalidInput = 29,
     InvalidPrice100 = 30,
     AlreadyInitialized = 31,
+    DuplicatePrerequisite = 32,
 }
 
 pub fn handle_error(env: &Env, error: Error) -> ! {

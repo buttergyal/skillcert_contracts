@@ -6,6 +6,8 @@ use crate::functions::is_admin::is_admin;
 use crate::schema::{DataKey, LightProfile, ProfileUpdateParams, UserProfile};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
+use super::utils::url_validation;
+
 // Event symbol for user profile update
 const EVT_USER_UPDATED: Symbol = symbol_short!("usr_updt");
 
@@ -105,29 +107,37 @@ pub fn edit_user_profile(
         }
         // For now, update the name field (could split into name/lastname later)
         // This is a simplified approach - in production you might want more sophisticated name parsing
-        profile.name = name.clone();
-        // Keep lastname unchanged for now
+        profile.full_name = name.clone();
     }
 
     if let Some(ref profession) = updates.profession {
         if !profession.is_empty() && !validate_string_content(&env, profession, MAX_PROFESSION_LENGTH) {
             handle_error(&env, Error::InvalidProfession);
         }
-        profile.specialization = if profession.is_empty() { String::from_str(&env, "") } else { profession.clone() };
+        profile.profession = if profession.is_empty() { None } else { Some(profession.clone()) };
     }
 
     if let Some(ref country) = updates.country {
         if !country.is_empty() && !validate_string_content(&env, country, MAX_COUNTRY_LENGTH) {
             handle_error(&env, Error::InvalidCountry);
         }
-        profile.country = if country.is_empty() { String::from_str(&env, "") } else { country.clone() };
+        profile.country = if country.is_empty() { None } else { Some(country.clone()) };
     }
 
-    // Note: purpose field is not available in new UserProfile structure
-    // This update is ignored for now
-    if let Some(_purpose) = updates.purpose {
-        // Purpose field removed from new UserProfile structure
-        // Could be handled differently or stored elsewhere if needed
+    // Handle purpose field update
+    if let Some(ref purpose) = updates.purpose {
+        if !purpose.is_empty() && !validate_string_content(&env, purpose, MAX_PROFESSION_LENGTH) {
+            handle_error(&env, Error::InvalidProfession);
+        }
+        profile.purpose = if purpose.is_empty() { None } else { Some(purpose.clone()) };
+    }
+
+    // Validate profile picture URL if provided
+    if let Some(ref profile_pic_url) = updates.profile_picture_url {
+        if !profile_pic_url.is_empty() && !url_validation::is_valid_url(profile_pic_url) {
+            handle_error(&env, Error::InvalidProfilePicURL);
+        }
+        profile.profile_picture_url = if profile_pic_url.is_empty() { None } else { Some(profile_pic_url.clone()) };
     }
 
     // Update the full profile in storage
@@ -135,9 +145,9 @@ pub fn edit_user_profile(
 
     // Update the light profile with new data
     let updated_light_profile = LightProfile {
-        full_name: String::from_str(&env, "User Profile"), // Simplified for now
-        profession: Some(profile.specialization.clone()),
-        country: Some(profile.country.clone()),
+        full_name: profile.full_name.clone(),
+        profession: profile.profession.clone(),
+        country: profile.country.clone(),
         role: light_profile.role, // Role cannot be changed through this function
         status: light_profile.status, // Status cannot be changed through this function
         user_address: user_id.clone(),
@@ -158,7 +168,7 @@ pub fn edit_user_profile(
 mod tests {
     use crate::schema::{ProfileUpdateParams, UserProfile};
     use crate::{UserManagement, UserManagementClient};
-    use soroban_sdk::{testutils::Address as _, Address, Env, String, Vec};
+    use soroban_sdk::{testutils::Address as _, Address, Env, String};
 
     fn setup_test_env() -> (Env, Address, UserManagementClient<'static>) {
         let env = Env::default();
@@ -173,19 +183,12 @@ mod tests {
         user: &Address,
     ) -> UserProfile {
         let profile = UserProfile {
-            address: user.clone(),
-            name: String::from_str(env, "John"),
-            lastname: String::from_str(env, "Doe"),
-            email: String::from_str(env, "john@example.com"),
-            password_hash: String::from_str(env, "hashed_password"),
-            specialization: String::from_str(env, "Software Engineer"),
-            languages: Vec::new(env),
-            teaching_categories: Vec::new(env),
-            role: crate::schema::UserRole::Student,
-            status: crate::schema::UserStatus::Active,
-            country: String::from_str(env, "United States"),
-            created_at: 0,
-            updated_at: 0,
+            full_name: String::from_str(env, "John Doe"),
+            contact_email: String::from_str(env, "john@example.com"),
+            profession: Some(String::from_str(env, "Software Engineer")),
+            country: Some(String::from_str(env, "United States")),
+            purpose: Some(String::from_str(env, "Learn blockchain development")),
+            profile_picture_url: None,
         };
 
         env.mock_all_auths();
@@ -206,6 +209,7 @@ mod tests {
             profession: Some(String::from_str(&env, "Data Scientist")),
             country: Some(String::from_str(&env, "Canada")),
             purpose: Some(String::from_str(&env, "Master AI and ML")),
+            profile_picture_url: Some(String::from_str(&env, "https://example.com/profile.jpg")),
         };
 
         env.mock_all_auths();
@@ -214,22 +218,9 @@ mod tests {
         let updated_profile = client.edit_user_profile(&user, &user, &updates);
 
         // Verify updates
-        assert_eq!(updated_profile.name, String::from_str(&env, "Jane Doe"));
-        assert_eq!(updated_profile.lastname, String::from_str(&env, "Doe")); // lastname unchanged
-        assert_eq!(
-            updated_profile.specialization,
-            String::from_str(&env, "Data Scientist")
-        );
-        assert_eq!(
-            updated_profile.country,
-            String::from_str(&env, "Canada")
-        );
-
-        // Email should remain unchanged
-        assert_eq!(
-            updated_profile.email,
-            String::from_str(&env, "john@example.com")
-        );
+        assert_eq!(updated_profile.full_name, String::from_str(&env, "Jane Doe"));
+        assert_eq!(updated_profile.profession, Some(String::from_str(&env, "Data Scientist")));
+        assert_eq!(updated_profile.country, Some(String::from_str(&env, "Canada")));
     }
 
     #[test]
@@ -246,6 +237,7 @@ mod tests {
             profession: None,
             country: Some(String::from_str(&env, "Germany")),
             purpose: None,
+            profile_picture_url: None,
         };
 
         env.mock_all_auths();
@@ -254,12 +246,12 @@ mod tests {
         let updated_profile = client.edit_user_profile(&user, &user, &updates);
 
         // Verify only specified fields were updated
-        assert_eq!(updated_profile.name, String::from_str(&env, "Updated Name"));
-        assert_eq!(updated_profile.country, String::from_str(&env, "Germany"));
+        assert_eq!(updated_profile.full_name, String::from_str(&env, "Updated Name"));
+        assert_eq!(updated_profile.country, Some(String::from_str(&env, "Germany")));
 
         // Unchanged fields should retain original values
-        assert_eq!(updated_profile.specialization, original_profile.specialization);
-        assert_eq!(updated_profile.email, original_profile.email);
+        assert_eq!(updated_profile.profession, original_profile.profession);
+        assert_eq!(updated_profile.contact_email, original_profile.contact_email);
     }
 
     #[test]
@@ -274,6 +266,7 @@ mod tests {
             profession: None,
             country: None,
             purpose: None,
+            profile_picture_url: None,
         };
 
         env.mock_all_auths();
@@ -297,6 +290,7 @@ mod tests {
             profession: None,
             country: None,
             purpose: None,
+            profile_picture_url: None,
         };
 
         env.mock_all_auths();
@@ -319,11 +313,56 @@ mod tests {
             profession: None,
             country: None,
             purpose: None,
+            profile_picture_url: None,
         };
 
         env.mock_all_auths();
 
         // Try to set empty name
         client.edit_user_profile(&user, &user, &updates);
+    }
+
+    #[test]
+    #[should_panic(expected = "HostError: Error(Contract, #19)")]
+    fn test_edit_user_profile_invalid_profile_picture_url() {
+        let (env, _contract_id, client) = setup_test_env();
+        let user = Address::generate(&env);
+
+        // Create user first
+        create_test_user(&env, &client, &user);
+
+        let updates = ProfileUpdateParams {
+            full_name: None,
+            profession: None,
+            country: None,
+            purpose: None,
+            profile_picture_url: Some(String::from_str(&env, "invalid-url")), // Invalid URL
+        };
+
+        env.mock_all_auths();
+
+        client.edit_user_profile(&user, &user, &updates);
+    }
+
+    #[test]
+    fn test_edit_user_profile_valid_profile_picture_url() {
+        let (env, _contract_id, client) = setup_test_env();
+        let user = Address::generate(&env);
+
+        // Create user first
+        create_test_user(&env, &client, &user);
+
+        let updates = ProfileUpdateParams {
+            full_name: None,
+            profession: None,
+            country: None,
+            purpose: None,
+            profile_picture_url: Some(String::from_str(&env, "https://example.com/profile.jpg")),
+        };
+
+        env.mock_all_auths();
+
+        let updated_profile = client.edit_user_profile(&user, &user, &updates);
+        assert_eq!(updated_profile.profile_picture_url, Some(String::from_str(&env, "https://example.com/profile.jpg")));
     }
 }
