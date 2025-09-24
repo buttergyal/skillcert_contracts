@@ -158,6 +158,7 @@ mod tests {
                 super_admin: admin.clone(),
                 max_page_size,
                 total_user_count: 0,
+                rate_limit_config: get_default_rate_limit_config(),
             };
             env.storage()
                 .persistent()
