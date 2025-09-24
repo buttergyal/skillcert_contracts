@@ -18,6 +18,7 @@ fn test_create_user_profile_integration() {
         profession: Some(String::from_str(&env, "Data Scientist")),
         country: Some(String::from_str(&env, "United States")),
         purpose: Some(String::from_str(&env, "Learn machine learning")),
+        profile_picture_url: None,
     };
 
     // Mock authentication
@@ -47,6 +48,7 @@ fn test_get_user_by_id_self_access() {
         profession: Some(String::from_str(&env, "Software Engineer")),
         country: Some(String::from_str(&env, "Canada")),
         purpose: Some(String::from_str(&env, "Improve coding skills")),
+        profile_picture_url: None,
     };
 
     env.mock_all_auths();
@@ -83,6 +85,7 @@ fn test_get_user_by_id_admin_access() {
         profession: Some(String::from_str(&env, "Software Engineer")),
         country: Some(String::from_str(&env, "Canada")),
         purpose: Some(String::from_str(&env, "Improve coding skills")),
+        profile_picture_url: None,
     };
 
     client.create_user_profile(&user, &profile);
@@ -123,6 +126,7 @@ fn test_list_all_users_basic() {
             profession: Some(String::from_str(&env, profession)),
             country: Some(String::from_str(&env, "United States")),
             purpose: Some(String::from_str(&env, "Learn new skills")),
+            profile_picture_url: None,
         };
 
         client.create_user_profile(&user, &profile);
@@ -155,6 +159,7 @@ fn test_delete_user() {
         profession: Some(String::from_str(&env, "Tester")),
         country: Some(String::from_str(&env, "United States")),
         purpose: Some(String::from_str(&env, "Learn testing")),
+        profile_picture_url: None,
     };
 
     env.mock_all_auths();
