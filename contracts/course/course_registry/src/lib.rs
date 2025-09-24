@@ -444,4 +444,43 @@ impl CourseRegistry {
             &env, filters, limit, offset,
         )
     }
+
+    /// Export all course data for backup purposes (admin only)
+    ///
+    /// This function exports all course data including courses, categories,
+    /// modules, goals, and prerequisites for backup and recovery purposes.
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `caller` - Address performing the export (must be admin)
+    ///
+    /// # Returns
+    /// * `CourseBackupData` - Complete backup data structure
+    ///
+    /// # Panics
+    /// * If caller is not an admin
+    pub fn export_course_data(env: Env, caller: Address) -> crate::schema::CourseBackupData {
+        functions::backup_recovery::export_course_data(env, caller)
+    }
+
+    /// Import course data from backup (admin only)
+    ///
+    /// This function imports course data from a backup structure.
+    /// Only admins can perform this operation. This will overwrite existing data.
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `caller` - Address performing the import (must be admin)
+    /// * `backup_data` - Backup data structure to import
+    ///
+    /// # Returns
+    /// * `u32` - Number of courses imported
+    ///
+    /// # Panics
+    /// * If caller is not an admin
+    /// * If backup data is invalid
+    /// * If import operation fails
+    pub fn import_course_data(env: Env, caller: Address, backup_data: crate::schema::CourseBackupData) -> u32 {
+        functions::backup_recovery::import_course_data(env, caller, backup_data)
+    }
 }
