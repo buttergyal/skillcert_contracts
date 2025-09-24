@@ -15,12 +15,12 @@ pub fn list_courses_with_filters(
     // Validate pagination parameters to prevent abuse
     if let Some(l) = limit {
         if l > 100 { // Prevent excessively large limits
-            handle_error(env, Error::InvalidInput)
+            handle_error(env, Error::InvalidLimitValue)
         }
     }
     if let Some(o) = offset {
         if o > 10000 { // Prevent excessively large offsets
-            handle_error(env, Error::InvalidInput)
+            handle_error(env, Error::InvalidOffsetValue)
         }
     }
 
