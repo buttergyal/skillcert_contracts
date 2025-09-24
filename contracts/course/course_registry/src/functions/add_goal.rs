@@ -23,11 +23,11 @@ pub fn add_goal(env: Env, creator: Address, course_id: String, content: String) 
     
     // Check string lengths to prevent extremely long values
     if course_id.len() > 100 {
-        handle_error(&env, Error::InvalidInput);
+        handle_error(&env, Error::InvalidCourseId);
     }
     
     if content.len() > 1000 {
-        handle_error(&env, Error::InvalidInput);
+        handle_error(&env, Error::InvalidGoalContent);
     }
 
     // Load course
