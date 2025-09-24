@@ -1,20 +1,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use crate::error::{handle_error, Error};
+use crate::functions::rbac::{has_permission, is_admin};
+use crate::schema::Permission;
 use soroban_sdk::{symbol_short, Address, Env, Symbol, Vec};
 
 const EVT_ACCESS_LISTED: Symbol = symbol_short!("ac_listed");
-
-/// Helper function to check if the given address is an admin.
-/// Adjust the storage key or logic to match your contract.
-fn is_admin(env: &Env, who: &Address) -> bool {
-    // Retrieve the list of admin addresses from storage
-    let admins: Option<Vec<Address>> = env.storage().get(&("admins",));
-    match admins {
-        Some(list) => list.iter().any(|a| a == who),
-        None => false,
-    }
-}
 
 /// Helper function to check if the given address is the creator of the course.
 /// Adjust the storage key or logic to match your contract.
@@ -27,10 +19,35 @@ fn is_creator(env: &Env, course_id: u128, who: &Address) -> bool {
     creator == *who
 }
 
+/// Check if user has permission to list course access
+/// Uses RBAC system to determine access rights
+fn can_list_course_access(env: &Env, caller: &Address, course_id: u128) -> bool {
+    // Course creator always has access
+    if is_creator(env, course_id, caller) {
+        return true;
+    }
+
+    // Check RBAC permissions
+    if has_permission(env, caller, &Permission::ManageCourseAccess) {
+        return true;
+    }
+
+    // Check if user has ViewUsers permission (for admin-level access)
+    if has_permission(env, caller, &Permission::ViewUsers) {
+        return true;
+    }
+
+    // Fallback to legacy admin check for backward compatibility
+    is_admin(env, caller)
+}
+
 /// List all users who currently have access to a course.
 ///
-/// - Only callable by the course creator or an admin.
-/// - Emits an event with the number of users listed (optional).
+/// Now uses RBAC system for granular permission control:
+/// - Course creators can always list access for their courses
+/// - Users with ManageCourseAccess permission can list access
+/// - Users with ViewUsers permission can list access (admin-level)
+/// - Legacy admin check as fallback for backward compatibility
 ///
 /// # Arguments
 /// * env - Soroban environment.
@@ -43,11 +60,9 @@ pub fn list_users_with_access(env: Env, caller: Address, course_id: u128) -> Vec
     // Require the caller to be authenticated
     caller.require_auth();
 
-    // TODO: Implement role-based access control (RBAC) system for more granular permissions
-    // Authorization: must be course creator or admin
-    if !(is_creator(&env, course_id, &caller) || is_admin(&env, &caller)) {
-        // panic!("Not authorized");
-        handle_error(&env, Error::Unauthorized)
+    // RBAC: Check if caller has permission to list course access
+    if !can_list_course_access(&env, &caller, course_id) {
+        handle_error(&env, Error::AccessDenied);
     }
 
     // Retrieve the list of users with access from storage
