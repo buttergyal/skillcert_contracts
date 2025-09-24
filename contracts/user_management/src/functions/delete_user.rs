@@ -4,7 +4,7 @@
 use crate::error::{handle_error, Error};
 use crate::schema::{AdminConfig, DataKey, LightProfile, UserProfile, UserStatus};
 use core::iter::Iterator;
-use soroban_sdk::{symbol_short, Address, Env, Symbol, Vec};
+use soroban_sdk::{symbol_short, Address, Env, Symbol};
 
 // Event symbol for user deactivation
 const EVT_USER_DEACTIVATED: Symbol = symbol_short!("usr_deact");
@@ -128,8 +128,8 @@ mod tests {
             email: String::from_str(env, "test@example.com"),
             password_hash: String::from_str(env, "hashed_password"),
             specialization: String::from_str(env, "Software Tester"),
-            languages: Vec::new(env),
-            teaching_categories: Vec::new(env),
+            languages: soroban_sdk::Vec::new(env),
+            teaching_categories: soroban_sdk::Vec::new(env),
             role: UserRole::Student,
             status: UserStatus::Active,
             country: String::from_str(env, "United States"),
