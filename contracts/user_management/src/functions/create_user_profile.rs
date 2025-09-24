@@ -53,7 +53,7 @@ fn validate_email_format(email: &String) -> bool {
     // TODO: Implement proper RFC 5322 email validation
     // For the test to pass, we need to reject "invalid-email" (no @)
     // This is a workaround - in practice you'd implement proper email parsing
-    if (email.len() as u32) == INVALID_EMAIL_NO_AT_LENGTH {
+    if email.len() == INVALID_EMAIL_NO_AT_LENGTH {
         // "invalid-email" has 13 characters
         return false; // Simulate rejecting emails without @
     }
@@ -173,7 +173,7 @@ pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> Use
         full_name: profile.full_name.clone(),
         profession: profile.profession.clone(),
         country: profile.country.clone(),
-        role: UserRole::Student, // Default role
+        role: UserRole::Student,    // Default role
         status: UserStatus::Active, // Default status
         user_address: user.clone(),
     };

@@ -68,7 +68,7 @@ pub fn list_all_users(
         .get::<DataKey, Vec<Address>>(&DataKey::UsersIndex)
         .unwrap_or_else(|| Vec::new(&env));
 
-    if users_index.len() == 0 {
+    if users_index.is_empty() {
         return Vec::new(&env);
     }
 
@@ -148,7 +148,7 @@ fn get_admin_config(env: &Env) -> AdminConfig {
     env.storage()
         .persistent()
         .get::<DataKey, AdminConfig>(&DataKey::AdminConfig)
-        .unwrap_or_else(|| handle_error(&env, Error::SystemNotInitialized))
+        .unwrap_or_else(|| handle_error(env, Error::SystemNotInitialized))
 }
 
 /// Checks whether the caller is an admin with enhanced security

@@ -27,7 +27,7 @@ const EVT_USER_DEACTIVATED: Symbol = symbol_short!("usr_deact");
 ///
 /// # Events
 /// Emits a user deactivation event upon successful deletion
-pub fn delete_user(env: Env, caller: Address, user_id: Address) -> () {
+pub fn delete_user(env: Env, caller: Address, user_id: Address) {
     // Require authentication for the caller
     caller.require_auth();
 

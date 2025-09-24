@@ -9,36 +9,36 @@ const PREREQ_CREATED_EVENT: Symbol = symbol_short!("prereqAdd");
 
 pub fn add_prerequisite(env: Env, creator: Address, course_id: String, prerequisites: Vec<String>) {
     creator.require_auth();
-    
+
     // Validate input parameters
     if course_id.is_empty() {
         handle_error(&env, Error::EmptyCourseId);
     }
-    
+
     if course_id.len() > 100 {
         handle_error(&env, Error::EmptyCourseId);
     }
-    
+
     // Validate prerequisites list
     if prerequisites.is_empty() {
         handle_error(&env, Error::InvalidInput);
     }
-    
+
     // Check for reasonable limit on number of prerequisites
     if prerequisites.len() > 20 {
         handle_error(&env, Error::InvalidInput);
     }
-    
+
     // Validate each prerequisite ID
     for prerequisite_id in prerequisites.iter() {
         if prerequisite_id.is_empty() {
             handle_error(&env, Error::InvalidInput);
         }
-        
+
         if prerequisite_id.len() > 100 {
             handle_error(&env, Error::InvalidInput);
         }
-        
+
         // Check for self-prerequisite
         if prerequisite_id == course_id {
             handle_error(&env, Error::SelfPrerequisite);
@@ -71,17 +71,15 @@ pub fn add_prerequisite(env: Env, creator: Address, course_id: String, prerequis
         &prerequisites,
     );
 
-    env.events().publish(
-        (PREREQ_CREATED_EVENT, course_id),
-        prerequisites.len() as u32,
-    );
+    env.events()
+        .publish((PREREQ_CREATED_EVENT, course_id), prerequisites.len());
 }
 
 fn validate_no_circular_dependency(env: &Env, course_id: &String, new_prerequisites: &Vec<String>) {
     // Check if course_id appears in new_prerequisites (direct circular dependency)
     for prerequisite_id in new_prerequisites.iter() {
         if prerequisite_id.eq(course_id) {
-            handle_error(&env, Error::SelfPrerequisite)
+            handle_error(env, Error::SelfPrerequisite)
         }
     }
 
@@ -97,7 +95,7 @@ fn validate_no_circular_dependency(env: &Env, course_id: &String, new_prerequisi
             &mut visited,
             &mut rec_stack,
         ) {
-            handle_error(&env, Error::CircularDependency)
+            handle_error(env, Error::CircularDependency)
         }
     }
 }

@@ -19,11 +19,11 @@ pub fn archive_course(env: &Env, creator: Address, course_id: String) -> Course 
         .expect("Course not found");
 
     if course.creator != creator {
-        handle_error(&env, Error::OnlyCreatorCanArchive)
+        handle_error(env, Error::OnlyCreatorCanArchive)
     }
 
     if course.is_archived {
-        handle_error(&env, Error::CourseAlreadyArchived)
+        handle_error(env, Error::CourseAlreadyArchived)
     }
     course.is_archived = true;
 

@@ -47,17 +47,15 @@ pub fn edit_prerequisite(
     );
 
     // Emit event
-    env.events().publish(
-        (PREREQ_UPDATED_EVENT, course_id),
-        new_prerequisites.len() as u32,
-    );
+    env.events()
+        .publish((PREREQ_UPDATED_EVENT, course_id), new_prerequisites.len());
 }
 
 fn validate_no_circular_dependency(env: &Env, course_id: &String, new_prerequisites: &Vec<String>) {
     // Check if course_id appears in new_prerequisites (direct circular dependency)
     for prerequisite_id in new_prerequisites.iter() {
         if prerequisite_id.eq(course_id) {
-            handle_error(&env, Error::SelfPrerequisite)
+            handle_error(env, Error::SelfPrerequisite)
         }
     }
 
@@ -73,7 +71,7 @@ fn validate_no_circular_dependency(env: &Env, course_id: &String, new_prerequisi
             &mut visited,
             &mut rec_stack,
         ) {
-            handle_error(&env, Error::CircularDependency);
+            handle_error(env, Error::CircularDependency);
         }
     }
 }
