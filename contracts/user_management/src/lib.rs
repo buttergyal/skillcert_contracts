@@ -13,7 +13,7 @@ pub mod schema;
 #[cfg(test)]
 mod test;
 
-use crate::schema::{AdminConfig, LightProfile, ProfileUpdateParams, UserProfile, UserRole, UserStatus};
+use crate::schema::{AdminConfig, LightProfile, PaginatedLightProfiles, PaginationParams, ProfileUpdateParams, UserProfile, UserRole, UserStatus};
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
 
 /// User Management Contract
@@ -166,6 +166,37 @@ impl UserManagement {
             page_size,
             role_filter,
             country_filter,
+            status_filter,
+        )
+    }
+
+    /// Lists all registered users with cursor-based pagination and filtering (admin-only)
+    ///
+    /// This function implements efficient cursor-based pagination to avoid gas limit issues
+    /// when dealing with large datasets. It returns a PaginatedResult with metadata for
+    /// efficient navigation.
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `caller` - Address performing the call (must be admin)
+    /// * `pagination` - Pagination parameters including cursor and limit
+    /// * `role_filter` - Optional filter for user role
+    /// * `status_filter` - Optional filter for user status
+    ///
+    /// # Returns
+    /// * `PaginatedLightProfiles` - Paginated results with navigation metadata
+    pub fn list_all_users_cursor(
+        env: Env,
+        caller: Address,
+        pagination: PaginationParams,
+        role_filter: Option<UserRole>,
+        status_filter: Option<UserStatus>,
+    ) -> PaginatedLightProfiles {
+        functions::list_all_registered_users::list_all_users_cursor(
+            env,
+            caller,
+            pagination,
+            role_filter,
             status_filter,
         )
     }

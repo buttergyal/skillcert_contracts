@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use soroban_sdk::{contracttype, Address, String};
+use soroban_sdk::{contracttype, Address, String, Vec};
 
 /// Default and limit constants for user management configuration
 pub const DEFAULT_MAX_PAGE_SIZE: u32 = 100;
@@ -125,6 +125,36 @@ pub struct AdminConfig {
     pub max_page_size: u32,
     /// Total number of registered users
     pub total_user_count: u32,
+}
+
+/// Pagination parameters for cursor-based pagination.
+///
+/// Used to implement efficient pagination that avoids gas limit issues
+/// with large datasets by using cursor-based navigation.
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct PaginationParams {
+    /// Cursor for pagination (address of the last item from previous page)
+    pub cursor: Option<Address>,
+    /// Maximum number of items to return per page
+    pub limit: u32,
+}
+
+/// Pagination result with metadata for efficient navigation.
+///
+/// Contains the paginated data along with pagination metadata
+/// to enable cursor-based navigation.
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct PaginatedLightProfiles {
+    /// The paginated data items
+    pub data: Vec<LightProfile>,
+    /// Cursor for the next page (None if this is the last page)
+    pub next_cursor: Option<Address>,
+    /// Total count of items matching the filter (optional, may be expensive to compute)
+    pub total_count: Option<u32>,
+    /// Whether there are more pages available
+    pub has_more: bool,
 }
 
 /// Storage keys for different data types in the user management contract.
