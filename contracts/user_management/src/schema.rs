@@ -73,6 +73,7 @@ pub enum UserStatus {
 /// Filtering criteria for user queries.
 ///
 /// Used to filter users based on various attributes when listing or searching.
+/// Note: This struct is not #[contracttype] due to enum serialization limitations
 #[derive(Clone, Debug, PartialEq)]
 pub struct UserFilter {
     /// Filter by user role
@@ -81,6 +82,8 @@ pub struct UserFilter {
     pub country: Option<String>,
     /// Filter by account status
     pub status: Option<UserStatus>,
+    /// Text search in user's full name and profession
+    pub search_text: Option<String>,
 }
 
 /// Lightweight user profile for listing operations.
