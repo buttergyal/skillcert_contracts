@@ -47,7 +47,7 @@ fn test_get_user_profile_success() {
 }
 
 #[test]
-#[should_panic(expected = "User profile not found")]
+#[should_panic(expected = "HostError: Error(Contract, #1)")]
 fn test_get_user_profile_not_found() {
     let env = Env::default();
     let contract_id = env.register(UserProfileContract, {});
@@ -55,7 +55,7 @@ fn test_get_user_profile_not_found() {
 
     let user_address = Address::generate(&env);
 
-    // Try to get a profile that doesn't exist
+    // Try to get a profile that doesn't exist - should panic with UserProfileNotFound error (code 1)
     client.get_user_profile(&user_address);
 }
 
@@ -166,7 +166,7 @@ fn test_get_user_profile_with_privacy_same_user() {
 }
 
 #[test]
-#[should_panic(expected = "User profile not found")]
+#[should_panic(expected = "HostError: Error(Contract, #1)")]
 fn test_get_user_profile_with_privacy_not_found() {
     let env = Env::default();
     let contract_id = env.register(UserProfileContract, {});
@@ -175,7 +175,7 @@ fn test_get_user_profile_with_privacy_not_found() {
     let user_address = Address::generate(&env);
     let requester_address = Address::generate(&env);
 
-    // Try to get a profile that doesn't exist
+    // Try to get a profile that doesn't exist - should panic with UserProfileNotFound error (code 1)
     client.get_user_profile_with_privacy(&user_address, &requester_address);
 }
 
