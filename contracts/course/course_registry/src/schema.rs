@@ -96,6 +96,8 @@ pub struct CourseFilters {
     pub level: Option<CourseLevel>,
     pub min_duration: Option<u32>,
     pub max_duration: Option<u32>,
+    /// Text search in course title and description
+    pub search_text: Option<String>,
 }
 
 #[contracttype]
