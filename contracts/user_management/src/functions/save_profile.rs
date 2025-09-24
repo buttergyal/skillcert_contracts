@@ -2,7 +2,7 @@
 // Copyright (c) 2025 SkillCert
 
 use crate::error::{handle_error, Error};
-use crate::schema::{UserProfile, UserRole, UserStatus};
+use crate::schema::{UserProfile, UserRole, UserStatus, MAX_LANGUAGES, MAX_TEACHING_CATEGORIES};
 use soroban_sdk::{Address, Env, String, Vec};
 
 use super::utils::storage_utils;
@@ -25,6 +25,14 @@ pub fn save_profile(
     }
     if name.is_empty() || lastname.is_empty() || email.is_empty() {
         handle_error(&env, Error::RequiredFieldMissing);
+    }
+
+    // Validate array limits
+    if languages.len() > MAX_LANGUAGES {
+        handle_error(&env, Error::TooManyLanguages);
+    }
+    if teaching_categories.len() > MAX_TEACHING_CATEGORIES {
+        handle_error(&env, Error::TooManyTeachingCategories);
     }
 
     // Check if email is already registered for another user
