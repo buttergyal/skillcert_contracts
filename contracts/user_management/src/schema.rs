@@ -119,6 +119,30 @@ pub struct AdminConfig {
     pub total_user_count: u32,
 }
 
+/// Backup data structure for user management system.
+///
+/// Contains all user data and system configuration for backup and recovery operations.
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct UserBackupData {
+    /// All user profiles in the system
+    pub user_profiles: soroban_sdk::Map<Address, UserProfile>,
+    /// All lightweight profiles for efficient queries
+    pub light_profiles: soroban_sdk::Map<Address, LightProfile>,
+    /// Email to address mapping for uniqueness
+    pub email_mappings: soroban_sdk::Map<String, Address>,
+    /// List of all registered user addresses
+    pub users_index: soroban_sdk::Vec<Address>,
+    /// Administrative configuration
+    pub admin_config: AdminConfig,
+    /// List of admin addresses
+    pub admins: soroban_sdk::Vec<Address>,
+    /// Backup timestamp
+    pub backup_timestamp: u64,
+    /// Backup version for compatibility
+    pub backup_version: String,
+}
+
 /// Storage keys for different data types in the user management contract.
 ///
 /// This enum defines the various keys used to store and retrieve
