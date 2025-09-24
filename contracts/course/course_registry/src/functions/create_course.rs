@@ -32,7 +32,7 @@ pub fn create_course(
     
     // Additional title validation
     if title.len() > 200 {
-        handle_error(&env, Error::InvalidInput);
+        handle_error(&env, Error::InvalidTitleLength);
     }
 
     // Validate description - only check length, allow empty
@@ -54,19 +54,19 @@ pub fn create_course(
     
     if let Some(ref lang) = language {
         if lang.is_empty() || lang.len() > 50 {
-            handle_error(&env, Error::InvalidInput);
+            handle_error(&env, Error::InvalidLanguageLength);
         }
     }
     
     if let Some(ref url) = thumbnail_url {
         if url.is_empty() || url.len() > 500 {
-            handle_error(&env, Error::InvalidInput);
+            handle_error(&env, Error::InvalidThumbnailUrlLength);
         }
     }
     
     if let Some(duration) = duration_hours {
         if duration == 0 || duration > 8760 { // 8760 hours = 1 year, reasonable maximum
-            handle_error(&env, Error::InvalidInput);
+            handle_error(&env, Error::InvalidDurationValue);
         }
     }
 
