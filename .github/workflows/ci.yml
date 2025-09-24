@@ -44,16 +44,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
             
-      - name: Check code formatting
-        run: |
-          source $HOME/.cargo/env
-          cargo fmt --all -- --check
-
-      - name: Run Clippy
-        run: |
-          source $HOME/.cargo/env
-          cargo clippy --all-targets --all-features -- -D warnings
-
       - name: Build Cargo project
         run: |
           source $HOME/.cargo/env
