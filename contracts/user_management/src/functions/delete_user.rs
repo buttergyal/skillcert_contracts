@@ -158,7 +158,10 @@ mod tests {
                 super_admin: admin.clone(),
                 max_page_size,
                 total_user_count: 0,
-                rate_limit_config: get_default_rate_limit_config(),
+                rate_limit_config: {
+                    use crate::functions::utils::rate_limit_utils::get_default_rate_limit_config;
+                    get_default_rate_limit_config()
+                },
             };
             env.storage()
                 .persistent()
