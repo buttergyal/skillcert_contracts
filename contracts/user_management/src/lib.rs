@@ -13,7 +13,7 @@ pub mod schema;
 #[cfg(test)]
 mod test;
 
-use crate::schema::{AdminConfig, LightProfile, ProfileUpdateParams, UserProfile, UserRole, UserStatus};
+use crate::schema::{AdminConfig, LightProfile, PaginatedLightProfiles, PaginationParams, ProfileUpdateParams, UserProfile, UserRole, UserStatus};
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
 
 /// User Management Contract
@@ -310,6 +310,37 @@ impl UserManagement {
         )
     }
 
+    /// Lists all registered users with cursor-based pagination and filtering (admin-only)
+    ///
+    /// This function implements efficient cursor-based pagination to avoid gas limit issues
+    /// when dealing with large datasets. It returns a PaginatedResult with metadata for
+    /// efficient navigation.
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `caller` - Address performing the call (must be admin)
+    /// * `pagination` - Pagination parameters including cursor and limit
+    /// * `role_filter` - Optional filter for user role
+    /// * `status_filter` - Optional filter for user status
+    ///
+    /// # Returns
+    /// * `PaginatedLightProfiles` - Paginated results with navigation metadata
+    pub fn list_all_users_cursor(
+        env: Env,
+        caller: Address,
+        pagination: PaginationParams,
+        role_filter: Option<UserRole>,
+        status_filter: Option<UserStatus>,
+    ) -> PaginatedLightProfiles {
+        functions::list_all_registered_users::list_all_users_cursor(
+            env,
+            caller,
+            pagination,
+            role_filter,
+            status_filter,
+        )
+    }
+
     /// Initialize the admin system (one-time only)
     ///
     /// # Arguments
@@ -474,5 +505,84 @@ impl UserManagement {
     /// * **One-time check**: Once initialized, always returns `true`
     pub fn is_system_initialized(env: Env) -> bool {
         functions::admin_management::is_system_initialized(env)
+    }
+
+    /// Get the current contract version
+    ///
+    /// Returns the semantic version of the current contract deployment.
+    /// This is useful for tracking contract upgrades and compatibility.
+    ///
+    /// # Arguments
+    /// * `_env` - The Soroban environment (unused)
+    ///
+    /// # Returns
+    /// * `String` - The current contract version
+    pub fn get_contract_version(_env: Env) -> String {
+        String::from_str(&_env, VERSION)
+    }
+
+    /// Get contract version history
+    ///
+    /// Returns a list of all versions that have been deployed for this contract.
+    /// This helps track the evolution of the contract over time.
+    ///
+    /// # Arguments
+    /// * `env` - The Soroban environment
+    ///
+    /// # Returns
+    /// * `Vec<String>` - Vector of version strings in chronological order
+    pub fn get_version_history(env: Env) -> Vec<String> {
+        functions::contract_versioning::get_version_history(&env)
+    }
+
+    /// Check compatibility between contract versions
+    ///
+    /// Determines if data from one version can be safely used with another version.
+    /// This is crucial for migration processes and backward compatibility.
+    ///
+    /// # Arguments
+    /// * `env` - The Soroban environment
+    /// * `from_version` - The source version to check compatibility from
+    /// * `to_version` - The target version to check compatibility to
+    ///
+    /// # Returns
+    /// * `bool` - True if the versions are compatible, false otherwise
+    pub fn is_version_compatible(env: Env, from_version: String, to_version: String) -> bool {
+        functions::contract_versioning::is_version_compatible(&env, from_version, to_version)
+    }
+
+    /// Migrate user data between contract versions
+    ///
+    /// Performs data migration from one contract version to another.
+    /// This function handles the transformation of user data structures
+    /// when upgrading contract versions.
+    ///
+    /// # Arguments
+    /// * `env` - The Soroban environment
+    /// * `caller` - The address performing the migration (must be admin)
+    /// * `from_version` - The source version to migrate from
+    /// * `to_version` - The target version to migrate to
+    ///
+    /// # Returns
+    /// * `bool` - True if migration was successful, false otherwise
+    ///
+    /// # Events
+    /// Emits a migration event upon successful completion
+    pub fn migrate_user_data(env: Env, caller: Address, from_version: String, to_version: String) -> bool {
+        functions::contract_versioning::migrate_user_data(&env, caller, from_version, to_version)
+    }
+
+    /// Get migration status for the current contract
+    ///
+    /// Returns information about the current migration status and any
+    /// pending migrations that need to be completed.
+    ///
+    /// # Arguments
+    /// * `env` - The Soroban environment
+    ///
+    /// # Returns
+    /// * `String` - Migration status information
+    pub fn get_migration_status(env: Env) -> String {
+        functions::contract_versioning::get_migration_status(&env)
     }
 }

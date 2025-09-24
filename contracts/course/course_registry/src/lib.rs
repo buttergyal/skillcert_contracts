@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
-
+#![allow(clippy::too_many_arguments)]
 #![no_std]
 
 /// Contract version for tracking deployments and upgrades
@@ -263,6 +263,17 @@ impl CourseRegistry {
     ///
     /// # Panics
     ///
+    /// Remove a module from a course.
+    ///
+    /// This function removes a specific module from its associated course.
+    ///
+    /// # Arguments
+    ///
+    /// * `env` - The Soroban environment
+    /// * `module_id` - The unique identifier of the module to remove
+    ///
+    /// # Panics
+    ///
     /// * If the module doesn't exist
     /// * If the module_id is invalid or empty
     /// * If module removal operation fails
@@ -279,7 +290,9 @@ impl CourseRegistry {
     /// * **Non-existent module**: Will panic if module ID doesn't exist
     /// * **Invalid ID**: Will panic for invalid or empty module IDs
     /// * **Course updates**: Automatically updates course module count
-    pub fn remove_module(env: Env, module_id: String) -> () {
+    ///
+    /// Panics if the module removal fails or if the module doesn't exist.
+    pub fn remove_module(env: Env, module_id: String) {
         functions::remove_module::remove_module(&env, module_id).unwrap_or_else(|e| panic!("{}", e))
     }
 
@@ -325,7 +338,13 @@ impl CourseRegistry {
     /// * **Empty title**: Module title cannot be empty
     /// * **Creator only**: Only course creator can add modules
     /// * **Auto-generated ID**: Module gets unique auto-generated ID
-    pub fn add_module(env: Env, caller: Address, course_id: String, position: u32, title: String) -> CourseModule {
+    pub fn add_module(
+        env: Env,
+        caller: Address,
+        course_id: String,
+        position: u32,
+        title: String,
+    ) -> CourseModule {
         functions::add_module::course_registry_add_module(env, caller, course_id, position, title)
     }
 
@@ -359,7 +378,9 @@ impl CourseRegistry {
     /// * **Non-existent course**: Will panic if course doesn't exist
     /// * **Permanent deletion**: Course and all associated data are permanently removed
     /// * **Enrolled students**: Consider impact on enrolled students before deletion
-    pub fn delete_course(env: Env, creator: Address, course_id: String) -> () {
+    /// 
+    /// Panics if the deletion fails or if the creator is not authorized.
+    pub fn delete_course(env: Env, creator: Address, course_id: String) {
         functions::delete_course::delete_course(&env, creator, course_id)
             .unwrap_or_else(|e| panic!("{}", e))
     }
@@ -524,7 +545,7 @@ impl CourseRegistry {
     /// * **Non-existent goal**: Will panic if goal ID doesn't exist
     /// * **Permanent removal**: Goal is permanently deleted from course
     /// * **Goal count**: Automatically updates course goal count
-    pub fn remove_goal(env: Env, caller: Address, course_id: String, goal_id: String) -> () {
+    pub fn remove_goal(env: Env, caller: Address, course_id: String, goal_id: String) {
         functions::remove_goal::remove_goal(env, caller, course_id, goal_id)
     }
 
@@ -907,5 +928,84 @@ impl CourseRegistry {
         functions::list_courses_with_filters::list_courses_with_filters(
             &env, filters, limit, offset,
         )
+    }
+
+    /// Get the current contract version
+    ///
+    /// Returns the semantic version of the current contract deployment.
+    /// This is useful for tracking contract upgrades and compatibility.
+    ///
+    /// # Arguments
+    /// * `_env` - The Soroban environment (unused)
+    ///
+    /// # Returns
+    /// * `String` - The current contract version
+    pub fn get_contract_version(_env: Env) -> String {
+        String::from_str(&_env, VERSION)
+    }
+
+    /// Get contract version history
+    ///
+    /// Returns a list of all versions that have been deployed for this contract.
+    /// This helps track the evolution of the contract over time.
+    ///
+    /// # Arguments
+    /// * `env` - The Soroban environment
+    ///
+    /// # Returns
+    /// * `Vec<String>` - Vector of version strings in chronological order
+    pub fn get_version_history(env: Env) -> Vec<String> {
+        functions::contract_versioning::get_version_history(&env)
+    }
+
+    /// Check compatibility between contract versions
+    ///
+    /// Determines if data from one version can be safely used with another version.
+    /// This is crucial for migration processes and backward compatibility.
+    ///
+    /// # Arguments
+    /// * `env` - The Soroban environment
+    /// * `from_version` - The source version to check compatibility from
+    /// * `to_version` - The target version to check compatibility to
+    ///
+    /// # Returns
+    /// * `bool` - True if the versions are compatible, false otherwise
+    pub fn is_version_compatible(env: Env, from_version: String, to_version: String) -> bool {
+        functions::contract_versioning::is_version_compatible(&env, from_version, to_version)
+    }
+
+    /// Migrate course data between contract versions
+    ///
+    /// Performs data migration from one contract version to another.
+    /// This function handles the transformation of course data structures
+    /// when upgrading contract versions.
+    ///
+    /// # Arguments
+    /// * `env` - The Soroban environment
+    /// * `caller` - The address performing the migration (must be course creator or admin)
+    /// * `from_version` - The source version to migrate from
+    /// * `to_version` - The target version to migrate to
+    ///
+    /// # Returns
+    /// * `bool` - True if migration was successful, false otherwise
+    ///
+    /// # Events
+    /// Emits a migration event upon successful completion
+    pub fn migrate_course_data(env: Env, caller: Address, from_version: String, to_version: String) -> bool {
+        functions::contract_versioning::migrate_course_data(&env, caller, from_version, to_version)
+    }
+
+    /// Get migration status for the current contract
+    ///
+    /// Returns information about the current migration status and any
+    /// pending migrations that need to be completed.
+    ///
+    /// # Arguments
+    /// * `env` - The Soroban environment
+    ///
+    /// # Returns
+    /// * `String` - Migration status information
+    pub fn get_migration_status(env: Env) -> String {
+        functions::contract_versioning::get_migration_status(&env)
     }
 }
