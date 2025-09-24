@@ -154,7 +154,6 @@ pub fn edit_user_profile(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::schema::{ProfileUpdateParams, UserProfile};
     use crate::{UserManagement, UserManagementClient};
     use soroban_sdk::{testutils::Address as _, Address, Env, String};
