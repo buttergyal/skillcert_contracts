@@ -127,6 +127,7 @@ mod tests {
             profession: Some(String::from_str(env, "Software Tester")),
             country: Some(String::from_str(env, "United States")),
             purpose: Some(String::from_str(env, "Learn testing methodologies")),
+            profile_picture_url: None,
         };
 
         let light_profile = LightProfile {

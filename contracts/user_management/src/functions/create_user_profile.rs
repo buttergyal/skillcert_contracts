@@ -6,6 +6,8 @@ use crate::schema::{DataKey, LightProfile, UserProfile, UserRole, UserStatus};
 use core::iter::Iterator;
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
 
+use super::utils::url_validation;
+
 // Event symbol for user creation
 const EVT_USER_CREATED: Symbol = symbol_short!("usr_cr8d");
 
@@ -162,6 +164,13 @@ pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> Use
         }
     }
 
+    // Validate profile picture URL if provided
+    if let Some(ref profile_pic_url) = profile.profile_picture_url {
+        if !profile_pic_url.is_empty() && !url_validation::is_valid_url(profile_pic_url) {
+            handle_error(&env, Error::InvalidProfilePicURL)
+        }
+    }
+
     // Store the profile using persistent storage
     env.storage().persistent().set(&storage_key, &profile);
 
@@ -226,6 +235,7 @@ mod tests {
             profession: Some(String::from_str(&env, "Software Engineer")),
             country: Some(String::from_str(&env, "United States")),
             purpose: Some(String::from_str(&env, "Learn blockchain development")),
+            profile_picture_url: Some(String::from_str(&env, "https://example.com/profile.jpg")),
         };
 
         env.mock_all_auths();
@@ -282,6 +292,7 @@ mod tests {
             profession: None,
             country: None,
             purpose: None,
+            profile_picture_url: None,
         };
 
         env.mock_all_auths();
@@ -308,6 +319,7 @@ mod tests {
             profession: None,
             country: None,
             purpose: None,
+            profile_picture_url: None,
         };
 
         let profile2 = UserProfile {
@@ -316,6 +328,7 @@ mod tests {
             profession: None,
             country: None,
             purpose: None,
+            profile_picture_url: None,
         };
 
         env.mock_all_auths();
@@ -339,6 +352,7 @@ mod tests {
             profession: None,
             country: None,
             purpose: None,
+            profile_picture_url: None,
         };
 
         let profile2 = UserProfile {
@@ -347,6 +361,7 @@ mod tests {
             profession: None,
             country: None,
             purpose: None,
+            profile_picture_url: None,
         };
 
         env.mock_all_auths();
@@ -370,6 +385,7 @@ mod tests {
             profession: None,
             country: None,
             purpose: None,
+            profile_picture_url: None,
         };
 
         env.mock_all_auths();
@@ -389,10 +405,51 @@ mod tests {
             profession: None,
             country: None,
             purpose: None,
+            profile_picture_url: None,
         };
 
         env.mock_all_auths();
 
         client.create_user_profile(&user, &profile);
+    }
+
+    #[test]
+    #[should_panic(expected = "HostError: Error(Contract, #19)")]
+    fn test_create_user_profile_invalid_profile_picture_url() {
+        let (env, _contract_id, client) = setup_test_env();
+        let user = Address::generate(&env);
+
+        let profile = UserProfile {
+            full_name: String::from_str(&env, "John Doe"),
+            contact_email: String::from_str(&env, "john@example.com"),
+            profession: None,
+            country: None,
+            purpose: None,
+            profile_picture_url: Some(String::from_str(&env, "invalid-url")), // Invalid URL
+        };
+
+        env.mock_all_auths();
+
+        client.create_user_profile(&user, &profile);
+    }
+
+    #[test]
+    fn test_create_user_profile_valid_profile_picture_url() {
+        let (env, _contract_id, client) = setup_test_env();
+        let user = Address::generate(&env);
+
+        let profile = UserProfile {
+            full_name: String::from_str(&env, "John Doe"),
+            contact_email: String::from_str(&env, "john@example.com"),
+            profession: None,
+            country: None,
+            purpose: None,
+            profile_picture_url: Some(String::from_str(&env, "https://example.com/profile.jpg")),
+        };
+
+        env.mock_all_auths();
+
+        let created_profile = client.create_user_profile(&user, &profile);
+        assert_eq!(created_profile.profile_picture_url, profile.profile_picture_url);
     }
 }

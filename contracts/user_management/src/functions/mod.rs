@@ -9,3 +9,4 @@ pub mod edit_user_profile;
 pub mod get_user_by_id;
 pub mod is_admin;
 pub mod list_all_registered_users;
+pub mod utils;
