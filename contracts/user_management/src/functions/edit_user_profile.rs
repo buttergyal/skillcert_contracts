@@ -6,6 +6,8 @@ use crate::functions::is_admin::is_admin;
 use crate::schema::{DataKey, LightProfile, ProfileUpdateParams, UserProfile};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
+use super::utils::url_validation;
+
 // Event symbol for user profile update
 const EVT_USER_UPDATED: Symbol = symbol_short!("usr_updt");
 
@@ -128,6 +130,14 @@ pub fn edit_user_profile(
         profile.purpose = if purpose.is_empty() { None } else { Some(purpose.clone()) };
     }
 
+    // Validate profile picture URL if provided
+    if let Some(ref profile_pic_url) = updates.profile_picture_url {
+        if !profile_pic_url.is_empty() && !url_validation::is_valid_url(profile_pic_url) {
+            handle_error(&env, Error::InvalidProfilePicURL);
+        }
+        profile.profile_picture_url = if profile_pic_url.is_empty() { None } else { Some(profile_pic_url.clone()) };
+    }
+
     // Update the full profile in storage
     env.storage().persistent().set(&storage_key, &profile);
 
@@ -176,6 +186,7 @@ mod tests {
             profession: Some(String::from_str(env, "Software Engineer")),
             country: Some(String::from_str(env, "United States")),
             purpose: Some(String::from_str(env, "Learn blockchain development")),
+            profile_picture_url: None,
         };
 
         env.mock_all_auths();
@@ -196,6 +207,7 @@ mod tests {
             profession: Some(String::from_str(&env, "Data Scientist")),
             country: Some(String::from_str(&env, "Canada")),
             purpose: Some(String::from_str(&env, "Master AI and ML")),
+            profile_picture_url: Some(String::from_str(&env, "https://example.com/profile.jpg")),
         };
 
         env.mock_all_auths();
@@ -239,6 +251,7 @@ mod tests {
             profession: None,
             country: Some(String::from_str(&env, "Germany")),
             purpose: None,
+            profile_picture_url: None,
         };
 
         env.mock_all_auths();
@@ -268,6 +281,7 @@ mod tests {
             profession: None,
             country: None,
             purpose: None,
+            profile_picture_url: None,
         };
 
         env.mock_all_auths();
@@ -291,6 +305,7 @@ mod tests {
             profession: None,
             country: None,
             purpose: None,
+            profile_picture_url: None,
         };
 
         env.mock_all_auths();
@@ -313,11 +328,56 @@ mod tests {
             profession: None,
             country: None,
             purpose: None,
+            profile_picture_url: None,
         };
 
         env.mock_all_auths();
 
         // Try to set empty name
         client.edit_user_profile(&user, &user, &updates);
+    }
+
+    #[test]
+    #[should_panic(expected = "HostError: Error(Contract, #19)")]
+    fn test_edit_user_profile_invalid_profile_picture_url() {
+        let (env, _contract_id, client) = setup_test_env();
+        let user = Address::generate(&env);
+
+        // Create user first
+        create_test_user(&env, &client, &user);
+
+        let updates = ProfileUpdateParams {
+            full_name: None,
+            profession: None,
+            country: None,
+            purpose: None,
+            profile_picture_url: Some(String::from_str(&env, "invalid-url")), // Invalid URL
+        };
+
+        env.mock_all_auths();
+
+        client.edit_user_profile(&user, &user, &updates);
+    }
+
+    #[test]
+    fn test_edit_user_profile_valid_profile_picture_url() {
+        let (env, _contract_id, client) = setup_test_env();
+        let user = Address::generate(&env);
+
+        // Create user first
+        create_test_user(&env, &client, &user);
+
+        let updates = ProfileUpdateParams {
+            full_name: None,
+            profession: None,
+            country: None,
+            purpose: None,
+            profile_picture_url: Some(String::from_str(&env, "https://example.com/profile.jpg")),
+        };
+
+        env.mock_all_auths();
+
+        let updated_profile = client.edit_user_profile(&user, &user, &updates);
+        assert_eq!(updated_profile.profile_picture_url, Some(String::from_str(&env, "https://example.com/profile.jpg")));
     }
 }
