@@ -2,7 +2,7 @@
 // Copyright (c) 2025 SkillCert
 
 use crate::error::{handle_error, Error};
-use crate::schema::{AdminConfig, DataKey, LightProfile, UserRole, UserStatus};
+use crate::schema::{AdminConfig, DataKey, LightProfile, PaginatedLightProfiles, PaginationParams, UserRole, UserStatus};
 use core::iter::Iterator;
 use soroban_sdk::{Address, Env, String, Vec};
 
@@ -225,6 +225,179 @@ fn validate_input(
     Ok(())
 }
 
+/// Lists all registered users with cursor-based pagination and filtering (admin-only).
+///
+/// This function implements efficient cursor-based pagination to avoid gas limit issues
+/// when dealing with large datasets. It returns a PaginatedResult with metadata for
+/// efficient navigation.
+///
+/// Arguments:
+/// - env: Soroban environment
+/// - caller: address performing the call (must be admin)
+/// - pagination: pagination parameters including cursor and limit
+/// - role_filter: optional filter for user role
+/// - status_filter: optional filter for user status
+///
+/// Returns:
+/// - PaginatedLightProfiles containing paginated results with navigation metadata
+///
+/// Storage expectations:
+/// - DataKey::UsersIndex -> Vec<Address>   // ordered list of registered user addresses
+/// - DataKey::UserProfileLight(Address) -> LightProfile  // lightweight profile data
+/// - DataKey::Admins -> Vec<Address>      // list of admin addresses
+pub fn list_all_users_cursor(
+    env: Env,
+    caller: Address,
+    pagination: PaginationParams,
+    role_filter: Option<UserRole>,
+    status_filter: Option<UserStatus>,
+) -> PaginatedLightProfiles {
+    // Require the caller to be authenticated
+    caller.require_auth();
+
+    // Check system initialization first
+    if !is_system_initialized(&env) {
+        handle_error(&env, Error::SystemNotInitialized)
+    }
+
+    // Get admin configuration
+    let config = get_admin_config(&env);
+
+    // Authorization: only admins can call
+    if !is_admin(&env, &caller) {
+        handle_error(&env, Error::AccessDenied)
+    }
+
+    // Validate and sanitize input parameters
+    if let Err(error) = validate_pagination_params(&pagination, &config) {
+        panic!("{}", error);
+    }
+
+    // Read user index (list of registered user addresses)
+    let users_index: Vec<Address> = env
+        .storage()
+        .persistent()
+        .get::<DataKey, Vec<Address>>(&DataKey::UsersIndex)
+        .unwrap_or_else(|| Vec::new(&env));
+
+    if users_index.len() == 0 {
+        return PaginatedLightProfiles {
+            data: Vec::new(&env),
+            next_cursor: None,
+            total_count: Some(0),
+            has_more: false,
+        };
+    }
+
+    // Find the starting index based on cursor
+    let start_index = if let Some(cursor) = &pagination.cursor {
+        find_address_index(&users_index, cursor).unwrap_or(0)
+    } else {
+        0
+    };
+
+    // Collect filtered profiles starting from the cursor position
+    let mut result_data = Vec::new(&env);
+    let mut processed_count = 0;
+    let mut next_cursor: Option<Address> = None;
+    let mut total_matching = 0u32;
+
+    for i in start_index..users_index.len() {
+        if processed_count >= pagination.limit {
+            // We've reached the limit, set the next cursor
+            if let Some(addr) = users_index.get(i) {
+                next_cursor = Some(addr);
+            }
+            break;
+        }
+
+        if let Some(addr) = users_index.get(i) {
+            // Fetch lightweight profile for each address
+            if let Some(profile) = env
+                .storage()
+                .persistent()
+                .get::<DataKey, LightProfile>(&DataKey::UserProfileLight(addr))
+            {
+                // Apply filter if provided
+                if matches_filter(&profile, &role_filter, &None, &status_filter) {
+                    total_matching += 1;
+                    
+                    // Skip the cursor address itself (we start after it)
+                    if pagination.cursor.is_some() && i == start_index {
+                        continue;
+                    }
+                    
+                    if processed_count < pagination.limit {
+                        result_data.push_back(profile);
+                        processed_count += 1;
+                    }
+                }
+            }
+        }
+    }
+
+    // Determine if there are more pages
+    let has_more = if next_cursor.is_some() {
+        true
+    } else {
+        // Check if there are more items after the current batch
+        let mut found_more = false;
+        for i in (start_index + processed_count)..users_index.len() {
+            if let Some(addr) = users_index.get(i) {
+                if let Some(profile) = env
+                    .storage()
+                    .persistent()
+                    .get::<DataKey, LightProfile>(&DataKey::UserProfileLight(addr))
+                {
+                    if matches_filter(&profile, &role_filter, &None, &status_filter) {
+                        found_more = true;
+                        break;
+                    }
+                }
+            }
+        }
+        found_more
+    };
+
+    PaginatedLightProfiles {
+        data: result_data,
+        next_cursor,
+        total_count: Some(total_matching),
+        has_more,
+    }
+}
+
+/// Finds the index of an address in the users index vector.
+///
+/// Returns the index if found, None otherwise.
+fn find_address_index(users_index: &Vec<Address>, target: &Address) -> Option<u32> {
+    for i in 0..users_index.len() {
+        if let Some(addr) = users_index.get(i) {
+            if &addr == target {
+                return Some(i);
+            }
+        }
+    }
+    None
+}
+
+/// Validates pagination parameters for cursor-based pagination.
+fn validate_pagination_params(
+    pagination: &PaginationParams,
+    config: &AdminConfig,
+) -> Result<(), &'static str> {
+    // Validate limit
+    let max_allowed = config.max_page_size.min(MAX_PAGE_SIZE_ABSOLUTE);
+    if pagination.limit == 0 {
+        return Err("limit must be greater than 0");
+    }
+    if pagination.limit > max_allowed {
+        return Err("limit exceeds maximum allowed limit");
+    }
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -299,5 +472,85 @@ mod tests {
             &None, // Country filter is deprecated but kept for compatibility
             &Some(UserStatus::Active)
         ));
+    }
+
+    #[test]
+    fn test_find_address_index_exists() {
+        let env = Env::default();
+        let mut users_index = Vec::new(&env);
+        let addr1 = Address::generate(&env);
+        let addr2 = Address::generate(&env);
+        let addr3 = Address::generate(&env);
+        
+        users_index.push_back(addr1.clone());
+        users_index.push_back(addr2.clone());
+        users_index.push_back(addr3.clone());
+
+        assert_eq!(find_address_index(&users_index, &addr2), Some(1));
+        assert_eq!(find_address_index(&users_index, &addr1), Some(0));
+        assert_eq!(find_address_index(&users_index, &addr3), Some(2));
+    }
+
+    #[test]
+    fn test_find_address_index_not_exists() {
+        let env = Env::default();
+        let users_index = Vec::new(&env);
+        let addr = Address::generate(&env);
+
+        assert_eq!(find_address_index(&users_index, &addr), None);
+    }
+
+    #[test]
+    fn test_validate_pagination_params_valid() {
+        let env = Env::default();
+        let config = AdminConfig {
+            initialized: true,
+            super_admin: Address::generate(&env),
+            max_page_size: 100,
+            total_user_count: 0,
+        };
+
+        let pagination = PaginationParams {
+            cursor: None,
+            limit: 50,
+        };
+
+        assert!(validate_pagination_params(&pagination, &config).is_ok());
+    }
+
+    #[test]
+    fn test_validate_pagination_params_invalid_limit_zero() {
+        let env = Env::default();
+        let config = AdminConfig {
+            initialized: true,
+            super_admin: Address::generate(&env),
+            max_page_size: 100,
+            total_user_count: 0,
+        };
+
+        let pagination = PaginationParams {
+            cursor: None,
+            limit: 0,
+        };
+
+        assert!(validate_pagination_params(&pagination, &config).is_err());
+    }
+
+    #[test]
+    fn test_validate_pagination_params_invalid_limit_too_large() {
+        let env = Env::default();
+        let config = AdminConfig {
+            initialized: true,
+            super_admin: Address::generate(&env),
+            max_page_size: 100,
+            total_user_count: 0,
+        };
+
+        let pagination = PaginationParams {
+            cursor: None,
+            limit: 150,
+        };
+
+        assert!(validate_pagination_params(&pagination, &config).is_err());
     }
 }
