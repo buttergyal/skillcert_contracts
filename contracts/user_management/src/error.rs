@@ -32,6 +32,11 @@ pub enum Error {
     PageParamTooLarge = 23,
     InvalidInput = 24,
     PasswordMismatch = 25,
+    RequiredFieldMissing = 26,
+    EmailAlreadyRegistered = 27,
+    TooManyLanguages = 28,
+    TooManyTeachingCategories = 29,
+    TooManyPrerequisites = 30,
 }
 
 pub fn handle_error(env: &Env, error: Error) -> ! {
