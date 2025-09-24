@@ -3,6 +3,7 @@
 
 use crate::error::{handle_error, Error};
 use crate::schema::Course;
+use super::course_rate_limit_utils::initialize_course_rate_limit_config;
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol, IntoVal};
 
 const KEY_USER_MGMT_ADDR: &str = "user_mgmt_addr";
@@ -64,6 +65,9 @@ pub fn initialize(env: &Env, owner: &Address, user_mgmt_addr: &Address) {
     env.storage()
         .instance()
         .set(&(KEY_USER_MGMT_ADDR,), user_mgmt_addr);
+    
+    // Initialize rate limiting configuration
+    initialize_course_rate_limit_config(env);
 }
 
 /// Update the user management contract address
