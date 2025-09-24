@@ -429,3 +429,99 @@ fn test_list_categories_with_id_gaps() {
     assert_eq!(prog, 2); // Course 1 and Course 3
     assert_eq!(data, 0); // Course 2 was deleted
 }
+
+#[test]
+fn test_course_backup_and_recovery_system() {
+    let env = Env::default();
+    let contract_id: Address = env.register(CourseRegistry, {});
+    let client = CourseRegistryClient::new(&env, &contract_id);
+    
+    let admin: Address = Address::generate(&env);
+    let instructor: Address = Address::generate(&env);
+    
+    env.mock_all_auths();
+
+    // Create test courses
+    let course1 = client.create_course(
+        &instructor,
+        &String::from_str(&env, "Rust Programming"),
+        &String::from_str(&env, "Learn Rust from basics"),
+        &1000u128,
+        &Some(String::from_str(&env, "Programming")),
+        &Some(String::from_str(&env, "English")),
+        &None,
+        &Some(String::from_str(&env, "Beginner")),
+        &Some(40u32),
+    );
+
+    let course2 = client.create_course(
+        &instructor,
+        &String::from_str(&env, "Advanced Rust"),
+        &String::from_str(&env, "Advanced Rust concepts"),
+        &1500u128,
+        &Some(String::from_str(&env, "Programming")),
+        &Some(String::from_str(&env, "English")),
+        &None,
+        &Some(String::from_str(&env, "Advanced")),
+        &Some(60u32),
+    );
+
+    // Set up admin first (add to admin list) - use contract context
+    env.as_contract(&contract_id, || {
+        let mut admin_list = Vec::new(&env);
+        admin_list.push_back(admin.clone());
+        env.storage()
+            .persistent()
+            .set(&crate::schema::DataKey::Admins, &admin_list);
+    });
+
+    // Create categories
+    let category_id = client.create_course_category(
+        &admin,
+        &String::from_str(&env, "Programming"),
+        &Some(String::from_str(&env, "Programming courses")),
+    );
+
+    // Add goals to courses
+    client.add_goal(
+        &instructor,
+        &course1.id,
+        &String::from_str(&env, "Understand ownership"),
+    );
+
+    client.add_goal(
+        &instructor,
+        &course2.id,
+        &String::from_str(&env, "Master async programming"),
+    );
+
+    // Export course data (admin is already set up)
+    let backup_data = client.export_course_data(&admin);
+    
+    // Verify backup contains expected data
+    assert_eq!(backup_data.backup_version, String::from_str(&env, "1.0.0"));
+    // Verify backup was created (timestamp exists)
+    let _timestamp = backup_data.backup_timestamp; // Just verify field exists
+    assert_eq!(backup_data.courses.len(), 2);
+    assert!(backup_data.category_seq > 0);
+
+    // Test import functionality
+    let imported_count = client.import_course_data(&admin, &backup_data);
+    assert_eq!(imported_count, 2);
+
+    // Verify data integrity after import
+    let restored_course1 = client.get_course(&course1.id);
+    assert_eq!(restored_course1.title, course1.title);
+    assert_eq!(restored_course1.price, course1.price);
+
+    let restored_course2 = client.get_course(&course2.id);
+    assert_eq!(restored_course2.title, course2.title);
+    assert_eq!(restored_course2.price, course2.price);
+
+    // Verify categories are restored
+    let restored_category = client.get_course_category(&category_id);
+    assert!(restored_category.is_some());
+    if let Some(cat) = restored_category {
+        assert_eq!(cat.name, String::from_str(&env, "Programming"));
+    }
+}
