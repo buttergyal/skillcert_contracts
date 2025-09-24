@@ -5,6 +5,7 @@ use crate::error::{handle_error, Error};
 use crate::schema::{
     AdminConfig, DataKey, ABSOLUTE_MAX_PAGE_SIZE, DEFAULT_MAX_PAGE_SIZE, MAX_ADMINS,
 };
+use crate::functions::utils::rate_limit_utils::get_default_rate_limit_config;
 use core::iter::Iterator;
 use soroban_sdk::{Address, Env, Vec};
 
@@ -45,6 +46,7 @@ pub fn initialize_system(
         super_admin,
         max_page_size: validated_max_page_size,
         total_user_count: 0,
+        rate_limit_config: get_default_rate_limit_config(),
     };
 
     // Store the configuration
