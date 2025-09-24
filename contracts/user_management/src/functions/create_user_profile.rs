@@ -2,93 +2,23 @@
 // Copyright (c) 2025 SkillCert
 
 use crate::error::{handle_error, Error};
-use crate::schema::{DataKey, LightProfile, UserProfile, UserRole, UserStatus};
-use core::iter::Iterator;
-use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
+use crate::schema::{DataKey, LightProfile, UserProfile, UserRole, UserStatus, AdminConfig};
+use crate::functions::utils::rate_limit_utils::check_user_creation_rate_limit;
+use crate::functions::utils::storage_utils::{
+    add_to_users_index, is_email_unique, register_email, validate_email_format,
+    validate_string_content,
+};
+use soroban_sdk::{symbol_short, Address, Env, Symbol};
 
 // Event symbol for user creation
 const EVT_USER_CREATED: Symbol = symbol_short!("usr_cr8d");
 
 /// Security constants for profile validation
 const MAX_NAME_LENGTH: usize = 100;
-const MAX_EMAIL_LENGTH: usize = 320; // RFC 5321 standard
 const MAX_PROFESSION_LENGTH: usize = 100;
 const MAX_PURPOSE_LENGTH: usize = 500;
 const MAX_COUNTRY_LENGTH: usize = 56; // Longest country name
-const INVALID_EMAIL_NO_AT_LENGTH: u32 = 13; // "invalid-email"
 
-/// Validates string content for security
-fn validate_string_content(_env: &Env, s: &String, max_len: usize) -> bool {
-    if s.len() > max_len as u32 {
-        return false;
-    }
-    // For no_std environment, we'll do basic length validation
-    true
-}
-
-/// Validates email format (basic validation)
-fn validate_email_format(email: &String) -> bool {
-    // Basic email validation - must contain @ and have minimum length
-    if email.len() < 5 || email.len() > MAX_EMAIL_LENGTH as u32 {
-        return false;
-    }
-
-    // For Soroban strings, we'll do a basic validation
-    // Check if the string is empty (additional safety check)
-    if email.is_empty() {
-        return false;
-    }
-
-    // Basic validation - reject emails that are clearly invalid
-    // In production, implement proper RFC 5322 email validation
-    if email.len() == 13 {
-        // "invalid-email" has 13 characters - reject for testing
-        return false;
-    }
-
-    // This is where we would normally check for @ symbol, but due to Soroban SDK limitations
-    // we'll simulate the validation for the test
-    // In a real implementation, you might need to implement custom string parsing
-
-    // TODO: Implement proper RFC 5322 email validation
-    // For the test to pass, we need to reject "invalid-email" (no @)
-    // This is a workaround - in practice you'd implement proper email parsing
-    if (email.len() as u32) == INVALID_EMAIL_NO_AT_LENGTH {
-        // "invalid-email" has 13 characters
-        return false; // Simulate rejecting emails without @
-    }
-
-    true
-}
-
-/// Check if email is already taken
-fn is_email_unique(env: &Env, email: &String) -> bool {
-    let email_key = DataKey::EmailIndex(email.clone());
-    !env.storage().persistent().has(&email_key)
-}
-
-/// Register email in the email index
-fn register_email(env: &Env, email: &String, user_address: &Address) {
-    let email_key = DataKey::EmailIndex(email.clone());
-    env.storage().persistent().set(&email_key, user_address);
-}
-
-/// Add user to the global users index
-fn add_to_users_index(env: &Env, user: &Address) {
-    let mut users_index: Vec<Address> = env
-        .storage()
-        .persistent()
-        .get::<DataKey, Vec<Address>>(&DataKey::UsersIndex)
-        .unwrap_or_else(|| Vec::new(env));
-
-    // Check if user already exists
-    if !users_index.iter().any(|u| u == *user) {
-        users_index.push_back(user.clone());
-        env.storage()
-            .persistent()
-            .set(&DataKey::UsersIndex, &users_index);
-    }
-}
 
 /// Create a new user profile
 ///
@@ -112,6 +42,23 @@ fn add_to_users_index(env: &Env, user: &Address) {
 pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> UserProfile {
     // Require authentication for the user
     user.require_auth();
+
+    // Check rate limiting before proceeding (use default config if system not initialized)
+    let admin_config_key = DataKey::AdminConfig;
+    let rate_config = match env
+        .storage()
+        .persistent()
+        .get::<DataKey, AdminConfig>(&admin_config_key)
+    {
+        Some(config) => config.rate_limit_config,
+        None => {
+            // If system not initialized, use default rate limiting
+            use crate::functions::utils::rate_limit_utils::get_default_rate_limit_config;
+            get_default_rate_limit_config()
+        }
+    };
+
+    check_user_creation_rate_limit(&env, &user, &rate_config);
 
     // Check if user profile already exists
     let storage_key = DataKey::UserProfile(user.clone());
