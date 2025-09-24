@@ -8,6 +8,14 @@ pub const DEFAULT_MAX_PAGE_SIZE: u32 = 100;
 pub const ABSOLUTE_MAX_PAGE_SIZE: u32 = 1000;
 pub const MAX_ADMINS: u32 = 10;
 
+/// Password validation constants
+pub const MIN_PASSWORD_LENGTH: u32 = 8;
+pub const MAX_PASSWORD_LENGTH: u32 = 128;
+pub const REQUIRED_SPECIAL_CHARS: &str = "!@#$%^&*()_+-=[]{}|;:,.<>?";
+pub const REQUIRED_DIGITS: &str = "0123456789";
+pub const REQUIRED_UPPERCASE: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+pub const REQUIRED_LOWERCASE: &str = "abcdefghijklmnopqrstuvwxyz";
+
 /// User profile information matching UI definition.
 ///
 /// This struct contains user profile data with required and optional fields
