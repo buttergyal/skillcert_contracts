@@ -25,6 +25,8 @@ pub struct UserProfile {
     pub country: Option<String>,
     /// User's learning goals or purpose (optional)
     pub purpose: Option<String>,
+    /// User's profile picture URL (optional)
+    pub profile_picture_url: Option<String>,
 }
 
 /// Struct for profile update parameters
@@ -40,6 +42,8 @@ pub struct ProfileUpdateParams {
     pub country: Option<String>,
     /// User's learning goals or purpose
     pub purpose: Option<String>,
+    /// User's profile picture URL
+    pub profile_picture_url: Option<String>,
 }
 
 /// User roles in the SkillCert platform.
