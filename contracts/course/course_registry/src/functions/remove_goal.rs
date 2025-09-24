@@ -12,7 +12,7 @@ pub fn remove_goal(env: Env, caller: Address, course_id: String, goal_id: String
 
     // Validate input
     if course_id.is_empty() {
-        handle_error(&env, Error::InvalidInput)
+        handle_error(&env, Error::EmptyCourseId)
     }
     if goal_id.is_empty() {
         handle_error(&env, Error::EmptyGoalId)
