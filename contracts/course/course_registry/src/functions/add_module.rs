@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use soroban_sdk::{symbol_short, vec, Address, Env, String, Symbol};
+
 use super::utils::{concat_strings, u32_to_string};
 use crate::error::{handle_error, Error};
 pub use crate::schema::{Course, CourseModule};
-use soroban_sdk::{symbol_short, vec, Address, Env, String, Symbol};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const MODULE_KEY: Symbol = symbol_short!("module");

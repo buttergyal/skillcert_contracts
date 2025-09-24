@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use soroban_sdk::{symbol_short, Address, Env, String, Symbol, IntoVal};
+
 use crate::error::{handle_error, Error};
 use crate::schema::Course;
-use soroban_sdk::{symbol_short, Address, Env, String, Symbol, IntoVal};
+
+const INIT_ACCESS_CONTROL_EVENT: Symbol = symbol_short!("init_a_cl");
+const UPDATE_USER_MNGMT_EVENT: Symbol = symbol_short!("up_usr_mg");
 
 const KEY_USER_MGMT_ADDR: &str = "user_mgmt_addr";
 const KEY_OWNER: &str = "owner";
@@ -31,7 +35,7 @@ pub fn is_admin(env: &Env, who: &Address) -> bool {
 
 /// Check if a user is the creator of a specific course
 pub fn is_course_creator(env: &Env, course_id: &String, who: &Address) -> bool {
-    let key = (symbol_short!("course"), course_id.clone());
+    let key: (Symbol, String) = (symbol_short!("course"), course_id.clone());
     
     match env.storage().persistent().get::<_, Course>(&key) {
         Some(course) => course.creator == *who,
@@ -64,6 +68,8 @@ pub fn initialize(env: &Env, owner: &Address, user_mgmt_addr: &Address) {
     env.storage()
         .instance()
         .set(&(KEY_USER_MGMT_ADDR,), user_mgmt_addr);
+    env.events()
+        .publish((INIT_ACCESS_CONTROL_EVENT,), (owner, user_mgmt_addr));
 }
 
 /// Update the user management contract address
@@ -85,6 +91,8 @@ pub fn update_user_mgmt_address(env: &Env, caller: &Address, new_addr: &Address)
     env.storage()
         .instance()
         .set(&(KEY_USER_MGMT_ADDR,), new_addr);
+    env.events()
+        .publish((UPDATE_USER_MNGMT_EVENT,), (caller, new_addr));
 }
 
 #[cfg(test)]
