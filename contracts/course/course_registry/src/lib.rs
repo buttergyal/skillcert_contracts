@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
-
+#![allow(clippy::too_many_arguments)]
 #![no_std]
 
 /// Contract version for tracking deployments and upgrades
@@ -158,7 +158,7 @@ impl CourseRegistry {
     /// # Panics
     ///
     /// Panics if the module removal fails or if the module doesn't exist.
-    pub fn remove_module(env: Env, module_id: String) -> () {
+    pub fn remove_module(env: Env, module_id: String) {
         functions::remove_module::remove_module(&env, module_id).unwrap_or_else(|e| panic!("{}", e))
     }
 
@@ -177,7 +177,13 @@ impl CourseRegistry {
     /// # Returns
     ///
     /// Returns the created `CourseModule` object.
-    pub fn add_module(env: Env, caller: Address, course_id: String, position: u32, title: String) -> CourseModule {
+    pub fn add_module(
+        env: Env,
+        caller: Address,
+        course_id: String,
+        position: u32,
+        title: String,
+    ) -> CourseModule {
         functions::add_module::course_registry_add_module(env, caller, course_id, position, title)
     }
 
@@ -195,7 +201,7 @@ impl CourseRegistry {
     /// # Panics
     ///
     /// Panics if the deletion fails or if the creator is not authorized.
-    pub fn delete_course(env: Env, creator: Address, course_id: String) -> () {
+    pub fn delete_course(env: Env, creator: Address, course_id: String) {
         functions::delete_course::delete_course(&env, creator, course_id)
             .unwrap_or_else(|e| panic!("{}", e))
     }
@@ -269,7 +275,7 @@ impl CourseRegistry {
     /// * `caller` - The address of the user requesting the removal
     /// * `course_id` - The unique identifier of the course
     /// * `goal_id` - The unique identifier of the goal to remove
-    pub fn remove_goal(env: Env, caller: Address, course_id: String, goal_id: String) -> () {
+    pub fn remove_goal(env: Env, caller: Address, course_id: String, goal_id: String) {
         functions::remove_goal::remove_goal(env, caller, course_id, goal_id)
     }
 
