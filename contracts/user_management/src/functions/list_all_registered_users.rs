@@ -2,9 +2,20 @@
 // Copyright (c) 2025 SkillCert
 
 use crate::error::{handle_error, Error};
-use crate::schema::{AdminConfig, DataKey, LightProfile, UserRole, UserStatus};
+use crate::schema::{AdminConfig, DataKey, LightProfile, UserFilter};
+#[cfg(test)]
+use crate::schema::{UserRole, UserStatus};
 use core::iter::Iterator;
 use soroban_sdk::{Address, Env, String, Vec};
+
+/// Helper function to check if a Soroban String contains a substring
+/// For now, this implements exact match only due to Soroban String limitations
+/// TODO: Implement proper substring search when Soroban provides better string utilities
+fn string_contains(haystack: &String, needle: &String) -> bool {
+    // For now, only exact match is supported
+    // This can be enhanced later when Soroban provides better string utilities
+    haystack == needle
+}
 
 /// Security constants
 const MAX_PAGE_SIZE_ABSOLUTE: u32 = 1000;
@@ -16,7 +27,7 @@ const MAX_PAGE_SIZE_ABSOLUTE: u32 = 1000;
 /// - caller: address performing the call (must be admin)
 /// - page: zero-based page index
 /// - page_size: number of items per page (must be > 0)
-/// - filter: optional filter criteria for role, country, and status
+/// - filter: optional filter criteria for role, country, status, and text search
 ///
 /// Returns:
 /// - Vec<LightProfile> containing filtered and paginated lightweight profiles
@@ -30,9 +41,7 @@ pub fn list_all_users(
     caller: Address,
     page: u32,
     page_size: u32,
-    role_filter: Option<UserRole>,
-    country_filter: Option<String>,
-    status_filter: Option<UserStatus>,
+    filter: Option<UserFilter>,
 ) -> Vec<LightProfile> {
     // Require the caller to be authenticated
     caller.require_auth();
@@ -51,7 +60,7 @@ pub fn list_all_users(
     }
 
     // Validate and sanitize input parameters
-    if let Err(error) = validate_input(page_size, &country_filter, &config) {
+    if let Err(error) = validate_input(page_size, &filter, &config) {
         panic!("{}", error);
     }
 
@@ -84,7 +93,7 @@ pub fn list_all_users(
                 .get::<DataKey, LightProfile>(&DataKey::UserProfileLight(addr))
             {
                 // Apply filter if provided
-                if matches_filter(&profile, &role_filter, &country_filter, &status_filter) {
+                if matches_filter(&profile, &filter) {
                     filtered_profiles.push_back(profile);
                 }
             }
@@ -179,24 +188,43 @@ fn is_admin(env: &Env, who: &Address) -> bool {
 /// Checks if a profile matches the given filter criteria
 fn matches_filter(
     profile: &LightProfile,
-    role_filter: &Option<UserRole>,
-    _country_filter: &Option<String>, // Deprecated but kept for API compatibility
-    status_filter: &Option<UserStatus>,
+    filter: &Option<UserFilter>,
 ) -> bool {
+    let Some(filter) = filter else {
+        return true; // No filter means all profiles match
+    };
+
     // Check role filter
-    if let Some(ref role) = role_filter {
+    if let Some(ref role) = filter.role {
         if &profile.role != role {
             return false;
         }
     }
 
-    // Note: Country filter was removed from the new schema as LightProfile
-    // no longer has a 'country' field. The parameter is kept for backward compatibility
-    // but the actual filtering is disabled.
+    // Check country filter
+    if let Some(ref country) = filter.country {
+        if profile.country.as_ref() != Some(country) {
+            return false;
+        }
+    }
 
     // Check status filter
-    if let Some(ref status) = status_filter {
+    if let Some(ref status) = filter.status {
         if &profile.status != status {
+            return false;
+        }
+    }
+
+    // Check text search filter (search in full_name and profession)
+    if let Some(ref search_text) = filter.search_text {
+        // Text search in name and profession
+        // Note: Case-sensitive search due to Soroban String limitations
+        let name_match = string_contains(&profile.full_name, search_text);
+        let profession_match = profile.profession.as_ref()
+            .map(|p| string_contains(p, search_text))
+            .unwrap_or(false);
+        
+        if !name_match && !profession_match {
             return false;
         }
     }
@@ -207,7 +235,7 @@ fn matches_filter(
 /// Validates and sanitizes input parameters
 fn validate_input(
     page_size: u32,
-    _country_filter: &Option<String>, // Deprecated but kept for API compatibility
+    filter: &Option<UserFilter>,
     config: &AdminConfig,
 ) -> Result<(), &'static str> {
     // Validate page_size
@@ -219,8 +247,17 @@ fn validate_input(
         return Err("page_size exceeds maximum allowed limit");
     }
 
-    // Country filter validation is no longer needed as it's deprecated
-    // but we keep the parameter for backward compatibility
+    // Validate search text length if provided
+    if let Some(filter) = filter {
+        if let Some(ref search_text) = filter.search_text {
+            if search_text.len() == 0 {
+                return Err("search_text cannot be empty");
+            }
+            if search_text.len() > 100 {
+                return Err("search_text is too long (max 100 characters)");
+            }
+        }
+    }
 
     Ok(())
 }
@@ -246,7 +283,7 @@ mod tests {
         let env = Env::default();
         let profile = create_test_profile(&env);
 
-        assert!(matches_filter(&profile, &None, &None, &None));
+        assert!(matches_filter(&profile, &None));
     }
 
     #[test]
@@ -254,12 +291,14 @@ mod tests {
         let env = Env::default();
         let profile = create_test_profile(&env);
 
-        assert!(matches_filter(
-            &profile,
-            &Some(UserRole::Student),
-            &None,
-            &None
-        ));
+        let filter = UserFilter {
+            role: Some(UserRole::Student),
+            country: None,
+            status: None,
+            search_text: None,
+        };
+
+        assert!(matches_filter(&profile, &Some(filter)));
     }
 
     #[test]
@@ -267,12 +306,14 @@ mod tests {
         let env = Env::default();
         let profile = create_test_profile(&env);
 
-        assert!(!matches_filter(
-            &profile,
-            &Some(UserRole::Admin),
-            &None,
-            &None
-        ));
+        let filter = UserFilter {
+            role: Some(UserRole::Admin),
+            country: None,
+            status: None,
+            search_text: None,
+        };
+
+        assert!(!matches_filter(&profile, &Some(filter)));
     }
 
     #[test]
@@ -280,12 +321,14 @@ mod tests {
         let env = Env::default();
         let profile = create_test_profile(&env);
 
-        assert!(matches_filter(
-            &profile,
-            &None,
-            &None,
-            &Some(UserStatus::Active)
-        ));
+        let filter = UserFilter {
+            role: None,
+            country: None,
+            status: Some(UserStatus::Active),
+            search_text: None,
+        };
+
+        assert!(matches_filter(&profile, &Some(filter)));
     }
 
     #[test]
@@ -293,11 +336,77 @@ mod tests {
         let env = Env::default();
         let profile = create_test_profile(&env);
 
-        assert!(matches_filter(
-            &profile,
-            &Some(UserRole::Student),
-            &None, // Country filter is deprecated but kept for compatibility
-            &Some(UserStatus::Active)
-        ));
+        let filter = UserFilter {
+            role: Some(UserRole::Student),
+            country: Some(String::from_str(&env, "United States")),
+            status: Some(UserStatus::Active),
+            search_text: None,
+        };
+
+        assert!(matches_filter(&profile, &Some(filter)));
+    }
+
+    #[test]
+    fn test_matches_filter_text_search_exact_name() {
+        let env = Env::default();
+        let profile = create_test_profile(&env);
+
+        // Search for exact full name - should match
+        let filter = UserFilter {
+            role: None,
+            country: None,
+            status: None,
+            search_text: Some(String::from_str(&env, "John Doe")),
+        };
+
+        assert!(matches_filter(&profile, &Some(filter)));
+    }
+
+    #[test]
+    fn test_matches_filter_text_search_exact_profession() {
+        let env = Env::default();
+        let profile = create_test_profile(&env);
+
+        // Search for exact profession - should match
+        let filter = UserFilter {
+            role: None,
+            country: None,
+            status: None,
+            search_text: Some(String::from_str(&env, "Software Engineer")),
+        };
+
+        assert!(matches_filter(&profile, &Some(filter)));
+    }
+
+    #[test]
+    fn test_matches_filter_text_search_partial_no_match() {
+        let env = Env::default();
+        let profile = create_test_profile(&env);
+
+        // Search for partial name - should NOT match (only exact match supported)
+        let filter = UserFilter {
+            role: None,
+            country: None,
+            status: None,
+            search_text: Some(String::from_str(&env, "John")),
+        };
+
+        assert!(!matches_filter(&profile, &Some(filter)));
+    }
+
+    #[test]
+    fn test_matches_filter_text_search_no_match() {
+        let env = Env::default();
+        let profile = create_test_profile(&env);
+
+        // Search for "Python" - should not match
+        let filter = UserFilter {
+            role: None,
+            country: None,
+            status: None,
+            search_text: Some(String::from_str(&env, "Python")),
+        };
+
+        assert!(!matches_filter(&profile, &Some(filter)));
     }
 }
