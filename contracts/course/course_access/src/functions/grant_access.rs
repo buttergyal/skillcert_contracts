@@ -69,5 +69,5 @@ pub fn course_access_grant_access(env: Env, course_id: String, user: Address) {
         env.storage().persistent().extend_ttl(&course_users_key, 100, 1000);
     }
     env.events()
-        .publish((COURSE_ACCESS_EVENT, &user), (course_id, user, course_users.users.len(),));
+        .publish((COURSE_ACCESS_EVENT, &user.clone()), (course_id, user, course_users.users.len(),));
 }
