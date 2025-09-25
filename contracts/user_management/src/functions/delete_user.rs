@@ -27,7 +27,7 @@ const EVT_USER_DEACTIVATED: Symbol = symbol_short!("usr_deact");
 ///
 /// # Events
 /// Emits a user deactivation event upon successful deletion
-pub fn delete_user(env: Env, caller: Address, user_id: Address) -> () {
+pub fn delete_user(env: Env, caller: Address, user_id: Address) {
     // Require authentication for the caller
     caller.require_auth();
 
@@ -122,19 +122,12 @@ mod tests {
     fn create_test_user(env: &Env, contract_id: &Address, user: &Address) -> UserProfile {
         // Create user profile directly in storage for testing
         let user_profile = UserProfile {
-            address: user.clone(),
-            name: String::from_str(env, "Test"),
-            lastname: String::from_str(env, "User"),
-            email: String::from_str(env, "test@example.com"),
-            password_hash: String::from_str(env, "hashed_password"),
-            specialization: String::from_str(env, "Software Tester"),
-            languages: soroban_sdk::Vec::new(env),
-            teaching_categories: soroban_sdk::Vec::new(env),
-            role: UserRole::Student,
-            status: UserStatus::Active,
-            country: String::from_str(env, "United States"),
-            created_at: 0,
-            updated_at: 0,
+            full_name: String::from_str(env, "Test User"),
+            contact_email: String::from_str(env, "test@example.com"),
+            profession: Some(String::from_str(env, "Software Tester")),
+            country: Some(String::from_str(env, "United States")),
+            purpose: Some(String::from_str(env, "Learn testing methodologies")),
+            profile_picture_url: None,
         };
 
         let light_profile = LightProfile {
@@ -206,8 +199,7 @@ mod tests {
                 .expect("Full profile should still exist");
 
             // Profile should still exist with the same data
-            assert_eq!(full_profile.name, String::from_str(&env, "Test"));
-            assert_eq!(full_profile.lastname, String::from_str(&env, "User"));
+            assert_eq!(full_profile.full_name, String::from_str(&env, "Test User"));
         });
     }
 

@@ -10,6 +10,7 @@ const COURSE_KEY: Symbol = symbol_short!("course");
 const TITLE_KEY: Symbol = symbol_short!("title");
 const COURSE_ID: Symbol = symbol_short!("course");
 
+#[allow(clippy::too_many_arguments)]
 pub fn create_course(
     env: Env,
     creator: Address,
@@ -29,7 +30,7 @@ pub fn create_course(
     if title.is_empty() || trimmed_title.is_empty() {
         handle_error(&env, Error::EmptyCourseTitle);
     }
-    
+
     // Additional title validation
     if title.len() > 200 {
         handle_error(&env, Error::InvalidTitleLength);
@@ -44,28 +45,29 @@ pub fn create_course(
     if price == 0 {
         handle_error(&env, Error::InvalidPrice);
     }
-    
+
     // Validate optional parameters
     if let Some(ref cat) = category {
         if cat.is_empty() || cat.len() > 100 {
             handle_error(&env, Error::EmptyCategory);
         }
     }
-    
+
     if let Some(ref lang) = language {
         if lang.is_empty() || lang.len() > 50 {
             handle_error(&env, Error::InvalidLanguageLength);
         }
     }
-    
+
     if let Some(ref url) = thumbnail_url {
         if url.is_empty() || url.len() > 500 {
             handle_error(&env, Error::InvalidThumbnailUrlLength);
         }
     }
-    
+
     if let Some(duration) = duration_hours {
-        if duration == 0 || duration > 8760 { // 8760 hours = 1 year, reasonable maximum
+        if duration == 0 || duration > 8760 {
+            // 8760 hours = 1 year, reasonable maximum
             handle_error(&env, Error::InvalidDurationValue);
         }
     }

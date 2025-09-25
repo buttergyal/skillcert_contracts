@@ -7,7 +7,7 @@ use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
 const GOAL_REMOVED_EVENT: Symbol = symbol_short!("goalrem");
 
-pub fn remove_goal(env: Env, caller: Address, course_id: String, goal_id: String) -> () {
+pub fn remove_goal(env: Env, caller: Address, course_id: String, goal_id: String) {
     caller.require_auth();
 
     // Validate input
