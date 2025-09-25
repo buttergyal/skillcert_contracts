@@ -6,7 +6,7 @@ use soroban_sdk::{Address, Env, String, Vec, Symbol, symbol_short};
 use crate::schema::{CourseAccess, DataKey, UserCourses, CourseUsers};
 use crate::error::{Error, handle_error};
 
-const COURSE_ACCESS_EVENT: Symbol = symbol_short!("crsaccess");
+const COURSE_ACCESS_EVENT: Symbol = symbol_short!("crsAccess");
 
 /// Grant access to a specific user for a given course
 pub fn course_access_grant_access(env: Env, course_id: String, user: Address) {

@@ -1,12 +1,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use soroban_sdk::{Address, Env, Vec, Symbol, symbol_short};
+
 use crate::error::{handle_error, Error};
 use crate::schema::{
     AdminConfig, DataKey, ABSOLUTE_MAX_PAGE_SIZE, DEFAULT_MAX_PAGE_SIZE, MAX_ADMINS,
 };
 use core::iter::Iterator;
-use soroban_sdk::{Address, Env, Vec};
+
+const INIT_SYSTEM_EVENT: Symbol = symbol_short!("initSys");
+const ADD_ADMIN_EVENT: Symbol = symbol_short!("addAdmin");
+const REMOVE_ADMIN_EVENT: Symbol = symbol_short!("rmvAdmin");
 
 /// Initialize the admin system - can only be called once
 pub fn initialize_system(
@@ -29,7 +34,7 @@ pub fn initialize_system(
     }
 
     // Validate max_page_size
-    let validated_max_page_size = match max_page_size {
+    let validated_max_page_size: u32 = match max_page_size {
         Some(size) => {
             if size == 0 || size > ABSOLUTE_MAX_PAGE_SIZE {
                 handle_error(&env, Error::InvalidMaxPageSize)
@@ -40,9 +45,9 @@ pub fn initialize_system(
         None => DEFAULT_MAX_PAGE_SIZE, // Default
     };
 
-    let config = AdminConfig {
+    let config: AdminConfig = AdminConfig {
         initialized: true,
-        super_admin,
+        super_admin: super_admin.clone(),
         max_page_size: validated_max_page_size,
         total_user_count: 0,
     };
@@ -58,6 +63,9 @@ pub fn initialize_system(
         .persistent()
         .set(&DataKey::Admins, &empty_admins);
 
+    env.events()
+        .publish((INIT_SYSTEM_EVENT,), (initializer, super_admin, max_page_size));
+
     config
 }
 
@@ -65,7 +73,7 @@ pub fn initialize_system(
 pub fn add_admin(env: Env, caller: Address, new_admin: Address) {
     caller.require_auth();
 
-    let config = env
+    let config: AdminConfig = env
         .storage()
         .persistent()
         .get::<DataKey, AdminConfig>(&DataKey::AdminConfig)
@@ -101,15 +109,18 @@ pub fn add_admin(env: Env, caller: Address, new_admin: Address) {
         handle_error(&env, Error::MaxAdminsReached)
     }
 
-    admins.push_back(new_admin);
+    admins.push_back(new_admin.clone());
     env.storage().persistent().set(&DataKey::Admins, &admins);
+
+    env.events()
+        .publish((ADD_ADMIN_EVENT,), (caller, new_admin));
 }
 
 /// Remove an admin (super admin only)
 pub fn remove_admin(env: Env, caller: Address, admin_to_remove: Address) {
     caller.require_auth();
 
-    let config = env
+    let config: AdminConfig = env
         .storage()
         .persistent()
         .get::<DataKey, AdminConfig>(&DataKey::AdminConfig)
@@ -136,8 +147,8 @@ pub fn remove_admin(env: Env, caller: Address, admin_to_remove: Address) {
         .unwrap_or_else(|| Vec::new(&env));
 
     // Find and remove the admin
-    let initial_len = admins.len();
-    let mut new_admins = Vec::new(&env);
+    let initial_len: u32 = admins.len();
+    let mut new_admins: Vec<Address> = Vec::new(&env);
 
     for admin in admins.iter() {
         if admin != admin_to_remove {
@@ -152,13 +163,16 @@ pub fn remove_admin(env: Env, caller: Address, admin_to_remove: Address) {
     env.storage()
         .persistent()
         .set(&DataKey::Admins, &new_admins);
+
+    env.events()
+        .publish((REMOVE_ADMIN_EVENT,), (caller, admin_to_remove));
 }
 
 /// Get list of all admins (admin only)
 pub fn get_admins(env: Env, caller: Address) -> Vec<Address> {
     caller.require_auth();
 
-    let config = env
+    let config: AdminConfig = env
         .storage()
         .persistent()
         .get::<DataKey, AdminConfig>(&DataKey::AdminConfig)
@@ -169,7 +183,7 @@ pub fn get_admins(env: Env, caller: Address) -> Vec<Address> {
     }
 
     // Check if caller is an admin (including super admin)
-    let is_super_admin = caller == config.super_admin;
+    let is_super_admin: bool = caller == config.super_admin;
     let regular_admins: Vec<Address> = env
         .storage()
         .persistent()
@@ -182,7 +196,7 @@ pub fn get_admins(env: Env, caller: Address) -> Vec<Address> {
     }
 
     // Return all admins including super admin
-    let mut all_admins = Vec::new(&env);
+    let mut all_admins: Vec<Address> = Vec::new(&env);
     all_admins.push_back(config.super_admin);
 
     for admin in regular_admins.iter() {

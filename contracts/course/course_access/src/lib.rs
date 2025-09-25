@@ -106,7 +106,7 @@ impl CourseAccessContract {
         goals: Option<String>,
         country: String,
     ) {
-        let user = env.current_contract_address();
+        let user: Address = env.current_contract_address();
         functions::save_profile::save_user_profile(env, name, email, profession, goals, country, user);
     }
 

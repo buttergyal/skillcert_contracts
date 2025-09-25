@@ -1,14 +1,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use super::utils::{concat_strings, to_lowercase, u32_to_string};
+use soroban_sdk::{symbol_short, vec, Address, Env, String, Symbol, Vec};
+
 use crate::error::{handle_error, Error};
 use crate::schema::{Course, CourseModule};
-use soroban_sdk::{symbol_short, vec, Address, Env, String, Symbol, Vec};
+use super::utils::{concat_strings, to_lowercase, u32_to_string};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const MODULE_KEY: Symbol = symbol_short!("module");
 const TITLE_KEY: Symbol = symbol_short!("title");
+
+const DELETE_COURSE_EVENT: Symbol = symbol_short!("delCourse");
 
 pub fn delete_course(env: &Env, creator: Address, course_id: String) -> Result<(), &'static str> {
     creator.require_auth();
@@ -17,7 +20,7 @@ pub fn delete_course(env: &Env, creator: Address, course_id: String) -> Result<(
         handle_error(&env, Error::EmptyCourseId)
     }
 
-    let course_storage_key = (COURSE_KEY, course_id.clone());
+    let course_storage_key: (Symbol, String) = (COURSE_KEY, course_id.clone());
 
     if !env.storage().persistent().has(&course_storage_key) {
         handle_error(&env, Error::CourseNotFound)
@@ -35,12 +38,15 @@ pub fn delete_course(env: &Env, creator: Address, course_id: String) -> Result<(
 
     delete_course_modules(env, &course_id);
 
-    let lowercase_title = to_lowercase(env, &course.title);
+    let lowercase_title: String = to_lowercase(env, &course.title);
 
-    let title_key = (TITLE_KEY, lowercase_title);
+    let title_key: (Symbol, String) = (TITLE_KEY, lowercase_title);
     env.storage().persistent().remove(&title_key);
     env.storage().persistent().remove(&course_storage_key);
-    env.events().publish((course_id,), "course_deleted");
+
+    // emit an event
+    env.events()
+        .publish((DELETE_COURSE_EVENT,), (creator, course_id));
 
     Ok(())
 }

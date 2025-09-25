@@ -6,7 +6,7 @@ use soroban_sdk::{Address, Env, String, Symbol, symbol_short};
 use crate::schema::{DataKey, UserCourses, CourseUsers};
 use crate::error::{Error, handle_error};
 
-const COURSE_ACCESS_REVOKE_EVENT: Symbol = symbol_short!("crs_a_rvk");
+const COURSE_ACCESS_REVOKE_EVENT: Symbol = symbol_short!("crsAcRvk");
 
 /// Revoke access for a specific user from a course
 pub fn course_access_revoke_access(env: Env, course_id: String, user: Address) -> bool {

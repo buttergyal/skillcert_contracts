@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use soroban_sdk::{symbol_short, vec, Address, Env, String, Symbol};
+use soroban_sdk::{symbol_short, Vec, vec, Address, Env, String, Symbol};
 
 use super::utils::{concat_strings, u32_to_string};
 use crate::error::{handle_error, Error};
@@ -9,6 +9,8 @@ pub use crate::schema::{Course, CourseModule};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const MODULE_KEY: Symbol = symbol_short!("module");
+
+const COURSE_REGISTRY_ADD_MODULE_EVENT: Symbol = symbol_short!("crsAddMod");
 
 pub fn course_registry_add_module(
     env: Env,
@@ -57,7 +59,7 @@ pub fn course_registry_add_module(
 
     let ledger_seq: u32 = env.ledger().sequence();
 
-    let arr = vec![
+    let arr: Vec<String> = vec![
         &env,
         String::from_str(&env, "module_"),
         course_id.clone(),
@@ -67,14 +69,14 @@ pub fn course_registry_add_module(
         u32_to_string(&env, ledger_seq),
     ];
 
-    let module_id = concat_strings(&env, arr);
+    let module_id: String = concat_strings(&env, arr);
 
     // Create new module
     let module: CourseModule = CourseModule {
         id: module_id.clone(),
         course_id: course_id.clone(),
         position,
-        title,
+        title: title.clone(),
         created_at: env.ledger().timestamp(),
     };
 
@@ -83,6 +85,10 @@ pub fn course_registry_add_module(
 
     env.storage().persistent().set(&storage_key, &module);
     env.storage().persistent().set(&position_key, &true);
+
+    // emit an event
+    env.events()
+        .publish((COURSE_REGISTRY_ADD_MODULE_EVENT,), (caller, course_id, position, title));
 
     module
 }

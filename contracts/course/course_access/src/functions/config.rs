@@ -2,11 +2,12 @@
 // Copyright (c) 2025 SkillCert
 
 use soroban_sdk::{Address, Env, Symbol, symbol_short};
+use soroban_sdk::storage::Instance;
 
 use crate::schema::{KEY_COURSE_REG_ADDR, KEY_USER_MGMT_ADDR};
 
-const INIT_EVENT: Symbol = symbol_short!("initial");
-const UPDATE_ADDRESS_EVENT: Symbol = symbol_short!("upd_addr");
+const INIT_EVENT: Symbol = symbol_short!("initialz");
+const UPDATE_ADDRESS_EVENT: Symbol = symbol_short!("updAddr");
 
 /// Storage key for initialization flag
 const KEY_INIT: &str = "init";
@@ -102,7 +103,7 @@ pub fn set_contract_addrs(
         panic!("only owner");
     }
 
-    let inst = env.storage().instance();
+    let inst: Instance = env.storage().instance();
     inst.set(&(KEY_USER_MGMT_ADDR,), &user_mgmt_addr);
     inst.set(&(KEY_COURSE_REG_ADDR,), &course_registry_addr);
     env.events()

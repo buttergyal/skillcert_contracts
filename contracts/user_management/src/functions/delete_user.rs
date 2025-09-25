@@ -7,7 +7,7 @@ use core::iter::Iterator;
 use soroban_sdk::{symbol_short, Address, Env, Symbol};
 
 // Event symbol for user deactivation
-const EVT_USER_DEACTIVATED: Symbol = symbol_short!("usr_deact");
+const USER_DEACTIVATED_EVENT: Symbol = symbol_short!("usrDeact");
 
 /// Delete (deactivate) a user account
 ///
@@ -69,7 +69,7 @@ pub fn delete_user(env: Env, caller: Address, user_id: Address) -> () {
 
     // Emits a user deactivation event upon successful deletion.
     env.events()
-        .publish((EVT_USER_DEACTIVATED, &caller), user_id.clone());
+        .publish((USER_DEACTIVATED_EVENT, &caller), user_id.clone());
 }
 
 /// Check if the caller is an admin

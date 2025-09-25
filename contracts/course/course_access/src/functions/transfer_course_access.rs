@@ -55,7 +55,7 @@ pub fn transfer_course_access(env: Env, course_id: String, from: Address, to: Ad
         1000,
     );
 
-    //emit an event
+    // emit an event
     env.events()
         .publish((COURSE_TRANSFER_EVENT,), (course_id, from, to));
 }

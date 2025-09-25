@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use soroban_sdk::{Address, Env, String, Vec};
+
 use crate::error::{handle_error, Error};
 use crate::schema::{AdminConfig, DataKey, LightProfile, UserRole, UserStatus};
 use core::iter::Iterator;
-use soroban_sdk::{Address, Env, String, Vec};
 
 /// Security constants
 const MAX_PAGE_SIZE_ABSOLUTE: u32 = 1000;
@@ -43,7 +44,7 @@ pub fn list_all_users(
     }
 
     // Get admin configuration
-    let config = get_admin_config(&env);
+    let config: AdminConfig = get_admin_config(&env);
 
     // Authorization: only admins can call
     if !is_admin(&env, &caller) {
@@ -56,7 +57,7 @@ pub fn list_all_users(
     }
 
     // Additional bounds checking for page parameter
-    let max_safe_page = u32::MAX / page_size.max(1) - 1; // Prevent overflow
+    let max_safe_page: u32 = u32::MAX / page_size.max(1) - 1; // Prevent overflow
     if page > max_safe_page {
         handle_error(&env, Error::PageParamTooLarge);
     }
@@ -97,9 +98,9 @@ pub fn list_all_users(
     }
 
     // Compute pagination window safely for filtered results
-    let start = {
-        let s = (page as u64).saturating_mul(page_size as u64);
-        let s = if s > u32::MAX as u64 {
+    let start: u32 = {
+        let s: u64 = (page as u64).saturating_mul(page_size as u64);
+        let s: u32 = if s > u32::MAX as u64 {
             u32::MAX
         } else {
             s as u32
@@ -107,9 +108,9 @@ pub fn list_all_users(
         s.min(total_filtered)
     };
 
-    let end = {
-        let e = (start as u64).saturating_add(page_size as u64);
-        let e = if e > u32::MAX as u64 {
+    let end: u32 = {
+        let e: u64 = (start as u64).saturating_add(page_size as u64);
+        let e: u32 = if e > u32::MAX as u64 {
             u32::MAX
         } else {
             e as u32
@@ -118,8 +119,8 @@ pub fn list_all_users(
     };
 
     // Build paginated result from filtered profiles
-    let mut result = Vec::new(&env);
-    let mut i = start;
+    let mut result: Vec<LightProfile> = Vec::new(&env);
+    let mut i: u32 = start;
     while i < end {
         if let Some(profile) = filtered_profiles.get(i) {
             result.push_back(profile);
@@ -158,7 +159,7 @@ fn is_admin(env: &Env, who: &Address) -> bool {
         return false;
     }
 
-    let config = get_admin_config(env);
+    let config: AdminConfig = get_admin_config(env);
 
     // Check if caller is the super admin
     if &config.super_admin == who {
@@ -211,7 +212,7 @@ fn validate_input(
     config: &AdminConfig,
 ) -> Result<(), &'static str> {
     // Validate page_size
-    let max_allowed = config.max_page_size.min(MAX_PAGE_SIZE_ABSOLUTE);
+    let max_allowed: u32 = config.max_page_size.min(MAX_PAGE_SIZE_ABSOLUTE);
     if page_size == 0 {
         return Err("page_size must be greater than 0");
     }

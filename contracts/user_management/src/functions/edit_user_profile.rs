@@ -7,7 +7,7 @@ use crate::schema::{DataKey, LightProfile, ProfileUpdateParams, UserProfile};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
 // Event symbol for user profile update
-const EVT_USER_UPDATED: Symbol = symbol_short!("usr_updt");
+const USER_UPDATED_EVENT: Symbol = symbol_short!("usrUpdt");
 
 // Security constants for profile validation (matching create_user_profile)
 const MAX_NAME_LENGTH: usize = 100;
@@ -71,7 +71,7 @@ pub fn edit_user_profile(
     caller.require_auth();
 
     // Check if user profile exists
-    let storage_key = DataKey::UserProfile(user_id.clone());
+    let storage_key: DataKey = DataKey::UserProfile(user_id.clone());
     let mut profile: UserProfile = env
         .storage()
         .persistent()
@@ -84,7 +84,7 @@ pub fn edit_user_profile(
     }
 
     // Check if user is active by looking at light profile
-    let light_storage_key = DataKey::UserProfileLight(user_id.clone());
+    let light_storage_key: DataKey = DataKey::UserProfileLight(user_id.clone());
     let light_profile: LightProfile = env
         .storage()
         .persistent()
@@ -132,7 +132,7 @@ pub fn edit_user_profile(
     env.storage().persistent().set(&storage_key, &profile);
 
     // Update the light profile with new data
-    let updated_light_profile = LightProfile {
+    let updated_light_profile: LightProfile = LightProfile {
         full_name: profile.full_name.clone(),
         profession: profile.profession.clone(),
         country: profile.country.clone(),
@@ -147,7 +147,7 @@ pub fn edit_user_profile(
 
     // Emit user update event
     env.events()
-        .publish((EVT_USER_UPDATED, &user_id), user_id.clone());
+        .publish((USER_UPDATED_EVENT, &user_id), user_id.clone());
 
     profile
 }

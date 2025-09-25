@@ -3,7 +3,7 @@
 
 use super::utils::u32_to_string;
 use crate::schema::Course;
-use soroban_sdk::{symbol_short, Address, Env, Symbol, Vec};
+use soroban_sdk::{symbol_short, Address, Env, Symbol, Vec, String};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 
@@ -12,8 +12,8 @@ pub fn get_courses_by_instructor(env: &Env, instructor: Address) -> Vec<Course> 
     let mut id: u128 = 1;
 
     loop {
-        let course_id = u32_to_string(env, id as u32);
-        let key = (COURSE_KEY, course_id.clone());
+        let course_id: String = u32_to_string(env, id as u32);
+        let key: (Symbol, String) = (COURSE_KEY, course_id.clone());
 
         if !env.storage().persistent().has(&key) {
             break;

@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use soroban_sdk::{symbol_short, Address, Env, Map, String, Symbol, Vec};
+
 use crate::error::{handle_error, Error};
 use crate::schema::{Course, DataKey};
-use soroban_sdk::{symbol_short, Address, Env, Map, String, Symbol, Vec};
+
+const COURSE_KEY: Symbol = symbol_short!("course");
 
 const PREREQ_CREATED_EVENT: Symbol = symbol_short!("prereqAdd");
 
@@ -45,7 +48,7 @@ pub fn add_prerequisite(env: Env, creator: Address, course_id: String, prerequis
         }
     }
 
-    let course_key: (Symbol, String) = (symbol_short!("course"), course_id.clone());
+    let course_key: (Symbol, String) = (COURSE_KEY, course_id.clone());
     let course: Course = env
         .storage()
         .persistent()
@@ -58,7 +61,7 @@ pub fn add_prerequisite(env: Env, creator: Address, course_id: String, prerequis
 
     for prerequisite_id in prerequisites.iter() {
         let prereq_course_key: (Symbol, String) =
-            (symbol_short!("course"), prerequisite_id.clone());
+            (COURSE_KEY, prerequisite_id.clone());
         if !env.storage().persistent().has(&prereq_course_key) {
             handle_error(&env, Error::PrereqCourseNotFound)
         }

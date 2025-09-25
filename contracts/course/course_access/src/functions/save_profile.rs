@@ -6,7 +6,7 @@ use soroban_sdk::{Address, Env, String, Symbol, symbol_short};
 use crate::error::{handle_error, Error};
 use crate::schema::{DataKey, UserProfile};
 
-const SAVE_USER_PROFILE_EVENT: Symbol = symbol_short!("sv_u_prfl");
+const SAVE_USER_PROFILE_EVENT: Symbol = symbol_short!("saveUsPrl");
 
 /// Save or update a user's profile information on-chain.
 ///

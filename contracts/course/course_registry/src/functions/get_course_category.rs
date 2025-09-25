@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use crate::schema::{CourseCategory, DataKey};
 use soroban_sdk::Env;
+use crate::schema::{CourseCategory, DataKey};
 
 /// Retrieves a course category by its ID.
 ///

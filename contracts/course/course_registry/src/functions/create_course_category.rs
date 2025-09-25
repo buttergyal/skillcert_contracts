@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use soroban_sdk::{Address, Env, String, Vec, Symbol, symbol_short};
+
 use crate::error::{handle_error, Error};
 use crate::schema::{CourseCategory, DataKey};
-use soroban_sdk::{Address, Env, String, Vec};
+
+const CREATE_COURSE_CATEGORY_EVENT: Symbol = symbol_short!("crtCrsCat");
+const NEXT_CATEGORY_ID_EVENT: Symbol = symbol_short!("nxtCatId");
 
 /// Creates a new course category (admin-only).
 ///
@@ -27,7 +31,7 @@ pub fn create_course_category(
 ) -> u128 {
     // Authentication and authorization
     caller.require_auth();
-    if !is_admin(&env, caller) {
+    if !is_admin(&env, caller.clone()) {
         handle_error(&env, Error::Unauthorized)
     }
 
@@ -49,17 +53,21 @@ pub fn create_course_category(
     }
 
     // Generate a new category ID
-    let id = next_category_id(&env);
+    let id: u128 = next_category_id(&env);
 
     // Build and persist the category
-    let category = CourseCategory {
+    let category: CourseCategory = CourseCategory {
         id,
-        name,
-        description,
+        name: name.clone(),
+        description: description.clone(),
     };
     env.storage()
         .persistent()
         .set(&DataKey::CourseCategory(id), &category);
+
+    // emit an event
+    env.events()
+        .publish((CREATE_COURSE_CATEGORY_EVENT,), (caller, name, description, id));
 
     // Return the new ID
     id
@@ -87,5 +95,10 @@ fn next_category_id(env: &Env) -> u128 {
         .unwrap_or(0u128);
     seq = seq.saturating_add(1);
     env.storage().persistent().set(&DataKey::CategorySeq, &seq);
+
+    // emit an event
+    env.events()
+        .publish((NEXT_CATEGORY_ID_EVENT,), seq);
+
     seq
 }

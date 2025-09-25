@@ -6,8 +6,10 @@ use soroban_sdk::{symbol_short, Address, Env, String, Symbol, IntoVal};
 use crate::error::{handle_error, Error};
 use crate::schema::Course;
 
-const INIT_ACCESS_CONTROL_EVENT: Symbol = symbol_short!("init_a_cl");
-const UPDATE_USER_MNGMT_EVENT: Symbol = symbol_short!("up_usr_mg");
+const COURSE_KEY: Symbol = symbol_short!("course");
+
+const INIT_ACCESS_CONTROL_EVENT: Symbol = symbol_short!("initAcCtr");
+const UPDATE_USER_MNGMT_EVENT: Symbol = symbol_short!("upUsrMgt");
 
 const KEY_USER_MGMT_ADDR: &str = "user_mgmt_addr";
 const KEY_OWNER: &str = "owner";
@@ -35,7 +37,7 @@ pub fn is_admin(env: &Env, who: &Address) -> bool {
 
 /// Check if a user is the creator of a specific course
 pub fn is_course_creator(env: &Env, course_id: &String, who: &Address) -> bool {
-    let key: (Symbol, String) = (symbol_short!("course"), course_id.clone());
+    let key: (Symbol, String) = (COURSE_KEY, course_id.clone());
     
     match env.storage().persistent().get::<_, Course>(&key) {
         Some(course) => course.creator == *who,

@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use soroban_sdk::{Env, String, Vec, Symbol, symbol_short};
+use soroban_sdk::{Env, String, Vec};
 
 use crate::schema::{CourseUsers, DataKey};
 use crate::error::{Error, handle_error};
-
-const COURSE_ACCESS_LIST_EVENT: Symbol = symbol_short!("crs_lst_a");
 
 pub fn course_access_list_course_access(env: Env, course_id: String) -> CourseUsers {
     // Validate input parameters
@@ -28,8 +26,6 @@ pub fn course_access_list_course_access(env: Env, course_id: String) -> CourseUs
             course: course_id.clone(),
             users: Vec::new(&env),
         });
-    env.events()
-        .publish((COURSE_ACCESS_LIST_EVENT,), course_id);
 
     return res
 }

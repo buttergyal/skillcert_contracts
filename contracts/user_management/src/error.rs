@@ -32,6 +32,7 @@ pub enum Error {
     PageParamTooLarge = 23,
     InvalidInput = 24,
     PasswordMismatch = 25,
+    Unauthorized = 26
 }
 
 pub fn handle_error(env: &Env, error: Error) -> ! {

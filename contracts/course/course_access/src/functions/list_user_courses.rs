@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
-use soroban_sdk::{Address, Env, Vec, Symbol, symbol_short};
+use soroban_sdk::{Address, Env, Vec};
 use crate::schema::{DataKey, UserCourses};
-
-const LIST_USER_COURSES_EVENT: Symbol = symbol_short!("lst_u_crs");
 
 /// List all courses that a specific user has access to.
 ///
@@ -27,8 +25,7 @@ pub fn list_user_courses(env: Env, user: Address) -> UserCourses {
         user: user.clone(),
         courses: Vec::new(&env),
     });
-    env.events()
-        .publish((LIST_USER_COURSES_EVENT,), user);
+
     return res
 }
 

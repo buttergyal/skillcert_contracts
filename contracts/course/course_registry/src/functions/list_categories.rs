@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use super::utils::u32_to_string;
-use crate::schema::{Category, Course};
 use soroban_sdk::{symbol_short, Env, Map, String, Symbol, Vec};
+use crate::schema::{Category, Course};
+use super::utils::u32_to_string;
 
 const COURSE_KEY: Symbol = symbol_short!("course");
-const COURSE_ID_COUNTER: Symbol = symbol_short!("course");
 
 /// Lists all unique course categories and counts how many courses belong to each category.
 ///
@@ -31,14 +30,14 @@ pub fn list_categories(env: &Env) -> Vec<Category> {
     let max_id: u128 = env
         .storage()
         .persistent()
-        .get(&COURSE_ID_COUNTER)
+        .get(&COURSE_KEY)
         .unwrap_or(0);
 
     // Iterate over all possible course IDs from 1 to max_id
     let mut id: u128 = 1;
     while id <= max_id {
-        let course_id = u32_to_string(env, id as u32);
-        let key = (COURSE_KEY, course_id);
+        let course_id: String = u32_to_string(env, id as u32);
+        let key: (Symbol, String) = (COURSE_KEY, course_id);
 
         // Check if a course with this ID exists
         if env.storage().persistent().has(&key) {
@@ -46,8 +45,8 @@ pub fn list_categories(env: &Env) -> Vec<Category> {
             if let Some(course) = env.storage().persistent().get::<_, Course>(&key) {
                 // Only count courses that have a category set
                 if let Some(cat) = course.category {
-                    let name = cat;
-                    let current = categories_map.get(name.clone()).unwrap_or(0);
+                    let name: String = cat;
+                    let current: u128 = categories_map.get(name.clone()).unwrap_or(0);
                     categories_map.set(name, current + 1);
                 }
             }
@@ -57,8 +56,8 @@ pub fn list_categories(env: &Env) -> Vec<Category> {
     }
 
     // Convert the map (name -> count) into a Vec<Category> for the final output
-    let mut out = Vec::new(env);
-    let keys = categories_map.keys();
+    let mut out: Vec<Category> = Vec::new(env);
+    let keys: Vec<String> = categories_map.keys();
     for k in keys.iter() {
         let count = categories_map.get(k.clone()).unwrap_or(0);
         out.push_back(Category { name: k, count });
