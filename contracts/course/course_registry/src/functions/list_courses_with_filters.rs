@@ -1,5 +1,5 @@
-use crate::functions::utils::u32_to_string;
 use crate::error::{handle_error, Error};
+use crate::functions::utils::u32_to_string;
 
 use soroban_sdk::{symbol_short, Env, Symbol, Vec, String};
 use crate::schema::{Course, CourseFilters, MAX_EMPTY_CHECKS};
@@ -14,12 +14,14 @@ pub fn list_courses_with_filters(
 ) -> Vec<Course> {
     // Validate pagination parameters to prevent abuse
     if let Some(l) = limit {
-        if l > 100 { // Prevent excessively large limits
+        if l > 100 {
+            // Prevent excessively large limits
             handle_error(env, Error::InvalidInput)
         }
     }
     if let Some(o) = offset {
-        if o > 10000 { // Prevent excessively large offsets
+        if o > 10000 {
+            // Prevent excessively large offsets
             handle_error(env, Error::InvalidInput)
         }
     }
@@ -76,17 +78,17 @@ pub fn list_courses_with_filters(
             && filters
                 .category
                 .as_ref()
-                .map_or(true, |cat| course.category.as_ref() == Some(cat))
+                .is_none_or(|cat| course.category.as_ref() == Some(cat))
             && filters
                 .level
                 .as_ref()
-                .map_or(true, |lvl| course.level.as_ref() == Some(lvl))
-            && filters.min_duration.map_or(true, |min| {
-                course.duration_hours.map_or(false, |d| d >= min)
-            })
-            && filters.max_duration.map_or(true, |max| {
-                course.duration_hours.map_or(false, |d| d <= max)
-            });
+                .is_none_or(|lvl| course.level.as_ref() == Some(lvl))
+            && filters
+                .min_duration
+                .is_none_or(|min| course.duration_hours.is_some_and(|d| d >= min))
+            && filters
+                .max_duration
+                .is_none_or(|max| course.duration_hours.is_some_and(|d| d <= max));
 
         // If course passes all filters
         if passes_filters {

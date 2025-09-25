@@ -33,7 +33,7 @@ pub fn create_course(
     if title.is_empty() || trimmed_title.is_empty() {
         handle_error(&env, Error::EmptyCourseTitle);
     }
-    
+
     // Additional title validation
     if title.len() > 200 {
         handle_error(&env, Error::InvalidInput);
@@ -48,28 +48,29 @@ pub fn create_course(
     if price == 0 {
         handle_error(&env, Error::InvalidPrice);
     }
-    
+
     // Validate optional parameters
     if let Some(ref cat) = category {
         if cat.is_empty() || cat.len() > 100 {
             handle_error(&env, Error::EmptyCategory);
         }
     }
-    
+
     if let Some(ref lang) = language {
         if lang.is_empty() || lang.len() > 50 {
             handle_error(&env, Error::InvalidInput);
         }
     }
-    
+
     if let Some(ref url) = thumbnail_url {
         if url.is_empty() || url.len() > 500 {
             handle_error(&env, Error::InvalidInput);
         }
     }
-    
+
     if let Some(duration) = duration_hours {
-        if duration == 0 || duration > 8760 { // 8760 hours = 1 year, reasonable maximum
+        if duration == 0 || duration > 8760 {
+            // 8760 hours = 1 year, reasonable maximum
             handle_error(&env, Error::InvalidInput);
         }
     }

@@ -12,7 +12,7 @@ pub fn user_profile_get_user_profile(env: &Env, user_address: Address) -> UserPr
     // Input validation
     // If Address type supports is_empty or similar, add check. Otherwise, skip.
     // For demonstration, assume Address cannot be empty.
-    
+
     // Get the user profile from storage with proper error handling
     match env
         .storage()

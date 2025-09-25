@@ -33,7 +33,7 @@ pub fn get_course(env: &Env, course_id: String) -> Course {
         .expect("Course not found");
 
     match course.is_archived {
-        true => handle_error(&env, Error::CourseAlreadyArchived),
+        true => handle_error(env, Error::CourseAlreadyArchived),
         false => course,
     }
 }

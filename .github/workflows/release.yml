@@ -1,0 +1,78 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  release:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Install Rust
+      run: |
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+        source $HOME/.cargo/env
+        
+    - name: Install Rust target for Soroban
+      run: |
+        source $HOME/.cargo/env
+        rustup target add wasm32-unknown-unknown
+        rustup target add wasm32v1-none
+        
+    - name: Install Stellar CLI with Homebrew
+      run: |
+        brew update
+        brew install stellar-cli
+        stellar --version
+    
+    - name: Build optimized contracts
+      run: |
+        source $HOME/.cargo/env
+        
+        # Create release artifacts directory
+        mkdir -p release-artifacts
+        
+        # Build all contracts with optimization
+        for contract in contracts/*/; do
+          if [ -f "$contract/Cargo.toml" ]; then
+            echo "Building optimized contract in $contract"
+            cd "$contract"
+            stellar contract build --verbose
+            # Copy WASM files to release artifacts
+            find target/wasm32-unknown-unknown/release -name "*.wasm" -exec cp {} ../../release-artifacts/ \; 2>/dev/null || true
+            cd ../..
+          fi
+        done
+        
+        # Build contracts in course subdirectory
+        for contract in contracts/course/*/; do
+          if [ -f "$contract/Cargo.toml" ]; then
+            echo "Building optimized contract in $contract"
+            cd "$contract"
+            stellar contract build --verbose
+            # Copy WASM files to release artifacts
+            find target/wasm32-unknown-unknown/release -name "*.wasm" -exec cp {} ../../../release-artifacts/ \; 2>/dev/null || true
+            cd ../../..
+          fi
+        done
+    
+    - name: List release artifacts
+      run: |
+        echo "Release artifacts:"
+        ls -la release-artifacts/
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: release-artifacts/*.wasm
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

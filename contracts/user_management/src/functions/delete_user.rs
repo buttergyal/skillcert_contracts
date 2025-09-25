@@ -27,7 +27,7 @@ const USER_DEACTIVATED_EVENT: Symbol = symbol_short!("usrDeact");
 ///
 /// # Events
 /// Emits a user deactivation event upon successful deletion
-pub fn delete_user(env: Env, caller: Address, user_id: Address) -> () {
+pub fn delete_user(env: Env, caller: Address, user_id: Address) {
     // Require authentication for the caller
     caller.require_auth();
 
@@ -127,6 +127,7 @@ mod tests {
             profession: Some(String::from_str(env, "Software Tester")),
             country: Some(String::from_str(env, "United States")),
             purpose: Some(String::from_str(env, "Learn testing methodologies")),
+            profile_picture_url: None,
         };
 
         let light_profile = LightProfile {

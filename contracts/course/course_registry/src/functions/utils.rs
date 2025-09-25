@@ -11,16 +11,16 @@ pub fn generate_unique_id(env: &Env) -> String {
 
     let str_vec: Vec<String> = vec![
         &env,
-        u32_to_string(&env, ts as u32),
-        String::from_str(&env, "-"),
-        u32_to_string(&env, rand1 as u32),
-        String::from_str(&env, "-"),
-        u32_to_string(&env, rand1 as u32),
-        String::from_str(&env, "-"),
-        u32_to_string(&env, rand2 as u32),
-        String::from_str(&env, "-"),
-        u32_to_string(&env, rand2 as u32),
-        String::from_str(&env, "-"),
+        u32_to_string(env, ts as u32),
+        String::from_str(env, "-"),
+        u32_to_string(env, rand1 as u32),
+        String::from_str(env, "-"),
+        u32_to_string(env, rand1 as u32),
+        String::from_str(env, "-"),
+        u32_to_string(env, rand2 as u32),
+        String::from_str(env, "-"),
+        u32_to_string(env, rand2 as u32),
+        String::from_str(env, "-"),
     ];
 
     let rust_str: String = concat_strings(&env, str_vec);
@@ -28,9 +28,9 @@ pub fn generate_unique_id(env: &Env) -> String {
 }
 
 pub fn to_lowercase(env: &Env, s: &String) -> String {
-    let len: u32 = s.len() as u32;
-    let mut buffer: [u8; 1024] = [0u8; 1024];
-    let slice: &mut [u8] = &mut buffer[..len as usize];
+    let len: u32 = s.len();
+    let mut buffer = [0u8; 1024];
+    let slice = &mut buffer[..len as usize];
     s.copy_into_slice(slice);
     let mut result_bytes = Bytes::new(env);
 
@@ -45,7 +45,7 @@ pub fn to_lowercase(env: &Env, s: &String) -> String {
     let mut result: [u8; 1024] = [0u8; 1024];
     let new_slice: &mut [u8] = &mut result[..len as usize];
     result_bytes.copy_into_slice(new_slice);
-    String::from_bytes(env, &new_slice)
+    String::from_bytes(env, new_slice)
 }
 
 pub fn u32_to_string(env: &Env, n: u32) -> String {
@@ -71,7 +71,7 @@ pub fn u32_to_string(env: &Env, n: u32) -> String {
     let mut result: [u8; 1024] = [0u8; 1024];
     let new_slice: &mut [u8] = &mut result[..len as usize];
     bytes.copy_into_slice(new_slice);
-    String::from_bytes(env, &new_slice)
+    String::from_bytes(env, new_slice)
 }
 
 pub fn trim(env: &Env, s: &String) -> String {
@@ -119,7 +119,7 @@ pub fn trim(env: &Env, s: &String) -> String {
     let mut result: [u8; 1024] = [0u8; 1024];
     let new_slice: &mut [u8] = &mut result[..(end - start) as usize];
     trimmed_bytes.copy_into_slice(new_slice);
-    String::from_bytes(env, &new_slice)
+    String::from_bytes(env, new_slice)
 }
 
 pub fn concat_strings(env: &Env, strings: Vec<String>) -> String {
@@ -138,7 +138,7 @@ pub fn concat_strings(env: &Env, strings: Vec<String>) -> String {
     let mut result: [u8; 1024] = [0u8; 1024];
     let new_slice: &mut [u8] = &mut result[..total_len as usize];
     result_byte.copy_into_slice(new_slice);
-    String::from_bytes(env, &new_slice)
+    String::from_bytes(env, new_slice)
 }
 
 #[cfg(test)]

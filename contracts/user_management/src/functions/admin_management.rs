@@ -64,7 +64,7 @@ pub fn initialize_system(
         .set(&DataKey::Admins, &empty_admins);
 
     env.events()
-        .publish((INIT_SYSTEM_EVENT,), (initializer, super_admin, max_page_size));
+        .publish((INIT_SYSTEM_EVENT, &initializer), (super_admin, validated_max_page_size));
 
     config
 }
@@ -105,7 +105,7 @@ pub fn add_admin(env: Env, caller: Address, new_admin: Address) {
     }
 
     // Limit number of admins for security
-    if (admins.len() as u32) >= MAX_ADMINS {
+    if admins.len() >= MAX_ADMINS {
         handle_error(&env, Error::MaxAdminsReached)
     }
 
@@ -113,7 +113,7 @@ pub fn add_admin(env: Env, caller: Address, new_admin: Address) {
     env.storage().persistent().set(&DataKey::Admins, &admins);
 
     env.events()
-        .publish((ADD_ADMIN_EVENT,), (caller, new_admin));
+        .publish((ADD_ADMIN_EVENT, &caller), (new_admin, admins.len()));
 }
 
 /// Remove an admin (super admin only)
@@ -165,7 +165,7 @@ pub fn remove_admin(env: Env, caller: Address, admin_to_remove: Address) {
         .set(&DataKey::Admins, &new_admins);
 
     env.events()
-        .publish((REMOVE_ADMIN_EVENT,), (caller, admin_to_remove));
+        .publish((REMOVE_ADMIN_EVENT, &caller), (admin_to_remove, new_admins.len()));
 }
 
 /// Get list of all admins (admin only)

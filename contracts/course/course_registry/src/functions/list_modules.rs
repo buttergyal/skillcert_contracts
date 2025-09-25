@@ -9,8 +9,8 @@ use crate::schema::CourseModule;
 const MODULE_KEY: Symbol = symbol_short!("module");
 
 pub fn course_registry_list_modules(env: &Env, course_id: String) -> CourseModule {
-    if course_id.len() == 0 {
-        handle_error(&env, Error::EmptyCourseId)
+    if course_id.is_empty() {
+        handle_error(env, Error::EmptyCourseId)
     }
 
     // Get the course from storage

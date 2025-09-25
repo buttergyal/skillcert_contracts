@@ -10,7 +10,7 @@ const COURSE_KEY: Symbol = symbol_short!("course");
 
 const GOAL_REMOVED_EVENT: Symbol = symbol_short!("goalRem");
 
-pub fn remove_goal(env: Env, caller: Address, course_id: String, goal_id: String) -> () {
+pub fn remove_goal(env: Env, caller: Address, course_id: String, goal_id: String) {
     caller.require_auth();
 
     // Validate input

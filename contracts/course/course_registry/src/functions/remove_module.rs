@@ -11,8 +11,8 @@ const MODULE_KEY: Symbol = symbol_short!("module");
 const REMOVE_MODULE_EVENT: Symbol = symbol_short!("remModule");
 
 pub fn remove_module(env: &Env, module_id: String) -> Result<(), &'static str> {
-    if module_id.len() == 0 {
-        handle_error(&env, Error::EmptyModuleId)
+    if module_id.is_empty() {
+        handle_error(env, Error::EmptyModuleId)
     }
 
     // Try to get the module data to verify it exists and is a valid CourseModule
@@ -23,7 +23,7 @@ pub fn remove_module(env: &Env, module_id: String) -> Result<(), &'static str> {
 
     // Validate that the module exists and is a valid CourseModule
     if module.is_none() {
-        handle_error(&env, Error::ModuleNotFound)
+        handle_error(env, Error::ModuleNotFound)
     }
 
     // Delete the CourseModule directly from persistent storage using its key.
@@ -61,10 +61,10 @@ mod tests {
     fn setup_test_env() -> (Env, Address, CourseRegistryClient<'static>) {
         let env = Env::default();
         env.mock_all_auths();
-        
+
         // Register mock user management contract
         let user_mgmt_id = env.register(mock_user_management::UserManagement, ());
-        
+
         let contract_id = env.register(CourseRegistry, ());
         let client = CourseRegistryClient::new(&env, &contract_id);
 
@@ -93,7 +93,12 @@ mod tests {
             &None,
             &None,
         );
-        let new_module = client.add_module(&creator, &course.id, &0, &String::from_str(&env, "Module Title"));
+        let new_module = client.add_module(
+            &creator,
+            &course.id,
+            &0,
+            &String::from_str(&env, "Module Title"),
+        );
 
         let exists: bool = env.as_contract(&contract_id, || {
             env.storage()
