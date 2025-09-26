@@ -602,7 +602,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "HostError: Error(Contract, #32)")]
+    #[should_panic(expected = "HostError: Error(Contract, #56)")]
     fn test_edit_prerequisite_duplicate_validation() {
         let env = Env::default();
         env.mock_all_auths();

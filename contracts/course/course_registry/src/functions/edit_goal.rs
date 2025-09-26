@@ -22,10 +22,10 @@ pub fn edit_goal(
     creator.require_auth();
     // Validate input
     if course_id.is_empty() {
-        handle_error(&env, Error::InvalidInput)
+        handle_error(&env, Error::EmptyCourseId)
     }
     if goal_id.is_empty() {
-        handle_error(&env, Error::InvalidInput)
+        handle_error(&env, Error::EmptyGoalId)
     }
     // Validate goal content - prevent empty or whitespace-only content
     if new_content.is_empty() || trim(&env, &new_content).is_empty() {

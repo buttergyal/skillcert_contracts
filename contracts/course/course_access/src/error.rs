@@ -16,7 +16,8 @@ pub enum Error {
     InvalidCourseId = 7,
     InvalidUser = 8,
     EmptyCourseId = 9,
-    InvalidInput = 10,
+    // Removed InvalidInput - replaced with specific validation errors below
+    InvalidTransferData = 10,
     SameUserTransfer = 11,
 }
 
