@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use soroban_sdk::{Address, Env};
+
 use crate::error::{handle_error, Error};
 use crate::schema::{DataKey, UserProfile};
 use core::iter::Iterator;
-use soroban_sdk::{symbol_short, Address, Env, Symbol};
-
-// Optional: event symbol
-const EVT_GET_USER: Symbol = symbol_short!("get_user");
 
 /// Get User by ID
 /// - Only the profile owner or an admin can access it.
@@ -17,7 +15,7 @@ pub fn get_user_by_id(env: Env, requester: Address, user_id: Address) -> UserPro
     requester.require_auth();
 
     // Authorization: allow only if the requester is the same as the user_id or is an admin
-    let allowed = requester == user_id || is_admin(&env, &requester);
+    let allowed: bool = requester == user_id || is_admin(&env, &requester);
     if !allowed {
         handle_error(&env, Error::AccessDenied); // Generic error message
     }
@@ -28,10 +26,6 @@ pub fn get_user_by_id(env: Env, requester: Address, user_id: Address) -> UserPro
         .persistent()
         .get::<DataKey, UserProfile>(&DataKey::UserProfile(user_id.clone()))
         .unwrap_or_else(|| handle_error(&env, Error::AccessDenied)); // Don't disclose if user exists
-
-    // (Optional) Emit a read event
-    env.events()
-        .publish((EVT_GET_USER, &requester), user_id.clone());
 
     profile
 }

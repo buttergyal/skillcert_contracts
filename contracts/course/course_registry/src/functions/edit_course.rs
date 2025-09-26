@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use super::utils::{to_lowercase, trim};
+use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
+
 use crate::error::{handle_error, Error};
 use crate::schema::{Course, EditCourseParams};
-use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
+use super::utils::{to_lowercase, trim};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const TITLE_KEY: Symbol = symbol_short!("title");
 
-const EDIT_COURSE_EVENT: Symbol = symbol_short!("editcours");
+const EDIT_COURSE_EVENT: Symbol = symbol_short!("editCours");
 
 pub fn edit_course(
     env: Env,
@@ -34,18 +35,18 @@ pub fn edit_course(
 
     // --- Title update (validate + uniqueness) ---
 
-    if let Some(t) = params.new_title {
+    if let Some(ref t) = params.new_title {
         // Clone the string to avoid move issues
-        let t_str = t.clone();
-        let t_trim = trim(&env, &t_str);
+        let t_str: String = t.clone();
+        let t_trim: String = trim(&env, &t_str);
 
         if t_trim.is_empty() {
             handle_error(&env, Error::EmptyCourseTitle)
         }
 
         // Only check/rotate title index if it's effectively changing (case-insensitive)
-        let old_title_lc = to_lowercase(&env, &course.title);
-        let new_title_lc = to_lowercase(&env, &t_str);
+        let old_title_lc: String = to_lowercase(&env, &course.title);
+        let new_title_lc: String = to_lowercase(&env, &t_str);
 
         if old_title_lc != new_title_lc {
             // uniqueness index key for the *new* title
@@ -64,8 +65,8 @@ pub fn edit_course(
     }
 
     // --- Description ---
-    if let Some(d) = params.new_description {
-        course.description = d;
+    if let Some(ref d) = params.new_description {
+        course.description = d.clone();
     }
 
     // --- Price (>0) ---
@@ -107,7 +108,7 @@ pub fn edit_course(
 
     // --- Emit event ---
     env.events()
-        .publish((EDIT_COURSE_EVENT, course_id.clone()), course.clone());
+        .publish((EDIT_COURSE_EVENT,), (creator, course_id));
 
     course
 }

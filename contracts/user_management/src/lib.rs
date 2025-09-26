@@ -13,8 +13,8 @@ pub mod schema;
 #[cfg(test)]
 mod test;
 
-use crate::schema::{AdminConfig, LightProfile, PaginatedLightProfiles, PaginationParams, Permission, ProfileUpdateParams, UserProfile, UserRole, UserStatus};
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
+use crate::schema::{AdminConfig, LightProfile, PaginatedLightProfiles, PaginationParams, Permission, ProfileUpdateParams, UserProfile, UserRole, UserStatus};
 
 /// User Management Contract
 ///
