@@ -14,7 +14,7 @@ pub mod schema;
 mod test;
 
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
-use crate::schema::{AdminConfig, LightProfile, PaginatedLightProfiles, PaginationParams, ProfileUpdateParams, UserProfile, UserRole, UserStatus};
+use crate::schema::{AdminConfig, LightProfile, PaginatedLightProfiles, PaginationParams, Permission, ProfileUpdateParams, UserProfile, UserRole, UserStatus};
 
 /// User Management Contract
 ///
@@ -584,5 +584,66 @@ impl UserManagement {
     /// * `String` - Migration status information
     pub fn get_migration_status(env: Env) -> String {
         functions::contract_versioning::get_migration_status(&env)
+    }
+
+    // RBAC Functions
+
+    /// Set a user's role (admin only)
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `caller` - Address performing the call (must have ManageAdmins permission)
+    /// * `user` - Address of the user to assign role to
+    /// * `role` - New role to assign
+    pub fn set_user_role(env: Env, caller: Address, user: Address, role: UserRole) {
+        functions::rbac::set_user_role(env, caller, user, role)
+    }
+
+    /// Check if a user has a specific permission
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `user` - Address of the user to check
+    /// * `permission` - Permission to check for
+    ///
+    /// # Returns
+    /// * `bool` - True if user has the permission
+    pub fn has_permission(env: Env, user: Address, permission: Permission) -> bool {
+        functions::rbac::has_permission(&env, &user, &permission)
+    }
+
+    /// Grant additional permission to a user (admin only)
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `caller` - Address performing the call (must have ManageAdmins permission)
+    /// * `user` - Address of the user to grant permission to
+    /// * `permission` - Permission to grant
+    pub fn grant_user_permission(env: Env, caller: Address, user: Address, permission: Permission) {
+        functions::rbac::grant_user_permission(env, caller, user, permission)
+    }
+
+    /// Revoke permission from a user (admin only)
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `caller` - Address performing the call (must have ManageAdmins permission)
+    /// * `user` - Address of the user to revoke permission from
+    /// * `permission` - Permission to revoke
+    pub fn revoke_user_permission(env: Env, caller: Address, user: Address, permission: Permission) {
+        functions::rbac::revoke_user_permission(env, caller, user, permission)
+    }
+
+    /// Get all permissions for a user
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `caller` - Address performing the call (must be user themselves or have ViewUsers permission)
+    /// * `user` - Address of the user to get permissions for
+    ///
+    /// # Returns
+    /// * `Vec<Permission>` - List of all permissions the user has
+    pub fn get_user_permissions(env: Env, caller: Address, user: Address) -> Vec<Permission> {
+        functions::rbac::get_user_permissions(env, caller, user)
     }
 }
