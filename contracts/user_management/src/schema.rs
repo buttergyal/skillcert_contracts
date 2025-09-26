@@ -66,6 +66,83 @@ pub enum UserRole {
     Instructor,
     /// Platform administrator with elevated privileges
     Admin,
+    /// Super administrator with full system access
+    SuperAdmin,
+    /// Content moderator with course content permissions
+    Moderator,
+    /// Support staff with user assistance permissions
+    Support,
+}
+
+/// Granular permissions for RBAC system.
+///
+/// Defines specific actions that can be granted or denied to users.
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub enum Permission {
+    // User management permissions
+    /// Can view user profiles
+    ViewUsers,
+    /// Can edit user profiles (own or others)
+    EditUsers,
+    /// Can delete/deactivate users
+    DeleteUsers,
+    /// Can create new user accounts
+    CreateUsers,
+    
+    // Course management permissions
+    /// Can view course details
+    ViewCourses,
+    /// Can create new courses
+    CreateCourses,
+    /// Can edit course content
+    EditCourses,
+    /// Can delete courses
+    DeleteCourses,
+    /// Can manage course access (grant/revoke)
+    ManageCourseAccess,
+    
+    // Administrative permissions
+    /// Can manage system configuration
+    ManageSystem,
+    /// Can manage admin roles
+    ManageAdmins,
+    /// Can view system analytics
+    ViewAnalytics,
+    /// Can moderate content
+    ModerateContent,
+    
+    // Support permissions
+    /// Can provide user support
+    ProvideSupport,
+    /// Can view support tickets
+    ViewSupport,
+}
+
+/// Role-based permissions mapping.
+///
+/// Defines which permissions are granted to each role by default.
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct RolePermissions {
+    /// The role this permission set applies to
+    pub role: UserRole,
+    /// List of permissions granted to this role
+    pub permissions: soroban_sdk::Vec<Permission>,
+}
+
+/// User-specific permission overrides.
+///
+/// Allows granting or revoking specific permissions to individual users.
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct UserPermissions {
+    /// The user address
+    pub user: Address,
+    /// Additional permissions granted beyond role defaults
+    pub granted_permissions: soroban_sdk::Vec<Permission>,
+    /// Permissions explicitly revoked from role defaults
+    pub revoked_permissions: soroban_sdk::Vec<Permission>,
 }
 
 /// User account status.
@@ -180,8 +257,14 @@ pub enum DataKey {
     EmailIndex(String),
     /// Key for storing the list of admin addresses
     Admins,
-    /// Key for storing user role assignments
-    UserRoles,
+    /// Key for storing user role assignments: user_address -> UserRole
+    UserRole(Address),
     /// Key for storing administrative configuration
     AdminConfig,
+    /// Key for storing role-based permissions: role -> RolePermissions
+    RolePermissions(UserRole),
+    /// Key for storing user-specific permission overrides: user_address -> UserPermissions
+    UserPermissions(Address),
+    /// Key for storing default role permissions configuration
+    DefaultRolePermissions,
 }
