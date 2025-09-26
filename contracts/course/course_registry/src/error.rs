@@ -46,6 +46,7 @@ pub enum Error {
     // Rate limiting errors
     CourseRateLimitExceeded = 32,
     CourseRateLimitNotConfigured = 33,
+    DuplicatePrerequisite = 34,
 }
 
 pub fn handle_error(env: &Env, error: Error) -> ! {

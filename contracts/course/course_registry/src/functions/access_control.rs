@@ -4,7 +4,7 @@
 use crate::error::{handle_error, Error};
 use crate::schema::Course;
 use super::course_rate_limit_utils::initialize_course_rate_limit_config;
-use soroban_sdk::{symbol_short, Address, Env, String, Symbol, IntoVal};
+use soroban_sdk::{symbol_short, Address, Env, IntoVal, String, Symbol};
 
 const KEY_USER_MGMT_ADDR: &str = "user_mgmt_addr";
 const KEY_OWNER: &str = "owner";
@@ -12,31 +12,28 @@ const KEY_OWNER: &str = "owner";
 /// Check if a user is an admin by querying the user management contract
 pub fn is_admin(env: &Env, who: &Address) -> bool {
     // Get user management contract address
-    let user_mgmt_addr: Option<Address> = env
-        .storage()
-        .instance()
-        .get(&(KEY_USER_MGMT_ADDR,));
+    let user_mgmt_addr: Option<Address> = env.storage().instance().get(&(KEY_USER_MGMT_ADDR,));
 
     match user_mgmt_addr {
         Some(addr) => {
             // Cross-contract call to check admin status
             env.invoke_contract(
                 &addr,
-                &Symbol::new(&env, "is_admin"),
+                &Symbol::new(env, "is_admin"),
                 (who.clone(),).into_val(env),
             )
         }
-        None => false // If user management contract isn't configured, no admins
+        None => false, // If user management contract isn't configured, no admins
     }
 }
 
 /// Check if a user is the creator of a specific course
 pub fn is_course_creator(env: &Env, course_id: &String, who: &Address) -> bool {
     let key = (symbol_short!("course"), course_id.clone());
-    
+
     match env.storage().persistent().get::<_, Course>(&key) {
         Some(course) => course.creator == *who,
-        None => false
+        None => false,
     }
 }
 
@@ -47,7 +44,7 @@ pub fn is_course_creator(env: &Env, course_id: &String, who: &Address) -> bool {
 pub fn require_course_management_auth(env: &Env, caller: &Address, course_id: &String) {
     // Always require basic authentication
     caller.require_auth();
-    
+
     // Check if caller is course creator or admin
     if !is_course_creator(env, course_id, caller) && !is_admin(env, caller) {
         handle_error(env, Error::Unauthorized)
@@ -74,7 +71,7 @@ pub fn initialize(env: &Env, owner: &Address, user_mgmt_addr: &Address) {
 /// Only the contract owner can perform this update
 pub fn update_user_mgmt_address(env: &Env, caller: &Address, new_addr: &Address) {
     caller.require_auth();
-    
+
     // Check if caller is contract owner
     let owner: Address = env
         .storage()
@@ -120,7 +117,7 @@ mod tests {
 
         // Create a mock contract to access storage
         let contract_id = Address::generate(&env);
-        
+
         env.as_contract(&contract_id, || {
             env.mock_all_auths();
 
@@ -137,11 +134,11 @@ mod tests {
 
         // Create a mock contract to access storage
         let contract_id = Address::generate(&env);
-        
+
         env.as_contract(&contract_id, || {
             // Initialize access control - this should not panic
             initialize(&env, &admin, &user_mgmt);
-            
+
             // Test passes if initialization completes without error
             assert!(true);
         });

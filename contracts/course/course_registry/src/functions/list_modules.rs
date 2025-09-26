@@ -6,8 +6,8 @@ use crate::schema::CourseModule;
 use soroban_sdk::{Env, String, Symbol};
 
 pub fn course_registry_list_modules(env: &Env, course_id: String) -> CourseModule {
-    if course_id.len() == 0 {
-        handle_error(&env, Error::EmptyCourseId)
+    if course_id.is_empty() {
+        handle_error(env, Error::EmptyCourseId)
     }
 
     let key: Symbol = Symbol::new(env, "module");

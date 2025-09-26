@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use soroban_sdk::{contracttype, Address, String};
+use soroban_sdk::{contracttype, Address, String, Vec};
 
 /// Default and limit constants for user management configuration
 pub const DEFAULT_MAX_PAGE_SIZE: u32 = 100;
@@ -11,6 +11,14 @@ pub const MAX_ADMINS: u32 = 10;
 /// Rate limiting constants
 pub const DEFAULT_RATE_LIMIT_WINDOW: u64 = 3600; // 1 hour in seconds
 pub const DEFAULT_MAX_USER_CREATIONS_PER_WINDOW: u32 = 5; // Max user creations per hour per address
+
+/// Password validation constants
+pub const MIN_PASSWORD_LENGTH: u32 = 8;
+pub const MAX_PASSWORD_LENGTH: u32 = 128;
+pub const REQUIRED_SPECIAL_CHARS: &str = "!@#$%^&*()_+-=[]{}|;:,.<>?";
+pub const REQUIRED_DIGITS: &str = "0123456789";
+pub const REQUIRED_UPPERCASE: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+pub const REQUIRED_LOWERCASE: &str = "abcdefghijklmnopqrstuvwxyz";
 
 /// User profile information matching UI definition.
 ///
@@ -29,6 +37,8 @@ pub struct UserProfile {
     pub country: Option<String>,
     /// User's learning goals or purpose (optional)
     pub purpose: Option<String>,
+    /// User's profile picture URL (optional)
+    pub profile_picture_url: Option<String>,
 }
 
 /// Struct for profile update parameters
@@ -44,6 +54,8 @@ pub struct ProfileUpdateParams {
     pub country: Option<String>,
     /// User's learning goals or purpose
     pub purpose: Option<String>,
+    /// User's profile picture URL
+    pub profile_picture_url: Option<String>,
 }
 
 /// User roles in the SkillCert platform.
@@ -147,6 +159,36 @@ pub struct AdminConfig {
     pub total_user_count: u32,
     /// Rate limiting configuration for user creation
     pub rate_limit_config: RateLimitConfig,
+}
+
+/// Pagination parameters for cursor-based pagination.
+///
+/// Used to implement efficient pagination that avoids gas limit issues
+/// with large datasets by using cursor-based navigation.
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct PaginationParams {
+    /// Cursor for pagination (address of the last item from previous page)
+    pub cursor: Option<Address>,
+    /// Maximum number of items to return per page
+    pub limit: u32,
+}
+
+/// Pagination result with metadata for efficient navigation.
+///
+/// Contains the paginated data along with pagination metadata
+/// to enable cursor-based navigation.
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct PaginatedLightProfiles {
+    /// The paginated data items
+    pub data: Vec<LightProfile>,
+    /// Cursor for the next page (None if this is the last page)
+    pub next_cursor: Option<Address>,
+    /// Total count of items matching the filter (optional, may be expensive to compute)
+    pub total_count: Option<u32>,
+    /// Whether there are more pages available
+    pub has_more: bool,
 }
 
 /// Storage keys for different data types in the user management contract.

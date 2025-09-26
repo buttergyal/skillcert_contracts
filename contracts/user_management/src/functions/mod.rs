@@ -2,6 +2,7 @@
 // Copyright (c) 2025 SkillCert
 
 pub mod admin_management;
+pub mod contract_versioning;
 pub mod create_user_profile;
 pub mod delete_user;
 pub mod edit_user_profile;
