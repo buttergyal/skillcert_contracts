@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use crate::error::{handle_error, Error};
-use crate::schema::{Course, DataKey};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
 
-const PREREQ_REMOVED_EVENT: Symbol = symbol_short!("prereqrmv");
+use crate::error::{handle_error, Error};
+use crate::schema::{Course, DataKey};
+
+const COURSE_KEY: Symbol = symbol_short!("course");
+
+const PREREQ_REMOVED_EVENT: Symbol = symbol_short!("prereqRmv");
 
 pub fn remove_prerequisite(
     env: Env,
@@ -16,7 +19,7 @@ pub fn remove_prerequisite(
     creator.require_auth();
 
     // Load course
-    let course_key = (symbol_short!("course"), course_id.clone());
+    let course_key: (Symbol, String) = (COURSE_KEY, course_id.clone());
     let course: Course = env
         .storage()
         .persistent()
@@ -36,7 +39,7 @@ pub fn remove_prerequisite(
         .unwrap_or(Vec::new(&env));
 
     // Find and remove the prerequisite
-    let index = prerequisites
+    let index: Option<usize> = prerequisites
         .iter()
         .position(|id| id.eq(&prerequisite_course_id));
 

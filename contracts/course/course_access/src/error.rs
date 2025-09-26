@@ -23,6 +23,3 @@ pub enum Error {
 pub fn handle_error(env: &Env, error: Error) -> ! {
     panic_with_error!(env, error);
 }
-
-// Alias para compatibilidad con imports existentes
-pub type CourseAccessError = Error;

@@ -1,16 +1,19 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use super::utils::{to_lowercase, trim, u32_to_string};
+use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
+
 use crate::error::{handle_error, Error};
 use crate::schema::{Course, CourseLevel};
-use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
+use super::utils::{to_lowercase, trim, u32_to_string};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const TITLE_KEY: Symbol = symbol_short!("title");
 const COURSE_ID: Symbol = symbol_short!("course");
 
-#[allow(clippy::too_many_arguments)]
+const CREATE_COURSE_EVENT: Symbol = symbol_short!("crtCourse");
+const GENERATE_COURSE_ID_EVENT: Symbol = symbol_short!("genCrsId");
+
 pub fn create_course(
     env: Env,
     creator: Address,
@@ -26,7 +29,7 @@ pub fn create_course(
     creator.require_auth();
 
     // ensure the title is not empty and not just whitespace
-    let trimmed_title = trim(&env, &title);
+    let trimmed_title: String = trim(&env, &title);
     if title.is_empty() || trimmed_title.is_empty() {
         handle_error(&env, Error::EmptyCourseTitle);
     }
@@ -72,7 +75,7 @@ pub fn create_course(
         }
     }
 
-    let lowercase_title = to_lowercase(&env, &title);
+    let lowercase_title: String = to_lowercase(&env, &title);
 
     // to avoid duplicate title,
     let title_key: (Symbol, String) = (TITLE_KEY, lowercase_title);
@@ -83,7 +86,7 @@ pub fn create_course(
 
     // generate the unique id
     let id: u128 = generate_course_id(&env);
-    let converted_id = u32_to_string(&env, id as u32);
+    let converted_id: String = u32_to_string(&env, id as u32);
 
     let storage_key: (Symbol, String) = (COURSE_KEY, converted_id.clone());
 
@@ -94,17 +97,17 @@ pub fn create_course(
     // create a new course
     let new_course: Course = Course {
         id: converted_id.clone(),
-        title,
-        description,
-        creator,
+        title: title.clone(),
+        description: description.clone(),
+        creator: creator.clone(),
         price,
-        category,
-        language,
-        thumbnail_url,
+        category: category.clone(),
+        language: language.clone(),
+        thumbnail_url: thumbnail_url.clone(),
         published: false,
         prerequisites: Vec::new(&env),
         is_archived: false,
-        level,
+        level: level.clone(),
         duration_hours,
     };
 
@@ -112,13 +115,22 @@ pub fn create_course(
     env.storage().persistent().set(&storage_key, &new_course);
     env.storage().persistent().set(&title_key, &true);
 
+    // emit an event
+    env.events()
+        .publish((CREATE_COURSE_EVENT,), (converted_id, creator, title, description, price, category, language, thumbnail_url, level, duration_hours));
+
     new_course
 }
 
 pub fn generate_course_id(env: &Env) -> u128 {
     let current_id: u128 = env.storage().persistent().get(&COURSE_ID).unwrap_or(0);
-    let new_id = current_id + 1;
+    let new_id: u128 = current_id + 1;
     env.storage().persistent().set(&COURSE_ID, &new_id);
+
+    // emit an event
+    env.events()
+        .publish((GENERATE_COURSE_ID_EVENT,), new_id);
+
     new_id
 }
 

@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
+
 use crate::error::{handle_error, Error};
 use crate::functions::utils::{self, trim};
 use crate::schema::{Course, CourseGoal, DataKey};
-use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
-const GOAL_ADDED_EVENT: Symbol = symbol_short!("goaladd");
+const COURSE_KEY: Symbol = symbol_short!("course");
+
+const GOAL_ADDED_EVENT: Symbol = symbol_short!("goalAdded");
 
 pub fn add_goal(env: Env, creator: Address, course_id: String, content: String) -> CourseGoal {
     creator.require_auth();
@@ -31,7 +34,7 @@ pub fn add_goal(env: Env, creator: Address, course_id: String, content: String) 
     }
 
     // Load course
-    let storage_key = (symbol_short!("course"), course_id.clone());
+    let storage_key: (Symbol, String) = (COURSE_KEY, course_id.clone());
     let course: Course = env
         .storage()
         .persistent()
@@ -47,7 +50,7 @@ pub fn add_goal(env: Env, creator: Address, course_id: String, content: String) 
     let goal_id = utils::generate_unique_id(&env);
 
     // Create new goal
-    let goal = CourseGoal {
+    let goal: CourseGoal = CourseGoal {
         course_id: course_id.clone(),
         goal_id: goal_id.clone(),
         content: content.clone(),

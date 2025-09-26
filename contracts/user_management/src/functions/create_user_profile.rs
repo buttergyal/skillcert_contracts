@@ -9,7 +9,7 @@ use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
 use super::utils::url_validation;
 
 // Event symbol for user creation
-const EVT_USER_CREATED: Symbol = symbol_short!("usr_cr8d");
+const USER_CREATED_EVENT: Symbol = symbol_short!("usrCrtd");
 
 /// Security constants for profile validation
 const MAX_NAME_LENGTH: usize = 100;
@@ -64,13 +64,13 @@ fn validate_email_format(email: &String) -> bool {
 
 /// Check if email is already taken
 fn is_email_unique(env: &Env, email: &String) -> bool {
-    let email_key = DataKey::EmailIndex(email.clone());
+    let email_key: DataKey = DataKey::EmailIndex(email.clone());
     !env.storage().persistent().has(&email_key)
 }
 
 /// Register email in the email index
 fn register_email(env: &Env, email: &String, user_address: &Address) {
-    let email_key = DataKey::EmailIndex(email.clone());
+    let email_key: DataKey = DataKey::EmailIndex(email.clone());
     env.storage().persistent().set(&email_key, user_address);
 }
 
@@ -115,7 +115,7 @@ pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> Use
     user.require_auth();
 
     // Check if user profile already exists
-    let storage_key = DataKey::UserProfile(user.clone());
+    let storage_key: DataKey = DataKey::UserProfile(user.clone());
     if env.storage().persistent().has(&storage_key) {
         handle_error(&env, Error::UserProfileExists)
     }
@@ -172,7 +172,7 @@ pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> Use
     register_email(&env, &profile.contact_email, &user);
 
     // Create and store lightweight profile for listing
-    let light_profile = LightProfile {
+    let light_profile: LightProfile = LightProfile {
         full_name: profile.full_name.clone(),
         profession: profile.profession.clone(),
         country: profile.country.clone(),
@@ -181,7 +181,7 @@ pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> Use
         user_address: user.clone(),
     };
 
-    let light_storage_key = DataKey::UserProfileLight(user.clone());
+    let light_storage_key: DataKey = DataKey::UserProfileLight(user.clone());
     env.storage()
         .persistent()
         .set(&light_storage_key, &light_profile);
@@ -191,7 +191,7 @@ pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> Use
 
     // Emit user creation audit event with detailed information
     env.events().publish(
-        (EVT_USER_CREATED, &user),
+        (USER_CREATED_EVENT, &user),
         (
             user.clone(),
             profile.full_name.clone(),

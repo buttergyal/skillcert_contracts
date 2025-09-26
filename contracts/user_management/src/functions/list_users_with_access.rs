@@ -3,15 +3,17 @@
 
 use soroban_sdk::{symbol_short, Address, Env, Symbol, Vec};
 
-const EVT_ACCESS_LISTED: Symbol = symbol_short!("ac_listed");
+use crate::error::{handle_error, Error};
+
+const ACCESS_LISTED_EVENT: Symbol = symbol_short!("acListed");
 
 /// Helper function to check if the given address is an admin.
 /// Adjust the storage key or logic to match your contract.
 fn is_admin(env: &Env, who: &Address) -> bool {
     // Retrieve the list of admin addresses from storage
-    let admins: Option<Vec<Address>> = env.storage().get(&("admins",));
+    let admins: Option<Vec<Address>> = env.storage().persistent().get(&("admins",));
     match admins {
-        Some(list) => list.iter().any(|a| a == who),
+        Some(list) => list.iter().any(|a| a == *who),
         None => false,
     }
 }
@@ -22,6 +24,7 @@ fn is_creator(env: &Env, course_id: u128, who: &Address) -> bool {
     // Retrieve the creator address for the course from storage
     let creator: Address = env
         .storage()
+        .persistent()
         .get(&(("course_creator", course_id),))
         .expect("Course not found");
     creator == *who
@@ -53,12 +56,13 @@ pub fn list_users_with_access(env: Env, caller: Address, course_id: u128) -> Vec
     // Retrieve the list of users with access from storage
     let access_list: Vec<Address> = env
         .storage()
+        .persistent()
         .get(&(("course_access", course_id),))
         .unwrap_or_else(|| Vec::new(&env));
 
     // Optional: Emit an event with the number of users
     env.events().publish(
-        (EVT_ACCESS_LISTED,),
+        (ACCESS_LISTED_EVENT,),
         (course_id, caller.clone(), access_list.len() as u32),
     );
 

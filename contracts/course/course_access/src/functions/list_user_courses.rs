@@ -20,11 +20,13 @@ use crate::schema::{DataKey, UserCourses};
 /// of course IDs they have access to. If no courses are found, returns
 /// an empty list.
 pub fn list_user_courses(env: Env, user: Address) -> UserCourses {
-    let key = DataKey::UserCourses(user.clone());
-    env.storage().persistent().get(&key).unwrap_or(UserCourses {
-        user,
+    let key: DataKey = DataKey::UserCourses(user.clone());
+    let res: UserCourses = env.storage().persistent().get(&key).unwrap_or(UserCourses {
+        user: user.clone(),
         courses: Vec::new(&env),
-    })
+    });
+
+    return res
 }
 
 #[cfg(test)]
