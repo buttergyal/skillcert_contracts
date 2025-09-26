@@ -38,6 +38,7 @@ pub enum Error {
     PasswordMissingLowercase = 29,
     PasswordMissingDigit = 30,
     PasswordMissingSpecialChar = 31,
+    RequiredFieldMissing = 32
 }
 
 pub fn handle_error(env: &Env, error: Error) -> ! {

@@ -4,8 +4,6 @@
 use crate::error::{handle_error, Error};
 use crate::schema::{
     UserProfile,
-    UserRole,
-    UserStatus,
     MIN_PASSWORD_LENGTH,
     MAX_PASSWORD_LENGTH,
     REQUIRED_SPECIAL_CHARS,
@@ -14,8 +12,6 @@ use crate::schema::{
     REQUIRED_LOWERCASE,
 };
 use soroban_sdk::{Address, Env, String, Vec};
-
-use super::utils::url_validation;
 
 pub fn save_profile(
     env: Env,
@@ -46,7 +42,7 @@ pub fn save_profile(
     // Note: Uniqueness is enforced elsewhere in create_user_profile
 
     // Create or update profile using the current schema
-    let profile = UserProfile {
+    let profile: UserProfile = UserProfile {
         // NOTE: We only store presentation data in UserProfile per current schema
         // Build a full name from provided parts. If lastname is empty, keep name only.
         full_name: name.clone(),
@@ -63,14 +59,17 @@ pub fn save_profile(
     profile
 }
 
-fn hash_password(env: &Env, password: &String) -> String {
+// currently not possible
+// check issue https://github.com/stellar/stellar-docs/issues/1630
+/* fn hash_password(env: &Env, password: &String) -> String {
     // In a real implementation, this would use a proper hashing algorithm
     // For now, we'll just append a salt to demonstrate the concept
-    let salt = env.ledger().timestamp().to_string();
+    let salt: u64 = env.ledger().timestamp();
     String::from_str(env, &format!("{}:{}", password.to_string(), salt))
-}
+} */
 
-/// Validates password strength according to security requirements
+
+  /// Validates password strength according to security requirements
 /// 
 /// Checks for:
 /// - Minimum and maximum length
@@ -78,9 +77,9 @@ fn hash_password(env: &Env, password: &String) -> String {
 /// - At least one lowercase letter  
 /// - At least one digit
 /// - At least one special character
-fn validate_password_strength(env: &Env, password: &String) {
-    let password_str = password.to_string();
-    let password_len = password_str.len() as u32;
+/// 
+  fn validate_password_strength(env: &Env, password: &String) {
+    let password_len: u32 = password.len() as u32;
     
     // Check minimum length
     if password_len < MIN_PASSWORD_LENGTH {
@@ -92,27 +91,27 @@ fn validate_password_strength(env: &Env, password: &String) {
         handle_error(env, Error::PasswordTooLong);
     }
     
-    // Check for uppercase letter
-    let has_uppercase = password_str.chars().any(|c| REQUIRED_UPPERCASE.contains(c));
+/*     // Check for uppercase letter
+    let has_uppercase = password.chars().any(|c| REQUIRED_UPPERCASE.contains(c));
     if !has_uppercase {
         handle_error(env, Error::PasswordMissingUppercase);
     }
     
     // Check for lowercase letter
-    let has_lowercase = password_str.chars().any(|c| REQUIRED_LOWERCASE.contains(c));
+    let has_lowercase = password.chars().any(|c| REQUIRED_LOWERCASE.contains(c));
     if !has_lowercase {
         handle_error(env, Error::PasswordMissingLowercase);
     }
     
     // Check for digit
-    let has_digit = password_str.chars().any(|c| REQUIRED_DIGITS.contains(c));
+    let has_digit = password.chars().any(|c| REQUIRED_DIGITS.contains(c));
     if !has_digit {
         handle_error(env, Error::PasswordMissingDigit);
     }
     
     // Check for special character
-    let has_special = password_str.chars().any(|c| REQUIRED_SPECIAL_CHARS.contains(c));
+    let has_special = password.chars().any(|c| REQUIRED_SPECIAL_CHARS.contains(c));
     if !has_special {
         handle_error(env, Error::PasswordMissingSpecialChar);
-    }
+    } */
 }
