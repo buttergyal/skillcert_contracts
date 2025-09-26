@@ -6,24 +6,24 @@ use crate::schema::{
     UserProfile,
     MIN_PASSWORD_LENGTH,
     MAX_PASSWORD_LENGTH,
-    REQUIRED_SPECIAL_CHARS,
+/*     REQUIRED_SPECIAL_CHARS,
     REQUIRED_DIGITS,
     REQUIRED_UPPERCASE,
-    REQUIRED_LOWERCASE,
+    REQUIRED_LOWERCASE, */
 };
-use soroban_sdk::{Address, Env, String, Vec};
+use soroban_sdk::{Env, String};
 
 pub fn save_profile(
     env: Env,
-    user: Address,
+    //user: Address,
     name: String,
-    lastname: String,
+    //lastname: String,
     email: String,
     password: String,
     confirm_password: String,
     specialization: String,
-    languages: Vec<String>,
-    teaching_categories: Vec<String>,
+    //languages: Vec<String>,
+    //teaching_categories: Vec<String>,
 ) -> UserProfile {
     // Validate inputs
     if password != confirm_password {
