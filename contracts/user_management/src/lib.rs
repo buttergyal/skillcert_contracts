@@ -14,7 +14,7 @@ pub mod schema;
 mod test;
 
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
-use crate::schema::{AdminConfig, LightProfile, PaginatedLightProfiles, PaginationParams, Permission, ProfileUpdateParams, UserProfile, UserRole, UserStatus};
+use crate::schema::{AdminConfig, LightProfile, PaginatedLightProfiles, PaginationParams, Permission, ProfileUpdateParams, UserFilter, UserProfile, UserRole, UserStatus};
 
 /// User Management Contract
 ///
@@ -299,14 +299,71 @@ impl UserManagement {
         country_filter: Option<String>,
         status_filter: Option<UserStatus>,
     ) -> Vec<LightProfile> {
+        // Convert old parameters to new UserFilter struct for backward compatibility
+        let filter = if role_filter.is_some() || country_filter.is_some() || status_filter.is_some() {
+            Some(UserFilter {
+                role: role_filter,
+                country: country_filter,
+                status: status_filter,
+                search_text: None,
+            })
+        } else {
+            None
+        };
+
         functions::list_all_registered_users::list_all_users(
             env,
             caller,
             page,
             page_size,
-            role_filter,
-            country_filter,
-            status_filter,
+            filter,
+        )
+    }
+
+    /// Lists all registered users with advanced filtering including text search (admin-only).
+    ///
+    /// This is the new version that supports text search functionality.
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `caller` - Address performing the call (must be admin)
+    /// * `page` - Zero-based page index
+    /// * `page_size` - Number of items per page
+    /// * `role_filter` - Optional role filter
+    /// * `country_filter` - Optional country filter
+    /// * `status_filter` - Optional status filter
+    /// * `search_text` - Optional text search in name and profession
+    ///
+    /// # Returns
+    /// * `Vec<LightProfile>` - Filtered and paginated lightweight user profiles
+    pub fn list_all_users_advanced(
+        env: Env,
+        caller: Address,
+        page: u32,
+        page_size: u32,
+        role_filter: Option<UserRole>,
+        country_filter: Option<String>,
+        status_filter: Option<UserStatus>,
+        search_text: Option<String>,
+    ) -> Vec<LightProfile> {
+        // Convert parameters to internal UserFilter struct
+        let filter = if role_filter.is_some() || country_filter.is_some() || status_filter.is_some() || search_text.is_some() {
+            Some(UserFilter {
+                role: role_filter,
+                country: country_filter,
+                status: status_filter,
+                search_text,
+            })
+        } else {
+            None
+        };
+
+        functions::list_all_registered_users::list_all_users(
+            env,
+            caller,
+            page,
+            page_size,
+            filter,
         )
     }
 
