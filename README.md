@@ -1,6 +1,6 @@
 # skillcert_contracts
 
-### Description
+## Description
 
 Skillcert is platform for issuing NFT-based digital certificates on the Stellar blockchain, ensuring authenticity, traceability, and instant verification. It also features an educational marketplace for courses with automated validated certification.
 
@@ -10,7 +10,6 @@ We are currently in the integration phase between the Web3 logic and the fronten
 
 The project roadmap is available in Notion:  
 🔗 [View Roadmap in Notion](https://www.notion.so/Skillcert-240bfdf2613c805898c9c91f0990600e)
-
 
 ### 📁 Project Architecture Overview
 
@@ -38,13 +37,12 @@ The project roadmap is available in Notion:
                 ├── lib.rs
                 └── test.rs
 ```
-> As the project grows, new modules, contracts and functions will arise in the architecture.
 
+> As the project grows, new modules, contracts and functions will arise in the architecture.
 
 #### Contract Deployment
 
 To deploy the contracts to the local network (Course Access, Course Registry, User Management), use the provided script:
-
 
 ```bash
 
@@ -58,6 +56,7 @@ This will deploy all contracts and save their addresses in a `contract.json` fil
 Here are some example interactions with the deployed contracts:
 
 1. Create a Course:
+
 ```bash
 stellar contract invoke \
   --id <course_registry_contract_id> \
@@ -74,6 +73,7 @@ stellar contract invoke \
 ```
 
 2. Grant Course Access:
+
 ```bash
 stellar contract invoke \
   --id <course_access_contract_id> \
@@ -85,6 +85,7 @@ stellar contract invoke \
 ```
 
 3. List User's Courses:
+
 ```bash
 stellar contract invoke \
   --id <course_access_contract_id> \
@@ -95,6 +96,7 @@ stellar contract invoke \
 ```
 
 4. View Course Details:
+
 ```bash
 stellar contract invoke \
   --id <course_registry_contract_id> \

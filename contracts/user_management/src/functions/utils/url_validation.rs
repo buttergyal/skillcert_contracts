@@ -21,7 +21,7 @@ pub fn is_valid_url(url: &String) -> bool {
         return false;
     }
 
-    let url_len = url.len();
+    let url_len: u32 = url.len();
     
     // Must have at least protocol + domain (minimum length check)
     if url_len < 11 { // "https://a" = 9 chars minimum

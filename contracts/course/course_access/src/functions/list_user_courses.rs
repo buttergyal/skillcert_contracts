@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
+
 use soroban_sdk::{Address, Env, Vec};
+
 use crate::schema::{DataKey, UserCourses};
 
 /// List all courses that a specific user has access to.
