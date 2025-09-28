@@ -110,6 +110,6 @@ pub fn set_contract_addrs(
         .publish((UPDATE_ADDRESS_EVENT,), (caller, user_mgmt_addr, course_registry_addr));
 }
 
-/// TTL configuration constants for persistent storage entries
+/* /// TTL configuration constants for persistent storage entries
 pub const TTL_TTL: u32 = 1000; // time-to-live
-pub const TTL_BUMP: u32 = 100; // bump amount on access
+pub const TTL_BUMP: u32 = 100; // bump amount on access */

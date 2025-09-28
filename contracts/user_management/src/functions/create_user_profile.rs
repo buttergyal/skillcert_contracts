@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use crate::error::{handle_error, Error};
-use crate::schema::{DataKey, LightProfile, UserProfile, UserRole, UserStatus};
-use core::iter::Iterator;
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
 
-use super::utils::url_validation;
+use crate::error::{handle_error, Error};
+use crate::functions::utils::url_validation;
+use crate::schema::{DataKey, LightProfile, UserProfile, UserRole, UserStatus};
+use core::iter::Iterator;
 
 // Event symbol for user creation
 const USER_CREATED_EVENT: Symbol = symbol_short!("usrCrtd");
