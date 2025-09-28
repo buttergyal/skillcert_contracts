@@ -15,17 +15,7 @@ mod test;
 
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
 
-use functions::config::initialize;
-use functions::grant_access::course_access_grant_access;
-use functions::revoke_access::course_access_revoke_access;
-use functions::save_profile::save_user_profile;
-use functions::list_user_courses::list_user_courses;
-use functions::list_course_access::course_access_list_course_access;
-use functions::revoke_all_access::revoke_all_access;
-use functions::config::set_contract_addrs;
-use functions::contract_versioning::{is_version_compatible, get_migration_status, get_version_history, migrate_access_data};
-use functions::transfer_course_access::transfer_course_access;
-
+use functions::{config::initialize,config::set_contract_addrs, grant_access::course_access_grant_access, revoke_access::course_access_revoke_access, revoke_all_access::revoke_all_access, save_profile::save_user_profile, list_user_courses::list_user_courses, list_course_access::course_access_list_course_access, contract_versioning::{is_version_compatible, get_migration_status, get_version_history, migrate_access_data}, transfer_course_access::transfer_course_access};
 use schema::{CourseUsers, UserCourses};
 
 /// Course Access Contract
