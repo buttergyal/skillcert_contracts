@@ -24,6 +24,8 @@ use functions::list_course_access::course_access_list_course_access;
 use functions::revoke_all_access::revoke_all_access;
 use functions::config::set_contract_addrs;
 use functions::contract_versioning::{is_version_compatible, get_migration_status, get_version_history, migrate_access_data};
+use functions::transfer_course_access::transfer_course_access;
+
 use schema::{CourseUsers, UserCourses};
 
 /// Course Access Contract
@@ -469,5 +471,9 @@ impl CourseAccessContract {
     /// * `String` - Migration status information
     pub fn get_migration_status(env: Env) -> String {
         get_migration_status(&env)
+    }
+
+    pub fn transfer_course(env: Env, course_id: String, from: Address, to: Address){
+        transfer_course_access(env, course_id, from, to)
     }
 }
