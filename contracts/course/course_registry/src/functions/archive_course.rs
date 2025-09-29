@@ -1,17 +1,19 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use crate::error::{handle_error, Error};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
+use crate::error::{handle_error, Error};
 use crate::schema::Course;
 
-const ARCHIVED_COURSE_EVENT: Symbol = symbol_short!("akhivecus");
+const COURSE_KEY: Symbol = symbol_short!("course");
+
+const ARCHIVED_COURSE_EVENT: Symbol = symbol_short!("archiveCs");
 
 pub fn archive_course(env: &Env, creator: Address, course_id: String) -> Course {
     creator.require_auth();
 
-    let key = (symbol_short!("course"), course_id.clone());
+    let key: (Symbol, String) = (COURSE_KEY, course_id.clone());
     let mut course: Course = env
         .storage()
         .persistent()
@@ -19,15 +21,16 @@ pub fn archive_course(env: &Env, creator: Address, course_id: String) -> Course 
         .expect("Course not found");
 
     if course.creator != creator {
-        handle_error(&env, Error::OnlyCreatorCanArchive)
+        handle_error(env, Error::OnlyCreatorCanArchive)
     }
 
     if course.is_archived {
-        handle_error(&env, Error::CourseAlreadyArchived)
+        handle_error(env, Error::CourseAlreadyArchived)
     }
     course.is_archived = true;
 
     env.storage().persistent().set(&key, &course);
+    
     env.events()
         .publish((ARCHIVED_COURSE_EVENT, course_id.clone()), course.clone());
 

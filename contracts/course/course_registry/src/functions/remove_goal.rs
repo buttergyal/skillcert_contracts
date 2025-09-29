@@ -1,25 +1,28 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use crate::error::{handle_error, Error};
-use crate::schema::{Course, CourseGoal, DataKey};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
-const GOAL_REMOVED_EVENT: Symbol = symbol_short!("goalrem");
+use crate::error::{handle_error, Error};
+use crate::schema::{Course, CourseGoal, DataKey};
 
-pub fn remove_goal(env: Env, caller: Address, course_id: String, goal_id: String) -> () {
+const COURSE_KEY: Symbol = symbol_short!("course");
+
+const GOAL_REMOVED_EVENT: Symbol = symbol_short!("goalRem");
+
+pub fn remove_goal(env: Env, caller: Address, course_id: String, goal_id: String) {
     caller.require_auth();
 
     // Validate input
     if course_id.is_empty() {
-        handle_error(&env, Error::InvalidInput)
+        handle_error(&env, Error::EmptyCourseId)
     }
     if goal_id.is_empty() {
         handle_error(&env, Error::EmptyGoalId)
     }
 
     // Load course to verify it exists and check permissions
-    let storage_key = (symbol_short!("course"), course_id.clone());
+    let storage_key: (Symbol, String) = (COURSE_KEY, course_id.clone());
     let course: Course = env
         .storage()
         .persistent()
@@ -33,7 +36,7 @@ pub fn remove_goal(env: Env, caller: Address, course_id: String, goal_id: String
     }
 
     // Check if the goal exists
-    let goal_storage_key = DataKey::CourseGoal(course_id.clone(), goal_id.clone());
+    let goal_storage_key: DataKey = DataKey::CourseGoal(course_id.clone(), goal_id.clone());
     let goal: CourseGoal = env
         .storage()
         .persistent()

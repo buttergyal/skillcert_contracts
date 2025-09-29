@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use crate::error::{handle_error, Error};
-use soroban_sdk::{Env, String, Symbol};
+use soroban_sdk::{Env, String, Symbol, symbol_short};
 
+use crate::error::{handle_error, Error};
 use crate::schema::Course;
+
+const COURSE_KEY: Symbol = symbol_short!("course");
 
 /// Retrieves a course by its ID.
 ///
@@ -22,18 +24,16 @@ use crate::schema::Course;
 /// Storage used (replace keys if your schema differs):
 /// - (("course", id),) -> Course    // course record by id
 pub fn get_course(env: &Env, course_id: String) -> Course {
-    // Create the storage key for the course
-    let key = Symbol::new(env, "course");
 
     // Get the course from storage
     let course: Course = env
         .storage()
         .persistent()
-        .get(&(key, course_id.clone()))
+        .get(&(COURSE_KEY, course_id.clone()))
         .expect("Course not found");
 
     match course.is_archived {
-        true => handle_error(&env, Error::CourseAlreadyArchived),
+        true => handle_error(env, Error::CourseAlreadyArchived),
         false => course,
     }
 }

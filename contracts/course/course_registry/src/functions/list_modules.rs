@@ -1,22 +1,23 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use soroban_sdk::{Env, String, Symbol, symbol_short};
+
 use crate::error::{handle_error, Error};
 use crate::schema::CourseModule;
-use soroban_sdk::{Env, String, Symbol};
+
+const MODULE_KEY: Symbol = symbol_short!("module");
 
 pub fn course_registry_list_modules(env: &Env, course_id: String) -> CourseModule {
-    if course_id.len() == 0 {
-        handle_error(&env, Error::EmptyCourseId)
+    if course_id.is_empty() {
+        handle_error(env, Error::EmptyCourseId)
     }
-
-    let key: Symbol = Symbol::new(env, "module");
 
     // Get the course from storage
     let module: CourseModule = env
         .storage()
         .persistent()
-        .get(&(key, course_id.clone()))
+        .get(&(MODULE_KEY, course_id.clone()))
         .expect("Module with the specified ID does not exist");
 
     module

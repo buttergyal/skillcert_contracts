@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use crate::schema::{CourseAccess, DataKey};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
+
+use crate::schema::{CourseAccess, DataKey};
 use crate::error::{Error, handle_error};
 
 const COURSE_TRANSFER_EVENT: Symbol = symbol_short!("transfer");
@@ -54,7 +55,7 @@ pub fn transfer_course_access(env: Env, course_id: String, from: Address, to: Ad
         1000,
     );
 
-    //emit an event
+    // emit an event
     env.events()
         .publish((COURSE_TRANSFER_EVENT,), (course_id, from, to));
 }

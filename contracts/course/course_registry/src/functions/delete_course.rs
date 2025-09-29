@@ -1,26 +1,29 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use super::utils::{concat_strings, to_lowercase, u32_to_string};
+use soroban_sdk::{symbol_short, vec, Address, Env, String, Symbol, Vec};
+
 use crate::error::{handle_error, Error};
 use crate::schema::{Course, CourseModule};
-use soroban_sdk::{symbol_short, vec, Address, Env, String, Symbol, Vec};
+use super::utils::{concat_strings, to_lowercase, u32_to_string};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const MODULE_KEY: Symbol = symbol_short!("module");
 const TITLE_KEY: Symbol = symbol_short!("title");
 
+const DELETE_COURSE_EVENT: Symbol = symbol_short!("delCourse");
+
 pub fn delete_course(env: &Env, creator: Address, course_id: String) -> Result<(), &'static str> {
     creator.require_auth();
 
     if course_id.is_empty() {
-        handle_error(&env, Error::EmptyCourseId)
+        handle_error(env, Error::EmptyCourseId)
     }
 
-    let course_storage_key = (COURSE_KEY, course_id.clone());
+    let course_storage_key: (Symbol, String) = (COURSE_KEY, course_id.clone());
 
     if !env.storage().persistent().has(&course_storage_key) {
-        handle_error(&env, Error::CourseNotFound)
+        handle_error(env, Error::CourseNotFound)
     }
 
     let course: Course = env
@@ -30,36 +33,39 @@ pub fn delete_course(env: &Env, creator: Address, course_id: String) -> Result<(
         .ok_or("Course not found")?;
 
     if course.creator != creator {
-        handle_error(&env, Error::Unauthorized)
+        handle_error(env, Error::Unauthorized)
     }
 
     delete_course_modules(env, &course_id);
 
-    let lowercase_title = to_lowercase(env, &course.title);
+    let lowercase_title: String = to_lowercase(env, &course.title);
 
-    let title_key = (TITLE_KEY, lowercase_title);
+    let title_key: (Symbol, String) = (TITLE_KEY, lowercase_title);
     env.storage().persistent().remove(&title_key);
     env.storage().persistent().remove(&course_storage_key);
-    env.events().publish((course_id,), "course_deleted");
+
+    // emit an event
+    env.events()
+        .publish((DELETE_COURSE_EVENT,), (creator, course_id));
 
     Ok(())
 }
 
 fn delete_course_modules(env: &Env, course_id: &String) {
-    let mut modules_to_delete: Vec<String> = Vec::new(&env);
+    let mut modules_to_delete: Vec<String> = Vec::new(env);
 
     let mut counter = 0u32;
     loop {
         let arr = vec![
             &env,
-            String::from_str(&env, "module_"),
+            String::from_str(env, "module_"),
             course_id.clone(),
-            String::from_str(&env, "_"),
-            u32_to_string(&env, counter),
-            String::from_str(&env, "_0"),
+            String::from_str(env, "_"),
+            u32_to_string(env, counter),
+            String::from_str(env, "_0"),
         ];
 
-        let module_id = concat_strings(&env, arr);
+        let module_id = concat_strings(env, arr);
         let key = (MODULE_KEY, module_id.clone());
         if env.storage().persistent().has(&key) {
             if let Some(module) = env.storage().persistent().get::<_, CourseModule>(&key) {
@@ -107,10 +113,10 @@ mod tests {
     fn setup_test_env() -> (Env, Address, CourseRegistryClient<'static>) {
         let env = Env::default();
         env.mock_all_auths();
-        
+
         // Register mock user management contract
         let user_mgmt_id = env.register(mock_user_management::UserManagement, ());
-        
+
         let contract_id = env.register(CourseRegistry, ());
         let client = CourseRegistryClient::new(&env, &contract_id);
 
@@ -238,7 +244,12 @@ mod tests {
             &None,
         );
 
-        let module = client.add_module(&creator, &new_course.id, &0, &String::from_str(&env, "Module Title"));
+        let module = client.add_module(
+            &creator,
+            &new_course.id,
+            &0,
+            &String::from_str(&env, "Module Title"),
+        );
 
         let module_exists: bool = env.as_contract(&contract_id, || {
             env.storage()

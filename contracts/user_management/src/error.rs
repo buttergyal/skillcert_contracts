@@ -19,19 +19,17 @@ pub enum Error {
     NameRequired = 10,
     EmailRequired = 11,
     CountryRequired = 12,
-    InvalidName = 13,
-    InvalidCountry = 14,
     InvalidEmailFormat = 15,
     EmailAlreadyExists = 16,
-    InvalidProfession = 17,
-    InvalidGoals = 18,
+    InvalidField = 17,
     InvalidProfilePicURL = 19,
     UserNotFound = 20,
     UserProfileNotFound = 21,
     InactiveUser = 22,
     PageParamTooLarge = 23,
-    InvalidInput = 24,
-    PasswordMismatch = 25,
+    // Removed InvalidInput - replaced with specific validation errors below
+    RequiredFieldMissing = 32,
+    Unauthorized = 33
 }
 
 pub fn handle_error(env: &Env, error: Error) -> ! {

@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use crate::error::{handle_error, Error};
-use crate::schema::{Course, DataKey};
 use soroban_sdk::{symbol_short, Address, Env, Map, String, Symbol, Vec};
 
-const PREREQ_UPDATED_EVENT: Symbol = symbol_short!("preqedit");
+use crate::error::{handle_error, Error};
+use crate::schema::{Course, DataKey};
+
+const COURSE_KEY: Symbol = symbol_short!("course");
+
+const PREREQ_UPDATED_EVENT: Symbol = symbol_short!("preqEdit");
 
 pub fn edit_prerequisite(
     env: Env,
@@ -16,7 +19,7 @@ pub fn edit_prerequisite(
     creator.require_auth();
 
     // Load course to verify it exists and check authorization
-    let course_key = (symbol_short!("course"), course_id.clone());
+    let course_key: (Symbol, String) = (COURSE_KEY, course_id.clone());
     let course: Course = env
         .storage()
         .persistent()
@@ -30,13 +33,15 @@ pub fn edit_prerequisite(
 
     // Validate that all prerequisite courses exist
     for prerequisite_id in new_prerequisites.iter() {
-        let prereq_course_key = (symbol_short!("course"), prerequisite_id.clone());
+        let prereq_course_key: (Symbol, String) = (COURSE_KEY, prerequisite_id.clone());
         if !env.storage().persistent().has(&prereq_course_key) {
             handle_error(&env, Error::PrereqCourseNotFound)
         }
     }
 
-    // TODO: Implement advanced prerequisite validation (depth limits, cyclic dependencies)
+    // Validate no duplicate prerequisites
+    validate_no_duplicate_prerequisites(&env, &new_prerequisites);
+
     // Prevent circular dependencies
     validate_no_circular_dependency(&env, &course_id, &new_prerequisites);
 
@@ -49,7 +54,7 @@ pub fn edit_prerequisite(
     // Emit event
     env.events().publish(
         (PREREQ_UPDATED_EVENT, course_id),
-        new_prerequisites.len() as u32,
+        new_prerequisites,
     );
 }
 
@@ -57,13 +62,13 @@ fn validate_no_circular_dependency(env: &Env, course_id: &String, new_prerequisi
     // Check if course_id appears in new_prerequisites (direct circular dependency)
     for prerequisite_id in new_prerequisites.iter() {
         if prerequisite_id.eq(course_id) {
-            handle_error(&env, Error::SelfPrerequisite)
+            handle_error(env, Error::SelfPrerequisite)
         }
     }
 
     // Check for indirect circular dependencies using DFS
-    let mut visited = Map::new(env);
-    let mut rec_stack = Map::new(env);
+    let mut visited: Map<String, bool> = Map::new(env);
+    let mut rec_stack: Map<String, bool> = Map::new(env);
 
     for prerequisite_id in new_prerequisites.iter() {
         if has_cycle(
@@ -73,7 +78,7 @@ fn validate_no_circular_dependency(env: &Env, course_id: &String, new_prerequisi
             &mut visited,
             &mut rec_stack,
         ) {
-            handle_error(&env, Error::CircularDependency);
+            handle_error(env, Error::CircularDependency);
         }
     }
 }
@@ -123,6 +128,18 @@ fn has_cycle(
     false
 }
 
+/// Validates that there are no duplicate prerequisites in the list
+fn validate_no_duplicate_prerequisites(env: &Env, prerequisites: &Vec<String>) {
+    let mut seen = Map::new(env);
+    
+    for prerequisite_id in prerequisites.iter() {
+        if seen.contains_key(prerequisite_id.clone()) {
+            handle_error(&env, Error::DuplicatePrerequisite);
+        }
+        seen.set(prerequisite_id.clone(), true);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -130,19 +147,19 @@ mod tests {
     use crate::CourseRegistryClient;
     use soroban_sdk::{
         testutils::{Address as TestAddress, Events},
-        Address, Env, String,
+        Address, Env, String, Val,
     };
 
     #[test]
     fn test_edit_prerequisite_success() {
-        let env = Env::default();
+        let env: Env = Env::default();
         env.mock_all_auths();
 
-        let contract_id = env.register(CourseRegistry, ());
-        let client = CourseRegistryClient::new(&env, &contract_id);
+        let contract_id: Address = env.register(CourseRegistry, ());
+        let client: CourseRegistryClient<'_> = CourseRegistryClient::new(&env, &contract_id);
 
         let creator: Address = Address::generate(&env);
-        let course1 = client.create_course(
+        let course1: Course = client.create_course(
             &creator,
             &String::from_str(&env, "Course 1"),
             &String::from_str(&env, "description"),
@@ -176,13 +193,13 @@ mod tests {
             &None,
         );
 
-        let mut prerequisites = Vec::new(&env);
+        let mut prerequisites: Vec<String> = Vec::new(&env);
         prerequisites.push_back(course2.id.clone());
         prerequisites.push_back(course3.id.clone());
 
         client.edit_prerequisite(&creator, &course1.id.clone(), &prerequisites.clone());
 
-        let events = env.events().all();
+        let events: Vec<(Address, Vec<Val>, Val)> = env.events().all();
         assert!(!events.is_empty());
 
         let stored_prerequisites: Vec<String> = env.as_contract(&contract_id, || {
@@ -582,5 +599,114 @@ mod tests {
                 .unwrap()
         });
         assert_eq!(stored_prerequisites.len(), 2);
+    }
+
+    #[test]
+    #[should_panic(expected = "HostError: Error(Contract, #56)")]
+    fn test_edit_prerequisite_duplicate_validation() {
+        let env = Env::default();
+        env.mock_all_auths();
+
+        let contract_id = env.register(CourseRegistry, ());
+        let client = CourseRegistryClient::new(&env, &contract_id);
+
+        let creator: Address = Address::generate(&env);
+        
+        let course1 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 1"),
+            &String::from_str(&env, "Description 1"),
+            &1000,
+            &None,
+            &None,
+            &None,
+            &None,
+            &None,
+        );
+
+        let course2 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 2"),
+            &String::from_str(&env, "Description 2"),
+            &1000,
+            &None,
+            &None,
+            &None,
+            &None,
+            &None,
+        );
+
+        // Try to edit with duplicate prerequisites
+        let mut prerequisites = Vec::new(&env);
+        prerequisites.push_back(course2.id.clone());
+        prerequisites.push_back(course2.id.clone()); // Duplicate
+
+        client.edit_prerequisite(&creator, &course1.id, &prerequisites);
+    }
+
+    #[test]
+    fn test_edit_prerequisite_no_duplicates_success() {
+        let env = Env::default();
+        env.mock_all_auths();
+
+        let contract_id = env.register(CourseRegistry, ());
+        let client = CourseRegistryClient::new(&env, &contract_id);
+
+        let creator: Address = Address::generate(&env);
+        
+        let course1 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 1"),
+            &String::from_str(&env, "Description 1"),
+            &1000,
+            &None,
+            &None,
+            &None,
+            &None,
+            &None,
+        );
+
+        let course2 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 2"),
+            &String::from_str(&env, "Description 2"),
+            &1000,
+            &None,
+            &None,
+            &None,
+            &None,
+            &None,
+        );
+
+        let course3 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Course 3"),
+            &String::from_str(&env, "Description 3"),
+            &1000,
+            &None,
+            &None,
+            &None,
+            &None,
+            &None,
+        );
+
+        // Edit with unique prerequisites
+        let mut prerequisites = Vec::new(&env);
+        prerequisites.push_back(course2.id.clone());
+        prerequisites.push_back(course3.id.clone());
+
+        client.edit_prerequisite(&creator, &course1.id, &prerequisites);
+
+        // Verify prerequisites were saved correctly
+        let stored_prerequisites: Vec<String> = env.as_contract(&contract_id, || {
+            env.storage()
+                .persistent()
+                .get(&DataKey::CoursePrerequisites(course1.id.clone()))
+                .unwrap()
+        });
+
+        assert_eq!(stored_prerequisites.len(), 2);
+        assert_eq!(stored_prerequisites.get(0).unwrap(), course2.id);
+        assert_eq!(stored_prerequisites.get(1).unwrap(), course3.id);
     }
 }

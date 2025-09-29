@@ -1,8 +1,8 @@
-use crate::functions::utils::u32_to_string;
 use crate::error::{handle_error, Error};
+use crate::functions::utils::u32_to_string;
 
-use crate::schema::{Course, CourseFilters};
-use soroban_sdk::{symbol_short, Env, Symbol, Vec};
+use soroban_sdk::{symbol_short, Env, Symbol, Vec, String};
+use crate::schema::{Course, CourseFilters, MAX_EMPTY_CHECKS};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 
@@ -14,13 +14,15 @@ pub fn list_courses_with_filters(
 ) -> Vec<Course> {
     // Validate pagination parameters to prevent abuse
     if let Some(l) = limit {
-        if l > 100 { // Prevent excessively large limits
-            handle_error(env, Error::InvalidInput)
+        if l > 100 {
+            // Prevent excessively large limits
+            handle_error(env, Error::InvalidLimitValue)
         }
     }
     if let Some(o) = offset {
-        if o > 10000 { // Prevent excessively large offsets
-            handle_error(env, Error::InvalidInput)
+        if o > 10000 {
+            // Prevent excessively large offsets
+            handle_error(env, Error::InvalidOffsetValue)
         }
     }
 
@@ -30,23 +32,23 @@ pub fn list_courses_with_filters(
     let mut matched: u32 = 0;
     let mut empty_checks: u32 = 0;
 
-    let offset_value = offset.unwrap_or(0);
-    let limit_value = limit.unwrap_or(10); // Reduced default limit for budget
+    let offset_value: u32 = offset.unwrap_or(0);
+    let limit_value: u32 = limit.unwrap_or(10); // Reduced default limit for budget
 
     // Safety check for limit - reduced for budget constraints
-    let max_limit = if limit_value > 20 { 20 } else { limit_value };
+    let max_limit: u32 = if limit_value > 20 { 20 } else { limit_value };
 
     loop {
         // Much more aggressive safety limits for budget
         if id > crate::schema::MAX_SCAN_ID as u128
-            || empty_checks > crate::schema::MAX_EMPTY_CHECKS as u32
+            || empty_checks > MAX_EMPTY_CHECKS as u32
         {
             break;
         }
 
         // Use the utility function instead of to_string()
-        let course_id = u32_to_string(env, id as u32);
-        let key = (COURSE_KEY, course_id.clone());
+        let course_id: String = u32_to_string(env, id as u32);
+        let key: (Symbol, String) = (COURSE_KEY, course_id.clone());
 
         if !env.storage().persistent().has(&key) {
             empty_checks += 1;
@@ -71,22 +73,22 @@ pub fn list_courses_with_filters(
         // - Category filter
         // - Level filter
         // - Duration filter (min/max, only if course has duration)
-        let passes_filters = filters.min_price.map_or(true, |min| course.price >= min)
+        let passes_filters: bool = filters.min_price.map_or(true, |min| course.price >= min)
             && filters.max_price.map_or(true, |max| course.price <= max)
             && filters
                 .category
                 .as_ref()
-                .map_or(true, |cat| course.category.as_ref() == Some(cat))
+                .is_none_or(|cat| course.category.as_ref() == Some(cat))
             && filters
                 .level
                 .as_ref()
-                .map_or(true, |lvl| course.level.as_ref() == Some(lvl))
-            && filters.min_duration.map_or(true, |min| {
-                course.duration_hours.map_or(false, |d| d >= min)
-            })
-            && filters.max_duration.map_or(true, |max| {
-                course.duration_hours.map_or(false, |d| d <= max)
-            });
+                .is_none_or(|lvl| course.level.as_ref() == Some(lvl))
+            && filters
+                .min_duration
+                .is_none_or(|min| course.duration_hours.is_some_and(|d| d >= min))
+            && filters
+                .max_duration
+                .is_none_or(|max| course.duration_hours.is_some_and(|d| d <= max));
 
         // If course passes all filters
         if passes_filters {

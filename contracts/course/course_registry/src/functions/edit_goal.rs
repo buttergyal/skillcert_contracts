@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
+
 use super::is_course_creator::is_course_creator;
 use crate::error::{handle_error, Error};
 use crate::functions::utils::trim;
 use crate::schema::{Course, CourseGoal, DataKey};
-use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
-const GOAL_EDITED_EVENT: Symbol = symbol_short!("goaledit");
+const COURSE_KEY: Symbol = symbol_short!("course");
+
+const GOAL_EDITED_EVENT: Symbol = symbol_short!("goalEdit");
 
 pub fn edit_goal(
     env: Env,
@@ -19,10 +22,10 @@ pub fn edit_goal(
     creator.require_auth();
     // Validate input
     if course_id.is_empty() {
-        handle_error(&env, Error::InvalidInput)
+        handle_error(&env, Error::EmptyCourseId)
     }
     if goal_id.is_empty() {
-        handle_error(&env, Error::InvalidInput)
+        handle_error(&env, Error::EmptyGoalId)
     }
     // Validate goal content - prevent empty or whitespace-only content
     if new_content.is_empty() || trim(&env, &new_content).is_empty() {
@@ -30,7 +33,7 @@ pub fn edit_goal(
     }
 
     // Load course
-    let storage_key = (symbol_short!("course"), course_id.clone());
+    let storage_key: (Symbol, String) = (COURSE_KEY, course_id.clone());
     let course: Course = env
         .storage()
         .persistent()
@@ -42,7 +45,7 @@ pub fn edit_goal(
         handle_error(&env, Error::Unauthorized)
     }
 
-    let goal_key = DataKey::CourseGoal(course_id.clone(), goal_id.clone());
+    let goal_key: DataKey = DataKey::CourseGoal(course_id.clone(), goal_id.clone());
     let mut goal: CourseGoal = env
         .storage()
         .persistent()

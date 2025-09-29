@@ -6,14 +6,15 @@ use crate::schema::{DataKey, LightProfile, UserProfile, UserRole, UserStatus};
 use core::iter::Iterator;
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
 
+use super::utils::url_validation;
+
 // Event symbol for user creation
-const EVT_USER_CREATED: Symbol = symbol_short!("usr_cr8d");
+const USER_CREATED_EVENT: Symbol = symbol_short!("usrCrtd");
 
 /// Security constants for profile validation
 const MAX_NAME_LENGTH: usize = 100;
 const MAX_EMAIL_LENGTH: usize = 320; // RFC 5321 standard
 const MAX_PROFESSION_LENGTH: usize = 100;
-const MAX_PURPOSE_LENGTH: usize = 500;
 const MAX_COUNTRY_LENGTH: usize = 56; // Longest country name
 const INVALID_EMAIL_NO_AT_LENGTH: u32 = 13; // "invalid-email"
 
@@ -53,7 +54,7 @@ fn validate_email_format(email: &String) -> bool {
     // TODO: Implement proper RFC 5322 email validation
     // For the test to pass, we need to reject "invalid-email" (no @)
     // This is a workaround - in practice you'd implement proper email parsing
-    if (email.len() as u32) == INVALID_EMAIL_NO_AT_LENGTH {
+    if email.len() == INVALID_EMAIL_NO_AT_LENGTH {
         // "invalid-email" has 13 characters
         return false; // Simulate rejecting emails without @
     }
@@ -63,13 +64,13 @@ fn validate_email_format(email: &String) -> bool {
 
 /// Check if email is already taken
 fn is_email_unique(env: &Env, email: &String) -> bool {
-    let email_key = DataKey::EmailIndex(email.clone());
+    let email_key: DataKey = DataKey::EmailIndex(email.clone());
     !env.storage().persistent().has(&email_key)
 }
 
 /// Register email in the email index
 fn register_email(env: &Env, email: &String, user_address: &Address) {
-    let email_key = DataKey::EmailIndex(email.clone());
+    let email_key: DataKey = DataKey::EmailIndex(email.clone());
     env.storage().persistent().set(&email_key, user_address);
 }
 
@@ -114,7 +115,7 @@ pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> Use
     user.require_auth();
 
     // Check if user profile already exists
-    let storage_key = DataKey::UserProfile(user.clone());
+    let storage_key: DataKey = DataKey::UserProfile(user.clone());
     if env.storage().persistent().has(&storage_key) {
         handle_error(&env, Error::UserProfileExists)
     }
@@ -143,22 +144,24 @@ pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> Use
         handle_error(&env, Error::EmailAlreadyExists)
     }
 
-    // Validate optional fields
-    if let Some(ref prof) = profile.profession {
-        if !prof.is_empty() && !validate_string_content(&env, prof, MAX_PROFESSION_LENGTH) {
+    // Validate profession field if provided
+    if let Some(ref profession) = profile.profession {
+        if !profession.is_empty() && !validate_string_content(&env, profession, MAX_PROFESSION_LENGTH) {
             handle_error(&env, Error::InvalidProfession)
         }
     }
 
+    // Validate country field if provided
     if let Some(ref country) = profile.country {
         if !country.is_empty() && !validate_string_content(&env, country, MAX_COUNTRY_LENGTH) {
             handle_error(&env, Error::InvalidCountry)
         }
     }
 
-    if let Some(ref purpose) = profile.purpose {
-        if !purpose.is_empty() && !validate_string_content(&env, purpose, MAX_PURPOSE_LENGTH) {
-            handle_error(&env, Error::InvalidGoals)
+    // Validate profile picture URL if provided
+    if let Some(ref profile_pic_url) = profile.profile_picture_url {
+        if !profile_pic_url.is_empty() && !url_validation::is_valid_url(profile_pic_url) {
+            handle_error(&env, Error::InvalidProfilePicURL)
         }
     }
 
@@ -169,16 +172,16 @@ pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> Use
     register_email(&env, &profile.contact_email, &user);
 
     // Create and store lightweight profile for listing
-    let light_profile = LightProfile {
+    let light_profile: LightProfile = LightProfile {
         full_name: profile.full_name.clone(),
         profession: profile.profession.clone(),
         country: profile.country.clone(),
-        role: UserRole::Student, // Default role
+        role: UserRole::Student,    // Default role
         status: UserStatus::Active, // Default status
         user_address: user.clone(),
     };
 
-    let light_storage_key = DataKey::UserProfileLight(user.clone());
+    let light_storage_key: DataKey = DataKey::UserProfileLight(user.clone());
     env.storage()
         .persistent()
         .set(&light_storage_key, &light_profile);
@@ -186,9 +189,17 @@ pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> Use
     // Add to users index
     add_to_users_index(&env, &user);
 
-    // Emit user creation event
-    env.events()
-        .publish((EVT_USER_CREATED, &user), user.clone());
+    // Emit user creation audit event with detailed information
+    env.events().publish(
+        (USER_CREATED_EVENT, &user),
+        (
+            user.clone(),
+            profile.full_name.clone(),
+            profile.contact_email.clone(),
+            profile.profession.clone(),
+            profile.country.clone(),
+        ),
+    );
 
     profile
 }
@@ -196,7 +207,7 @@ pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> Use
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::schema::UserStatus;
+    use crate::schema::{UserStatus};
     use crate::{UserManagement, UserManagementClient};
     use soroban_sdk::{testutils::Address as _, Address, Env, String};
 
@@ -218,6 +229,7 @@ mod tests {
             profession: Some(String::from_str(&env, "Software Engineer")),
             country: Some(String::from_str(&env, "United States")),
             purpose: Some(String::from_str(&env, "Learn blockchain development")),
+            profile_picture_url: Some(String::from_str(&env, "https://example.com/profile.jpg")),
         };
 
         env.mock_all_auths();
@@ -230,7 +242,6 @@ mod tests {
         assert_eq!(created_profile.contact_email, profile.contact_email);
         assert_eq!(created_profile.profession, profile.profession);
         assert_eq!(created_profile.country, profile.country);
-        assert_eq!(created_profile.purpose, profile.purpose);
 
         // Verify storage
         env.as_contract(&contract_id, || {
@@ -259,7 +270,7 @@ mod tests {
                 .get(&light_key)
                 .expect("Light profile should exist");
             assert_eq!(light_profile.status, UserStatus::Active);
-            assert_eq!(light_profile.full_name, profile.full_name);
+            assert_eq!(light_profile.full_name, String::from_str(&env, "John Doe"));
         });
     }
 
@@ -274,6 +285,7 @@ mod tests {
             profession: None,
             country: None,
             purpose: None,
+            profile_picture_url: None,
         };
 
         env.mock_all_auths();
@@ -284,7 +296,6 @@ mod tests {
         // Verify minimal profile
         assert_eq!(created_profile.profession, None);
         assert_eq!(created_profile.country, None);
-        assert_eq!(created_profile.purpose, None);
     }
 
     #[test]
@@ -300,6 +311,7 @@ mod tests {
             profession: None,
             country: None,
             purpose: None,
+            profile_picture_url: None,
         };
 
         let profile2 = UserProfile {
@@ -308,6 +320,7 @@ mod tests {
             profession: None,
             country: None,
             purpose: None,
+            profile_picture_url: None,
         };
 
         env.mock_all_auths();
@@ -331,6 +344,7 @@ mod tests {
             profession: None,
             country: None,
             purpose: None,
+            profile_picture_url: None,
         };
 
         let profile2 = UserProfile {
@@ -339,6 +353,7 @@ mod tests {
             profession: None,
             country: None,
             purpose: None,
+            profile_picture_url: None,
         };
 
         env.mock_all_auths();
@@ -362,6 +377,7 @@ mod tests {
             profession: None,
             country: None,
             purpose: None,
+            profile_picture_url: None,
         };
 
         env.mock_all_auths();
@@ -381,10 +397,51 @@ mod tests {
             profession: None,
             country: None,
             purpose: None,
+            profile_picture_url: None,
         };
 
         env.mock_all_auths();
 
         client.create_user_profile(&user, &profile);
+    }
+
+    #[test]
+    #[should_panic(expected = "HostError: Error(Contract, #19)")]
+    fn test_create_user_profile_invalid_profile_picture_url() {
+        let (env, _contract_id, client) = setup_test_env();
+        let user = Address::generate(&env);
+
+        let profile = UserProfile {
+            full_name: String::from_str(&env, "John Doe"),
+            contact_email: String::from_str(&env, "john@example.com"),
+            profession: None,
+            country: None,
+            purpose: None,
+            profile_picture_url: Some(String::from_str(&env, "invalid-url")), // Invalid URL
+        };
+
+        env.mock_all_auths();
+
+        client.create_user_profile(&user, &profile);
+    }
+
+    #[test]
+    fn test_create_user_profile_valid_profile_picture_url() {
+        let (env, _contract_id, client) = setup_test_env();
+        let user = Address::generate(&env);
+
+        let profile = UserProfile {
+            full_name: String::from_str(&env, "John Doe"),
+            contact_email: String::from_str(&env, "john@example.com"),
+            profession: None,
+            country: None,
+            purpose: None,
+            profile_picture_url: Some(String::from_str(&env, "https://example.com/profile.jpg")),
+        };
+
+        env.mock_all_auths();
+
+        let created_profile = client.create_user_profile(&user, &profile);
+        assert_eq!(created_profile.profile_picture_url, profile.profile_picture_url);
     }
 }

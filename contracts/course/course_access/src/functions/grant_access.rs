@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use soroban_sdk::{Address, Env, String, Vec, Symbol, symbol_short};
+
 use crate::schema::{CourseAccess, DataKey, UserCourses, CourseUsers};
-use soroban_sdk::{Address, Env, String, Vec};
 use crate::error::{Error, handle_error};
+
+const COURSE_ACCESS_EVENT: Symbol = symbol_short!("crsAccess");
 
 /// Grant access to a specific user for a given course
 pub fn course_access_grant_access(env: Env, course_id: String, user: Address) {
@@ -35,7 +38,7 @@ pub fn course_access_grant_access(env: Env, course_id: String, user: Address) {
     env.storage().persistent().extend_ttl(&key, 100, 1000);
 
     // Update UserCourses
-    let user_courses_key = DataKey::UserCourses(user.clone());
+    let user_courses_key: DataKey = DataKey::UserCourses(user.clone());
     let mut user_courses: UserCourses = env
         .storage()
         .persistent()
@@ -65,4 +68,6 @@ pub fn course_access_grant_access(env: Env, course_id: String, user: Address) {
         env.storage().persistent().set(&course_users_key, &course_users);
         env.storage().persistent().extend_ttl(&course_users_key, 100, 1000);
     }
+    env.events()
+        .publish((COURSE_ACCESS_EVENT, &user.clone()), (course_id, user, course_users.users.len(),));
 }
