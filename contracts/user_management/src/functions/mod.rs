@@ -14,7 +14,7 @@ pub mod list_all_registered_users;
 // Additional features like RBAC, admin management, and contract versioning are ommitted for brevity
 pub mod user;
 
-// pub mod utils;
+pub mod utils;
 // pub mod contract_versioning;
 // pub mod list_users_with_access;
 // pub mod rbac;
