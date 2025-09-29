@@ -27,7 +27,7 @@ pub fn save_profile(
 ) -> UserProfile {
     // Validate inputs
     if password != confirm_password {
-        handle_error(&env, Error::PasswordMismatch);
+        handle_error(&env, Error::InvalidField);
     }
     
     // Validate password strength
@@ -83,12 +83,12 @@ pub fn save_profile(
     
     // Check minimum length
     if password_len < MIN_PASSWORD_LENGTH {
-        handle_error(env, Error::PasswordTooShort);
+        handle_error(env, Error::InvalidField);
     }
     
     // Check maximum length
     if password_len > MAX_PASSWORD_LENGTH {
-        handle_error(env, Error::PasswordTooLong);
+        handle_error(env, Error::InvalidField);
     }
     
 /*     // Check for uppercase letter

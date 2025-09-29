@@ -131,7 +131,7 @@ pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> Use
 
     // Validate field lengths and content
     if !validate_string_content(&env, &profile.full_name, MAX_NAME_LENGTH) {
-        handle_error(&env, Error::InvalidName)
+        handle_error(&env, Error::NameRequired)
     }
 
     // Validate email format
@@ -147,14 +147,14 @@ pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> Use
     // Validate profession field if provided
     if let Some(ref profession) = profile.profession {
         if !profession.is_empty() && !validate_string_content(&env, profession, MAX_PROFESSION_LENGTH) {
-            handle_error(&env, Error::InvalidProfession)
+            handle_error(&env, Error::InvalidField)
         }
     }
 
     // Validate country field if provided
     if let Some(ref country) = profile.country {
         if !country.is_empty() && !validate_string_content(&env, country, MAX_COUNTRY_LENGTH) {
-            handle_error(&env, Error::InvalidCountry)
+            handle_error(&env, Error::InvalidField)
         }
     }
 

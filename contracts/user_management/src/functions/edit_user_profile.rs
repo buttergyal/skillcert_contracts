@@ -101,7 +101,7 @@ pub fn edit_user_profile(
             handle_error(&env, Error::NameRequired);
         }
         if !validate_string_content(&env, name, MAX_NAME_LENGTH) {
-            handle_error(&env, Error::InvalidName);
+            handle_error(&env, Error::NameRequired);
         }
         // For now, update the name field (could split into name/lastname later)
         // This is a simplified approach - in production you might want more sophisticated name parsing
@@ -110,14 +110,14 @@ pub fn edit_user_profile(
 
     if let Some(ref profession) = updates.profession {
         if !profession.is_empty() && !validate_string_content(&env, profession, MAX_PROFESSION_LENGTH) {
-            handle_error(&env, Error::InvalidProfession);
+            handle_error(&env, Error::InvalidField);
         }
         profile.profession = if profession.is_empty() { None } else { Some(profession.clone()) };
     }
 
     if let Some(ref country) = updates.country {
         if !country.is_empty() && !validate_string_content(&env, country, MAX_COUNTRY_LENGTH) {
-            handle_error(&env, Error::InvalidCountry);
+            handle_error(&env, Error::InvalidField);
         }
         profile.country = if country.is_empty() { None } else { Some(country.clone()) };
     }
@@ -125,7 +125,7 @@ pub fn edit_user_profile(
     // Handle purpose field update
     if let Some(ref purpose) = updates.purpose {
         if !purpose.is_empty() && !validate_string_content(&env, purpose, MAX_PROFESSION_LENGTH) {
-            handle_error(&env, Error::InvalidProfession);
+            handle_error(&env, Error::InvalidField);
         }
         profile.purpose = if purpose.is_empty() { None } else { Some(purpose.clone()) };
     }
