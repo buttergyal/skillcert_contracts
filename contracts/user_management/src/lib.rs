@@ -8,13 +8,15 @@ pub const VERSION: &str = "1.0.0";
 
 pub mod error;
 pub mod functions;
+pub mod models;
 pub mod schema;
 
 #[cfg(test)]
 mod test;
 
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
-use crate::schema::{AdminConfig, LightProfile, PaginatedLightProfiles, PaginationParams, Permission, ProfileUpdateParams, UserFilter, UserProfile, UserRole, UserStatus};
+use crate::schema::{AdminConfig, LightProfile, PaginatedLightProfiles, PaginationParams, ProfileUpdateParams, UserFilter, UserProfile, UserRole, UserStatus};
+use crate::error::Error;
 
 /// User Management Contract
 ///
@@ -26,46 +28,51 @@ pub struct UserManagement;
 
 #[contractimpl]
 impl UserManagement {
-
-
-    /// Retrieve a user profile by their address.
+    /// Retrieve a user profile for the authenticated user.
     ///
-    /// This function fetches a complete user profile using the user's blockchain address.
-    /// Access may be restricted based on the requester's permissions.
+    /// This function fetches the complete user profile associated with the provided
+    /// blockchain address. The user must be authenticated; otherwise, the function
+    /// will panic.
     ///
-    /// # Arguments
+    /// ### Arguments
     ///
-    /// * `env` - The Soroban environment
-    /// * `requester` - The address of the user requesting the profile
-    /// * `user_id` - The address of the user whose profile is being requested
+    /// * `env` - The Soroban environment.
+    /// * `user` - The address of the user whose profile is being requested.
     ///
-    /// # Returns
+    /// ### Returns
     ///
-    /// Returns the requested `UserProfile`.
+    /// Returns the `UserProfile` corresponding to the authenticated user.
     ///
-    /// # Panics
+    /// ### Panics
     ///
-    /// * If the user profile doesn't exist
-    /// * If the requester doesn't have permission to view the profile
-    /// * If the requester is not the user themselves or an admin
+    /// * If the user is not authenticated (`require_auth` fails).
+    /// * If the user profile does not exist (`UserNotFound` error).
     ///
-    /// # Examples
+    /// ### Examples
     ///
     /// ```rust
-    /// // Get your own profile
-    /// let my_profile = contract.get_user_by_id(env.clone(), my_address, my_address);
-    /// 
-    /// // Admin getting any user's profile
-    /// let user_profile = contract.get_user_by_id(env.clone(), admin_address, user_address);
+    /// // Assuming the user is authenticated in the environment
+    /// let profile = contract.get_user_profile(env.clone(), my_address);
+    /// println!("User full name: {}", profile.full_name);
     /// ```
     ///
-    /// # Edge Cases
+    /// ### Notes
     ///
-    /// * **Non-existent user**: Will panic with appropriate error message
-    /// * **Inactive user**: Returns profile but status will be `UserStatus::Inactive`
-    /// * **Permission denied**: Non-admin users can only view their own profiles
-    pub fn get_user_by_id(env: Env, requester: Address, user_id: Address) -> UserProfile {
-        functions::get_user_by_id::get_user_by_id(env, requester, user_id)
+    /// * Only the user themselves can fetch their profile; there is no admin override
+    ///   in this function.
+    /// * If the profile is not found in storage, the function will panic with
+    ///   `UserNotFound`.
+    pub fn get_user_profile(env: Env, user: Address) -> Result<UserProfile, Error> {
+        // Convert from models::user::UserProfile to schema::UserProfile
+        let model_profile = functions::user::get_user_profile(env.clone(), user)?;
+        Ok(UserProfile {
+            full_name: model_profile.full_name,
+            contact_email: model_profile.contact_email,
+            profession: model_profile.profession,
+            country: model_profile.country,
+            purpose: model_profile.purpose,
+            profile_picture_url: model_profile.profile_picture_url,
+        })
     }
 
     /// Create a new user profile
@@ -101,7 +108,7 @@ impl UserManagement {
     ///     country: Some("US".try_into().unwrap()),
     ///     ..Default::default()
     /// };
-    /// 
+    ///
     /// let created_profile = contract.create_user_profile(env, user_address, profile);
     /// ```
     ///
@@ -576,131 +583,5 @@ impl UserManagement {
     /// * `String` - The current contract version
     pub fn get_contract_version(_env: Env) -> String {
         String::from_str(&_env, VERSION)
-    }
-
-    /// Get contract version history
-    ///
-    /// Returns a list of all versions that have been deployed for this contract.
-    /// This helps track the evolution of the contract over time.
-    ///
-    /// # Arguments
-    /// * `env` - The Soroban environment
-    ///
-    /// # Returns
-    /// * `Vec<String>` - Vector of version strings in chronological order
-    pub fn get_version_history(env: Env) -> Vec<String> {
-        functions::contract_versioning::get_version_history(&env)
-    }
-
-    /// Check compatibility between contract versions
-    ///
-    /// Determines if data from one version can be safely used with another version.
-    /// This is crucial for migration processes and backward compatibility.
-    ///
-    /// # Arguments
-    /// * `env` - The Soroban environment
-    /// * `from_version` - The source version to check compatibility from
-    /// * `to_version` - The target version to check compatibility to
-    ///
-    /// # Returns
-    /// * `bool` - True if the versions are compatible, false otherwise
-    pub fn is_version_compatible(env: Env, from_version: String, to_version: String) -> bool {
-        functions::contract_versioning::is_version_compatible(&env, from_version, to_version)
-    }
-
-    /// Migrate user data between contract versions
-    ///
-    /// Performs data migration from one contract version to another.
-    /// This function handles the transformation of user data structures
-    /// when upgrading contract versions.
-    ///
-    /// # Arguments
-    /// * `env` - The Soroban environment
-    /// * `caller` - The address performing the migration (must be admin)
-    /// * `from_version` - The source version to migrate from
-    /// * `to_version` - The target version to migrate to
-    ///
-    /// # Returns
-    /// * `bool` - True if migration was successful, false otherwise
-    ///
-    /// # Events
-    /// Emits a migration event upon successful completion
-    pub fn migrate_user_data(env: Env, caller: Address, from_version: String, to_version: String) -> bool {
-        functions::contract_versioning::migrate_user_data(&env, caller, from_version, to_version)
-    }
-
-    /// Get migration status for the current contract
-    ///
-    /// Returns information about the current migration status and any
-    /// pending migrations that need to be completed.
-    ///
-    /// # Arguments
-    /// * `env` - The Soroban environment
-    ///
-    /// # Returns
-    /// * `String` - Migration status information
-    pub fn get_migration_status(env: Env) -> String {
-        functions::contract_versioning::get_migration_status(&env)
-    }
-
-    // RBAC Functions
-
-    /// Set a user's role (admin only)
-    ///
-    /// # Arguments
-    /// * `env` - Soroban environment
-    /// * `caller` - Address performing the call (must have ManageAdmins permission)
-    /// * `user` - Address of the user to assign role to
-    /// * `role` - New role to assign
-    pub fn set_user_role(env: Env, caller: Address, user: Address, role: UserRole) {
-        functions::rbac::set_user_role(env, caller, user, role)
-    }
-
-    /// Check if a user has a specific permission
-    ///
-    /// # Arguments
-    /// * `env` - Soroban environment
-    /// * `user` - Address of the user to check
-    /// * `permission` - Permission to check for
-    ///
-    /// # Returns
-    /// * `bool` - True if user has the permission
-    pub fn has_permission(env: Env, user: Address, permission: Permission) -> bool {
-        functions::rbac::has_permission(&env, &user, &permission)
-    }
-
-    /// Grant additional permission to a user (admin only)
-    ///
-    /// # Arguments
-    /// * `env` - Soroban environment
-    /// * `caller` - Address performing the call (must have ManageAdmins permission)
-    /// * `user` - Address of the user to grant permission to
-    /// * `permission` - Permission to grant
-    pub fn grant_user_permission(env: Env, caller: Address, user: Address, permission: Permission) {
-        functions::rbac::grant_user_permission(env, caller, user, permission)
-    }
-
-    /// Revoke permission from a user (admin only)
-    ///
-    /// # Arguments
-    /// * `env` - Soroban environment
-    /// * `caller` - Address performing the call (must have ManageAdmins permission)
-    /// * `user` - Address of the user to revoke permission from
-    /// * `permission` - Permission to revoke
-    pub fn revoke_user_permission(env: Env, caller: Address, user: Address, permission: Permission) {
-        functions::rbac::revoke_user_permission(env, caller, user, permission)
-    }
-
-    /// Get all permissions for a user
-    ///
-    /// # Arguments
-    /// * `env` - Soroban environment
-    /// * `caller` - Address performing the call (must be user themselves or have ViewUsers permission)
-    /// * `user` - Address of the user to get permissions for
-    ///
-    /// # Returns
-    /// * `Vec<Permission>` - List of all permissions the user has
-    pub fn get_user_permissions(env: Env, caller: Address, user: Address) -> Vec<Permission> {
-        functions::rbac::get_user_permissions(env, caller, user)
     }
 }
