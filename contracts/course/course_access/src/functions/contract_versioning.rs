@@ -22,11 +22,11 @@ pub enum VersioningError {
     MigrationFailed = 6,
 }
 
-/// Storage keys for versioning data
+
 const VERSION_HISTORY_KEY: &str = "version_history";
 const MIGRATION_STATUS_KEY: &str = "migration_status";
 
-/// Get the version history of the contract
+
 pub fn get_version_history(env: &Env) -> Vec<String> {
     let key = String::from_str(env, VERSION_HISTORY_KEY);
     env.storage()
@@ -35,18 +35,17 @@ pub fn get_version_history(env: &Env) -> Vec<String> {
         .unwrap_or_else(|| vec![env])
 }
 
-/// Store a new version in the history
 fn store_version_in_history(env: &Env, version: String) {
-    let mut history = get_version_history(env);
+    let mut history: Vec<String> = get_version_history(env);
     history.push_back(version.clone());
     
-    let key = String::from_str(env, VERSION_HISTORY_KEY);
+    let key: String = String::from_str(env, VERSION_HISTORY_KEY);
     env.storage().instance().set(&key, &history);
 }
 
-/// Check if a version exists in the history
+
 fn version_exists_in_history(env: &Env, version: &String) -> bool {
-    let history = get_version_history(env);
+    let history: Vec<String> = get_version_history(env);
     for v in history.iter() {
         if &v == version {
             return true;
@@ -55,31 +54,29 @@ fn version_exists_in_history(env: &Env, version: &String) -> bool {
     false
 }
 
-/// Get migration status information
+
 pub fn get_migration_status(env: &Env) -> String {
-    let key = String::from_str(env, MIGRATION_STATUS_KEY);
+    let key: String = String::from_str(env, MIGRATION_STATUS_KEY);
     env.storage()
         .instance()
         .get::<String, String>(&key)
         .unwrap_or_else(|| String::from_str(env, "No migrations pending"))
 }
 
-/// Set migration status
+
 fn set_migration_status(env: &Env, status: String) {
     let key = String::from_str(env, MIGRATION_STATUS_KEY);
     env.storage().instance().set(&key, &status);
 }
 
-/// Check compatibility between two versions
+
 pub fn is_version_compatible(_env: &Env, _from_version: String, _to_version: String) -> bool {
     // Simple compatibility check - for now, assume all versions are compatible
     // In a real implementation, you would parse semantic versions properly
     true
 }
 
-/// Check if the caller is authorized to perform migration
-/// For course access, we'll allow any authenticated user for now
-/// In a production environment, this should check for admin privileges
+
 fn is_authorized_for_migration(_env: &Env, _caller: Address) -> bool {
     // For now, we'll allow any authenticated user
     // In a real implementation, you would check against user management contract
@@ -93,40 +90,39 @@ fn is_authorized_for_migration(_env: &Env, _caller: Address) -> bool {
     true // Placeholder - allow all authenticated users
 }
 
-/// Migrate access data between contract versions
 pub fn migrate_access_data(
     env: &Env,
     caller: Address,
     from_version: String,
     to_version: String,
 ) -> bool {
-    // Check if caller is authorized
+
     if !is_authorized_for_migration(env, caller.clone()) {
         set_migration_status(env, String::from_str(env, "Migration failed: Unauthorized"));
         return false;
     }
     
-    // Validate versions exist in history
+
     if !version_exists_in_history(env, &from_version) {
         set_migration_status(env, String::from_str(env, "Migration failed: Source version not found"));
         return false;
     }
     
-    // Check compatibility
+
     if !is_version_compatible(env, from_version.clone(), to_version.clone()) {
         set_migration_status(env, String::from_str(env, "Migration failed: Versions not compatible"));
         return false;
     }
     
-    // Perform migration based on version differences
-    let migration_result = perform_access_data_migration(env, &from_version, &to_version);
+
+    let migration_result: bool = perform_access_data_migration(env, &from_version, &to_version);
     
     if migration_result {
         // Update version history with new version
         store_version_in_history(env, to_version.clone());
         
         // Set successful migration status
-        let status = String::from_str(env, "Migration completed successfully");
+        let status: String = String::from_str(env, "Migration completed successfully");
         set_migration_status(env, status);
         
         // Emit migration event

@@ -2,23 +2,21 @@
 // Copyright (c) 2025 SkillCert
 
 use crate::error::{handle_error, Error};
-use crate::schema::{DataKey, LightProfile, UserProfile, UserRole, UserStatus, AdminConfig};
+use crate::schema::{DataKey, LightProfile, UserProfile, UserRole, UserStatus};
 use crate::functions::utils::rate_limit_utils::check_user_creation_rate_limit;
-use crate::functions::utils::storage_utils::{
-    add_to_users_index, is_email_unique, register_email, validate_email_format,
-    validate_string_content,
-};
-use soroban_sdk::{symbol_short, Address, Env, Symbol};
-
-use super::utils::url_validation;
+use crate::functions::utils::url_validation;
+use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
+use core::iter::Iterator;
 
 // Event symbol for user creation
 const USER_CREATED_EVENT: Symbol = symbol_short!("usrCrtd");
 
 /// Security constants for profile validation
 const MAX_NAME_LENGTH: usize = 100;
+const MAX_EMAIL_LENGTH: usize = 320; // RFC 5321 standard
 const MAX_PROFESSION_LENGTH: usize = 100;
 const MAX_COUNTRY_LENGTH: usize = 56; // Longest country name
+const INVALID_EMAIL_NO_AT_LENGTH: u32 = 13; // "invalid-email"
 
 /// Validates string content for security
 fn validate_string_content(_env: &Env, s: &String, max_len: usize) -> bool {
@@ -121,7 +119,7 @@ pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> Use
     let rate_config = match env
         .storage()
         .persistent()
-        .get::<DataKey, AdminConfig>(&admin_config_key)
+        .get::<DataKey, crate::schema::AdminConfig>(&admin_config_key)
     {
         Some(config) => config.rate_limit_config,
         None => {
@@ -130,7 +128,7 @@ pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> Use
             get_default_rate_limit_config()
         }
     };
-
+    
     check_user_creation_rate_limit(&env, &user, &rate_config);
 
     // Check if user profile already exists
@@ -150,7 +148,7 @@ pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> Use
 
     // Validate field lengths and content
     if !validate_string_content(&env, &profile.full_name, MAX_NAME_LENGTH) {
-        handle_error(&env, Error::InvalidName)
+        handle_error(&env, Error::NameRequired)
     }
 
     // Validate email format
@@ -166,14 +164,14 @@ pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> Use
     // Validate profession field if provided
     if let Some(ref profession) = profile.profession {
         if !profession.is_empty() && !validate_string_content(&env, profession, MAX_PROFESSION_LENGTH) {
-            handle_error(&env, Error::InvalidProfession)
+            handle_error(&env, Error::InvalidField)
         }
     }
 
     // Validate country field if provided
     if let Some(ref country) = profile.country {
         if !country.is_empty() && !validate_string_content(&env, country, MAX_COUNTRY_LENGTH) {
-            handle_error(&env, Error::InvalidCountry)
+            handle_error(&env, Error::InvalidField)
         }
     }
 

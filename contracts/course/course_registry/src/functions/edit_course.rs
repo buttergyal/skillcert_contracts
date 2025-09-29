@@ -5,7 +5,7 @@ use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
 use crate::error::{handle_error, Error};
 use crate::schema::{Course, EditCourseParams};
-use super::utils::{to_lowercase, trim};
+use crate::functions::utils::{to_lowercase, trim};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const TITLE_KEY: Symbol = symbol_short!("title");

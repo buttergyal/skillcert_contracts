@@ -15,9 +15,8 @@ mod test;
 
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
 
-pub use error::Error;
-pub use functions::*;
-pub use schema::{CourseUsers, UserCourses};
+use functions::{config::initialize,config::set_contract_addrs, grant_access::course_access_grant_access, revoke_access::course_access_revoke_access, revoke_all_access::revoke_all_access, save_profile::save_user_profile, list_user_courses::list_user_courses, list_course_access::course_access_list_course_access, contract_versioning::{is_version_compatible, get_migration_status, get_version_history, migrate_access_data}, transfer_course_access::transfer_course_access};
+use schema::{CourseUsers, UserCourses};
 
 /// Course Access Contract
 ///
@@ -69,7 +68,7 @@ impl CourseAccessContract {
         user_mgmt_addr: Address,
         course_registry_addr: Address,
     ) {
-        functions::config::initialize(env, caller, user_mgmt_addr, course_registry_addr)
+        initialize(env, caller, user_mgmt_addr, course_registry_addr)
     }
 
     /// Grant access to a specific user for a given course.
@@ -114,7 +113,7 @@ impl CourseAccessContract {
     /// * **Permission denied**: Only course creators and admins can grant access
     /// * **User validation**: User address must be valid
     pub fn grant_access(env: Env, course_id: String, user: Address) {
-        functions::grant_access::course_access_grant_access(env, course_id, user)
+        course_access_grant_access(env, course_id, user)
     }
 
     /// Revoke access for a specific user from a course.
@@ -161,7 +160,7 @@ impl CourseAccessContract {
     /// * **Permission denied**: Only course creators and admins can revoke access
     /// * **Idempotent**: Safe to call multiple times
     pub fn revoke_access(env: Env, course_id: String, user: Address) -> bool {
-        functions::revoke_access::course_access_revoke_access(env, course_id, user)
+        course_access_revoke_access(env, course_id, user)
     }
 
     /// Save or update a user's profile on-chain.
@@ -222,7 +221,7 @@ impl CourseAccessContract {
         country: String,
     ) {
         let user: Address = env.current_contract_address();
-        functions::save_profile::save_user_profile(env, name, email, profession, goals, country, user);
+        save_user_profile(env, name, email, profession, goals, country, user);
     }
 
     /// List all courses a user has access to.
@@ -257,7 +256,7 @@ impl CourseAccessContract {
     /// * **Public access**: Anyone can query user courses
     /// * **Revoked courses**: Only includes currently accessible courses
     pub fn list_user_courses(env: Env, user: Address) -> UserCourses {
-        functions::list_user_courses::list_user_courses(env, user)
+        list_user_courses(env, user)
     }
 
     /// List all users who have access to a course.
@@ -291,7 +290,7 @@ impl CourseAccessContract {
     /// * **Public access**: Anyone can query course access
     /// * **Real-time data**: Always returns current access status
     pub fn list_course_access(env: Env, course_id: String) -> CourseUsers {
-        functions::list_course_access::course_access_list_course_access(env, course_id)
+        course_access_list_course_access(env, course_id)
     }
 
     /// Revoke all user access for a course.
@@ -334,7 +333,7 @@ impl CourseAccessContract {
     /// * **Permission denied**: Only course creators and admins can perform this
     /// * **Bulk operation**: Efficiently removes all access in one transaction
     pub fn revoke_all_access(env: Env, user: Address, course_id: String) -> u32 {
-        functions::revoke_all_access::revoke_all_access(env, user, course_id)
+        revoke_all_access(env, user, course_id)
     }
 
     /// Configure external contract addresses used for auth checks.
@@ -382,7 +381,7 @@ impl CourseAccessContract {
         user_mgmt_addr: Address,
         course_registry_addr: Address,
     ) {
-        functions::config::set_contract_addrs(env, caller, user_mgmt_addr, course_registry_addr)
+        set_contract_addrs(env, caller, user_mgmt_addr, course_registry_addr)
     }
 
     /// Get the current contract version
@@ -410,7 +409,7 @@ impl CourseAccessContract {
     /// # Returns
     /// * `Vec<String>` - Vector of version strings in chronological order
     pub fn get_version_history(env: Env) -> Vec<String> {
-        functions::contract_versioning::get_version_history(&env)
+        get_version_history(&env)
     }
 
     /// Check compatibility between contract versions
@@ -426,7 +425,7 @@ impl CourseAccessContract {
     /// # Returns
     /// * `bool` - True if the versions are compatible, false otherwise
     pub fn is_version_compatible(env: Env, from_version: String, to_version: String) -> bool {
-        functions::contract_versioning::is_version_compatible(&env, from_version, to_version)
+        is_version_compatible(&env, from_version, to_version)
     }
 
     /// Migrate access data between contract versions
@@ -447,7 +446,7 @@ impl CourseAccessContract {
     /// # Events
     /// Emits a migration event upon successful completion
     pub fn migrate_access_data(env: Env, caller: Address, from_version: String, to_version: String) -> bool {
-        functions::contract_versioning::migrate_access_data(&env, caller, from_version, to_version)
+        migrate_access_data(&env, caller, from_version, to_version)
     }
 
     /// Get migration status for the current contract
@@ -461,6 +460,10 @@ impl CourseAccessContract {
     /// # Returns
     /// * `String` - Migration status information
     pub fn get_migration_status(env: Env) -> String {
-        functions::contract_versioning::get_migration_status(&env)
+        get_migration_status(&env)
+    }
+
+    pub fn transfer_course(env: Env, course_id: String, from: Address, to: Address){
+        transfer_course_access(env, course_id, from, to)
     }
 }

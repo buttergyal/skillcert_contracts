@@ -15,35 +15,7 @@ const COURSES_KEY: Symbol = symbol_short!("courses");
 /// Event symbol for revoke all access operations
 const REVOKE_ALL_EVENT: Symbol = symbol_short!("revokeAll");
 
-/// Revoke access for all users from a specific course.
-///
-/// This function removes access for all users from the specified course and
-/// updates all related storage structures. Only admin users or course creators
-/// are authorized to perform this operation.
-///
-/// # Arguments
-///
-/// * `env` - The Soroban environment
-/// * `caller` - The address of the user requesting the operation
-/// * `course_id` - The unique identifier of the course to revoke all access from
-///
-/// # Returns
-///
-/// Returns the number of users whose access was revoked.
-///
-/// # Authorization
-///
-/// The caller must be either:
-/// - An admin user (verified via user management contract)
-/// - The creator of the course (verified via course registry contract)
-///
-/// # Events
-///
-/// Emits a `revokeall` event with the course ID and number of affected users.
-///
-/// # Panics
-///
-/// Panics with `Error::Unauthorized` if the caller is not authorized to perform this operation.
+
 pub fn revoke_all_access(env: Env, caller: Address, course_id: String) -> u32 {
     caller.require_auth();
 

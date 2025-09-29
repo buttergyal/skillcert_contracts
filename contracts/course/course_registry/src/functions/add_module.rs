@@ -3,9 +3,9 @@
 
 use soroban_sdk::{symbol_short, Vec, vec, Address, Env, String, Symbol};
 
-use super::utils::{concat_strings, u32_to_string};
+use crate::functions::utils::{concat_strings, u32_to_string};
 use crate::error::{handle_error, Error};
-pub use crate::schema::{Course, CourseModule};
+use crate::schema::{CourseModule};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const MODULE_KEY: Symbol = symbol_short!("module");
@@ -98,7 +98,7 @@ mod test {
     extern crate std;
     
     use super::*;
-    use crate::{CourseRegistry, CourseRegistryClient};
+    use crate::{schema::Course, CourseRegistry, CourseRegistryClient};
     use soroban_sdk::{testutils::Address as _, Address, Env};
 
     fn create_course<'a>(client: &CourseRegistryClient<'a>, creator: &Address) -> Course {

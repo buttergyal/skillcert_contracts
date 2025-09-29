@@ -3,7 +3,7 @@
 
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
-use super::is_course_creator::is_course_creator;
+use crate::functions::is_course_creator::is_course_creator;
 use crate::error::{handle_error, Error};
 use crate::functions::utils::trim;
 use crate::schema::{Course, CourseGoal, DataKey};
