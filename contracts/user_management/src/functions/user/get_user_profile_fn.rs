@@ -1,5 +1,5 @@
 use crate::error::{Error};
-use crate::models::{user::UserProfile, DataKey};
+use crate::schema::{UserProfile, DataKey};
 use soroban_sdk::{Address, Env};
 
 /// Get User Profile
@@ -41,7 +41,7 @@ mod tests {
         user,
         test_utils
     };
-    use crate::models::{user::UserProfile, DataKey};
+    use crate::schema::{UserProfile, DataKey};
     use soroban_sdk::{
         Address, Env, String,
         testutils::Address as _
