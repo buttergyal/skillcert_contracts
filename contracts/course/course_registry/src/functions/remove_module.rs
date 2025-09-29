@@ -1,9 +1,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use soroban_sdk::{symbol_short, Env, String, Symbol};
+
 use crate::error::{handle_error, Error};
 use crate::schema::CourseModule;
-use soroban_sdk::{symbol_short, Env, String};
+
+const MODULE_KEY: Symbol = symbol_short!("module");
+
+const REMOVE_MODULE_EVENT: Symbol = symbol_short!("remModule");
 
 pub fn remove_module(env: &Env, module_id: String) -> Result<(), &'static str> {
     if module_id.is_empty() {
@@ -14,7 +19,7 @@ pub fn remove_module(env: &Env, module_id: String) -> Result<(), &'static str> {
     let module: Option<CourseModule> = env
         .storage()
         .persistent()
-        .get(&(symbol_short!("module"), module_id.clone()));
+        .get(&(MODULE_KEY, module_id.clone()));
 
     // Validate that the module exists and is a valid CourseModule
     if module.is_none() {
@@ -24,10 +29,10 @@ pub fn remove_module(env: &Env, module_id: String) -> Result<(), &'static str> {
     // Delete the CourseModule directly from persistent storage using its key.
     env.storage()
         .persistent()
-        .remove(&(symbol_short!("module"), module_id.clone()));
+        .remove(&(MODULE_KEY, module_id.clone()));
 
     // Emits an event to indicate the module has been removed.
-    env.events().publish((module_id,), "module_removed");
+    env.events().publish((REMOVE_MODULE_EVENT,), module_id);
 
     Ok(())
 }

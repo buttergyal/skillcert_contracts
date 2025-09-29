@@ -16,13 +16,11 @@ pub enum Error {
     InvalidCourseId = 7,
     InvalidUser = 8,
     EmptyCourseId = 9,
-    InvalidInput = 10,
+    // Removed InvalidInput - replaced with specific validation errors below
+    InvalidTransferData = 10,
     SameUserTransfer = 11,
 }
 
 pub fn handle_error(env: &Env, error: Error) -> ! {
     panic_with_error!(env, error);
 }
-
-// Alias para compatibilidad con imports existentes
-pub type CourseAccessError = Error;

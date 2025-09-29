@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use crate::schema::Course;
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
+use crate::schema::Course;
+
 const COURSE_KEY: Symbol = symbol_short!("course");
 
 pub fn is_course_creator(env: &Env, course_id: String, user: Address) -> bool {
-    let key = (COURSE_KEY, course_id.clone());
+    let key: (Symbol, String) = (COURSE_KEY, course_id.clone());
     let course: Course = env.storage().persistent().get(&key).unwrap();
 
     if course.creator == user {

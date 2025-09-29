@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use soroban_sdk::{symbol_short, Address, Env, Map, String, Symbol, Vec};
+
 use crate::error::{handle_error, Error};
 use crate::schema::{Course, DataKey};
-use soroban_sdk::{symbol_short, Address, Env, Map, String, Symbol, Vec};
+
+const COURSE_KEY: Symbol = symbol_short!("course");
 
 const PREREQ_CREATED_EVENT: Symbol = symbol_short!("prereqAdd");
 
@@ -21,22 +24,22 @@ pub fn add_prerequisite(env: Env, creator: Address, course_id: String, prerequis
 
     // Validate prerequisites list
     if prerequisites.is_empty() {
-        handle_error(&env, Error::InvalidInput);
+        handle_error(&env, Error::EmptyPrerequisiteList);
     }
 
     // Check for reasonable limit on number of prerequisites
     if prerequisites.len() > 20 {
-        handle_error(&env, Error::InvalidInput);
+        handle_error(&env, Error::TooManyPrerequisites);
     }
 
     // Validate each prerequisite ID
     for prerequisite_id in prerequisites.iter() {
         if prerequisite_id.is_empty() {
-            handle_error(&env, Error::InvalidInput);
+            handle_error(&env, Error::EmptyPrerequisiteId);
         }
 
         if prerequisite_id.len() > 100 {
-            handle_error(&env, Error::InvalidInput);
+            handle_error(&env, Error::InvalidPrerequisiteId);
         }
 
         // Check for self-prerequisite
@@ -45,7 +48,7 @@ pub fn add_prerequisite(env: Env, creator: Address, course_id: String, prerequis
         }
     }
 
-    let course_key: (Symbol, String) = (symbol_short!("course"), course_id.clone());
+    let course_key: (Symbol, String) = (COURSE_KEY, course_id.clone());
     let course: Course = env
         .storage()
         .persistent()
@@ -58,7 +61,7 @@ pub fn add_prerequisite(env: Env, creator: Address, course_id: String, prerequis
 
     for prerequisite_id in prerequisites.iter() {
         let prereq_course_key: (Symbol, String) =
-            (symbol_short!("course"), prerequisite_id.clone());
+            (COURSE_KEY, prerequisite_id.clone());
         if !env.storage().persistent().has(&prereq_course_key) {
             handle_error(&env, Error::PrereqCourseNotFound)
         }
@@ -171,7 +174,7 @@ mod tests {
     };
 
     #[test]
-    #[should_panic(expected = "HostError: Error(Contract, #34)")]
+    #[should_panic(expected = "HostError: Error(Contract, #56)")]
     fn test_add_prerequisite_duplicate_validation() {
         let env = Env::default();
         env.mock_all_auths();

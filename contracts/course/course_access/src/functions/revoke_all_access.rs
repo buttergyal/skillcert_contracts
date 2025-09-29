@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use soroban_sdk::{symbol_short, Address, Env, IntoVal, String, Symbol, Vec};
+
 use crate::error::{handle_error, Error};
 use crate::schema::{DataKey, KEY_COURSE_REG_ADDR, KEY_USER_MGMT_ADDR};
-use soroban_sdk::{symbol_short, Address, Env, IntoVal, String, Symbol, Vec};
 
 /// Storage key symbol for user data
 const USER_KEY: Symbol = symbol_short!("user");
@@ -12,7 +13,7 @@ const USER_KEY: Symbol = symbol_short!("user");
 const COURSES_KEY: Symbol = symbol_short!("courses");
 
 /// Event symbol for revoke all access operations
-const REVOKE_ALL_EVENT: Symbol = symbol_short!("revokeall");
+const REVOKE_ALL_EVENT: Symbol = symbol_short!("revokeAll");
 
 /// Revoke access for all users from a specific course.
 ///
@@ -45,12 +46,12 @@ const REVOKE_ALL_EVENT: Symbol = symbol_short!("revokeall");
 /// Panics with `Error::Unauthorized` if the caller is not authorized to perform this operation.
 pub fn revoke_all_access(env: Env, caller: Address, course_id: String) -> u32 {
     caller.require_auth();
-    
+
     // Validate input parameters
     if course_id.is_empty() {
         handle_error(&env, Error::EmptyCourseId);
     }
-    
+
     // Check course_id length to prevent extremely long IDs
     if course_id.len() > 100 {
         handle_error(&env, Error::InvalidCourseId);
@@ -95,7 +96,7 @@ pub fn revoke_all_access(env: Env, caller: Address, course_id: String) -> u32 {
         None => Vec::new(&env),
     };
 
-    let count = affected_users.len();
+    let count: u32 = affected_users.len();
     if count == 0 {
         env.events()
             .publish((REVOKE_ALL_EVENT, course_id.clone()), count);
@@ -103,7 +104,7 @@ pub fn revoke_all_access(env: Env, caller: Address, course_id: String) -> u32 {
     }
 
     // Remove each user's access entry and update per-user course index if present
-    let mut i = 0u32;
+    let mut i: u32 = 0u32;
     while i < count {
         if let Some(user) = affected_users.get(i) {
             let access_key: DataKey = DataKey::CourseAccess(course_id.clone(), user.clone());
@@ -111,15 +112,15 @@ pub fn revoke_all_access(env: Env, caller: Address, course_id: String) -> u32 {
                 env.storage().persistent().remove(&access_key);
             }
 
-            let user_key = (USER_KEY, user.to_string());
+            let user_key: (Symbol, String) = (USER_KEY, user.to_string());
             if let Some(mut uc) = env
                 .storage()
                 .persistent()
                 .get::<_, crate::schema::UserCourses>(&user_key)
             {
                 let mut new_courses: Vec<String> = Vec::new(&env);
-                let mut j = 0u32;
-                let total = uc.courses.len();
+                let mut j: u32 = 0u32;
+                let total: u32 = uc.courses.len();
                 while j < total {
                     if let Some(cid) = uc.courses.get(j) {
                         if cid != course_id {
@@ -136,7 +137,7 @@ pub fn revoke_all_access(env: Env, caller: Address, course_id: String) -> u32 {
     }
 
     // Clear course -> users index
-    let empty = Vec::new(&env);
+    let empty: Vec<Address> = Vec::new(&env);
     if env.storage().persistent().has(&course_key) {
         let mut cu: crate::schema::CourseUsers =
             env.storage().persistent().get(&course_key).unwrap();

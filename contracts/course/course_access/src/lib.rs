@@ -15,7 +15,7 @@ mod test;
 
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
 
-pub use error::CourseAccessError;
+pub use error::Error;
 pub use functions::*;
 pub use schema::{CourseUsers, UserCourses};
 
@@ -221,7 +221,7 @@ impl CourseAccessContract {
         goals: Option<String>,
         country: String,
     ) {
-        let user = env.current_contract_address();
+        let user: Address = env.current_contract_address();
         functions::save_profile::save_user_profile(env, name, email, profession, goals, country, user);
     }
 
