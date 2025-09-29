@@ -9,24 +9,7 @@ use soroban_sdk::{symbol_short, Address, Env, Symbol};
 // Event symbol for user deactivation
 const USER_DEACTIVATED_EVENT: Symbol = symbol_short!("usrDeact");
 
-/// Delete (deactivate) a user account
-///
-/// This function performs a soft delete by marking the user as inactive instead of
-/// permanently removing their data. Only admins or the user themselves can trigger deletion.
-///
-/// # Arguments
-/// * `env` - Soroban environment
-/// * `caller` - Address performing the deletion (must be admin or the user themselves)
-/// * `user_id` - Address of the user to be deactivated
-///
-/// # Panics
-/// * If caller authentication fails
-/// * If user doesn't exist
-/// * If caller is neither admin nor the user themselves
-/// * If user is already inactive
-///
-/// # Events
-/// Emits a user deactivation event upon successful deletion
+
 pub fn delete_user(env: Env, caller: Address, user_id: Address) {
     // Require authentication for the caller
     caller.require_auth();
@@ -159,6 +142,10 @@ mod tests {
                 super_admin: admin.clone(),
                 max_page_size,
                 total_user_count: 0,
+                rate_limit_config: {
+                    use crate::functions::utils::rate_limit_utils::get_default_rate_limit_config;
+                    get_default_rate_limit_config()
+                },
             };
             env.storage()
                 .persistent()

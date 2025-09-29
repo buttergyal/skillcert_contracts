@@ -46,6 +46,7 @@ src/
 - test.rs: Extensive test coverage for all contract functionality
 
 ## Getting Started
+
 1. Core Operations: Use create_course, get_course, edit_course for basic course management
 2. Modules: Use add_module, remove_module to structure course content
 3. Goals: Use add_goal, edit_goal, remove_goal for learning objectives

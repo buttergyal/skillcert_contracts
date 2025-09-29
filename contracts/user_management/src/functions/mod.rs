@@ -3,22 +3,18 @@
 
 pub mod admin_management;
 pub mod backup_recovery;
+pub mod contract_versioning;
 pub mod create_user_profile;
 pub mod delete_user;
 pub mod edit_user_profile;
 pub mod get_user_by_id;
 pub mod is_admin;
 pub mod list_all_registered_users;
-
-// MVP Implementation - core user management functions
-// Additional features like RBAC, admin management, and contract versioning are ommitted for brevity
+pub mod list_users_with_access;
+pub mod rbac;
+pub mod save_profile;
 pub mod user;
-
 pub mod utils;
-// pub mod contract_versioning;
-// pub mod list_users_with_access;
-// pub mod rbac;
-// pub mod save_profile;
 
 #[cfg(test)]
 mod test_utils{

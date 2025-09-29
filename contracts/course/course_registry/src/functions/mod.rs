@@ -10,6 +10,7 @@ pub mod contract_versioning;
 pub mod create_course;
 pub mod create_course_category;
 pub mod create_prerequisite;
+pub mod course_rate_limit_utils;
 pub mod delete_course;
 pub mod edit_course;
 pub mod edit_goal;

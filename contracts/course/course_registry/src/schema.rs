@@ -10,6 +10,10 @@ pub const FILTER_MIN_PRICE: u128 = 500;
 pub const MAX_SCAN_ID: u32 = 50;
 pub const MAX_EMPTY_CHECKS: u32 = 10;
 
+/// Rate limiting constants for course operations
+pub const DEFAULT_COURSE_RATE_LIMIT_WINDOW: u64 = 3600; // 1 hour in seconds
+pub const DEFAULT_MAX_COURSE_CREATIONS_PER_WINDOW: u32 = 3; // Max course creations per hour per address
+
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]
 pub struct CourseModule {
@@ -28,6 +32,30 @@ pub struct CourseGoal {
     pub content: String,
     pub created_by: Address,
     pub created_at: u64,
+}
+
+/// Rate limiting configuration for course operations.
+///
+/// Tracks rate limiting settings for spam protection in course creation.
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct CourseRateLimitConfig {
+    /// Time window for rate limiting in seconds
+    pub window_seconds: u64,
+    /// Maximum course creations allowed per window
+    pub max_courses_per_window: u32,
+}
+
+/// Rate limiting tracking data for course operations per address.
+///
+/// Stores the current usage count and window start time for course rate limiting.
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct CourseRateLimitData {
+    /// Current count of course creations in this window
+    pub count: u32,
+    /// Timestamp when the current window started
+    pub window_start: u64,
 }
 
 #[contracttype]
@@ -49,6 +77,10 @@ pub enum DataKey {
     CategorySeq,          // Sequence counter for category IDs
     CourseCategory(u128), // Course category by ID
     Admins,               // List of admin addresses
+    /// Key for storing course rate limiting configuration
+    CourseRateLimitConfig,
+    /// Key for storing course rate limiting data per address: address -> CourseRateLimitData
+    CourseRateLimit(Address),
 }
 
 #[contracttype]
@@ -96,6 +128,8 @@ pub struct CourseFilters {
     pub level: Option<CourseLevel>,
     pub min_duration: Option<u32>,
     pub max_duration: Option<u32>,
+    /// Text search in course title and description
+    pub search_text: Option<String>,
 }
 
 #[contracttype]

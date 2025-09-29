@@ -11,9 +11,12 @@ pub mod functions;
 pub mod models;
 pub mod schema;
 
-use error::Error;
-use schema::UserProfile;
+#[cfg(test)]
+mod test;
+
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
+use crate::schema::{AdminConfig, LightProfile, PaginatedLightProfiles, PaginationParams, ProfileUpdateParams, UserFilter, UserProfile, UserRole, UserStatus};
+use crate::error::Error;
 
 /// User Management Contract
 ///
@@ -60,7 +63,56 @@ impl UserManagement {
     /// * If the profile is not found in storage, the function will panic with
     ///   `UserNotFound`.
     pub fn get_user_profile(env: Env, user: Address) -> Result<UserProfile, Error> {
-        functions::user::get_user_profile(env, user)
+        // Convert from models::user::UserProfile to schema::UserProfile
+        let model_profile = functions::user::get_user_profile(env.clone(), user)?;
+        Ok(UserProfile {
+            full_name: model_profile.full_name,
+            contact_email: model_profile.contact_email,
+            profession: model_profile.profession,
+            country: model_profile.country,
+            purpose: model_profile.purpose,
+            profile_picture_url: model_profile.profile_picture_url,
+        })
+    }
+
+    /// Retrieve a user profile by their address.
+    ///
+    /// This function fetches a complete user profile using the user's blockchain address.
+    /// Access may be restricted based on the requester's permissions.
+    ///
+    /// # Arguments
+    ///
+    /// * `env` - The Soroban environment
+    /// * `requester` - The address of the user requesting the profile
+    /// * `user_id` - The address of the user whose profile is being requested
+    ///
+    /// # Returns
+    ///
+    /// Returns the requested `UserProfile`.
+    ///
+    /// # Panics
+    ///
+    /// * If the user profile doesn't exist
+    /// * If the requester doesn't have permission to view the profile
+    /// * If the requester is not the user themselves or an admin
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// // Get your own profile
+    /// let my_profile = contract.get_user_by_id(env.clone(), my_address, my_address);
+    /// 
+    /// // Admin getting any user's profile
+    /// let user_profile = contract.get_user_by_id(env.clone(), admin_address, user_address);
+    /// ```
+    ///
+    /// # Edge Cases
+    ///
+    /// * **Non-existent user**: Will panic with appropriate error message
+    /// * **Inactive user**: Returns profile but status will be `UserStatus::Inactive`
+    /// * **Permission denied**: Non-admin users can only view their own profiles
+    pub fn get_user_by_id(env: Env, requester: Address, user_id: Address) -> UserProfile {
+        functions::get_user_by_id::get_user_by_id(env, requester, user_id)
     }
 
     /// Create a new user profile
@@ -106,7 +158,457 @@ impl UserManagement {
     /// * **Empty required fields**: Will panic if full_name or contact_email are empty
     /// * **Invalid email**: Will panic if email format is not valid
     pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> UserProfile {
-        functions::user::create_user_profile(env, user, profile)
+        functions::create_user_profile::create_user_profile(env, user, profile)
+    }
+
+    /// Edit an existing user profile
+    ///
+    /// Updates an existing user profile with new values for allowed fields.
+    /// Only the user themselves or administrators can perform updates.
+    /// Email and role fields cannot be updated through this function.
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `caller` - Address of the user performing the update
+    /// * `user_id` - Address of the user whose profile is being updated
+    /// * `updates` - ProfileUpdateParams containing fields to update
+    ///
+    /// # Returns
+    /// * `UserProfile` - The updated user profile
+    ///
+    /// # Panics
+    /// * If caller authentication fails
+    /// * If user profile doesn't exist
+    /// * If caller lacks permission to edit
+    /// * If any field validation fails
+    /// * If user is inactive
+    ///
+    /// # Events
+    /// Emits a user update event upon successful profile update
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// let updates = ProfileUpdateParams {
+    ///     full_name: Some("Jane Doe".try_into().unwrap()),
+    ///     country: Some("CA".try_into().unwrap()),
+    ///     bio: Some("Updated bio".try_into().unwrap()),
+    ///     ..Default::default()
+    /// };
+    /// 
+    /// let updated_profile = contract.edit_user_profile(env, caller_address, user_address, updates);
+    /// ```
+    ///
+    /// # Edge Cases
+    ///
+    /// * **Partial updates**: Only provided fields are updated, others remain unchanged
+    /// * **Admin override**: Admins can edit any user's profile except email/role
+    /// * **Inactive user**: Cannot edit profiles of inactive users
+    /// * **Invalid updates**: Empty strings or invalid data will cause panic
+    pub fn edit_user_profile(
+        env: Env,
+        caller: Address,
+        user_id: Address,
+        updates: ProfileUpdateParams,
+    ) -> UserProfile {
+        functions::edit_user_profile::edit_user_profile(env, caller, user_id, updates)
+    }
+
+    /// Check if an address has admin privileges.
+    ///
+    /// This function is used by other contracts to verify admin status
+    /// for cross-contract authorization checks.
+    ///
+    /// # Arguments
+    ///
+    /// * `env` - The Soroban environment
+    /// * `who` - The address to check for admin privileges
+    ///
+    /// # Returns
+    ///
+    /// Returns `true` if the address has admin privileges, `false` otherwise.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// // Check if user is admin
+    /// let is_admin = contract.is_admin(env.clone(), user_address);
+    /// if is_admin {
+    ///     // Perform admin operations
+    /// }
+    /// 
+    /// // Cross-contract admin check
+    /// let can_perform_action = contract.is_admin(env.clone(), caller_address);
+    /// ```
+    ///
+    /// # Edge Cases
+    ///
+    /// * **System not initialized**: Returns `false` if admin system hasn't been set up
+    /// * **Non-existent user**: Returns `false` for addresses that don't exist
+    /// * **Regular users**: Always returns `false` for non-admin users
+    pub fn is_admin(env: Env, who: Address) -> bool {
+        functions::is_admin::is_admin(env, who)
+    }
+
+    /// Delete (deactivate) a user account
+    ///
+    /// Performs a soft delete by marking the user as inactive instead of permanent deletion.
+    /// Only admins or the user themselves can trigger deletion.
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `caller` - Address performing the deletion (must be admin or the user themselves)
+    /// * `user_id` - Address of the user to be deactivated
+    ///
+    /// # Panics
+    /// * If caller authentication fails
+    /// * If user doesn't exist
+    /// * If caller is neither admin nor the user themselves
+    /// * If user is already inactive
+    ///
+    /// # Events
+    /// Emits a user deactivation event upon successful deletion
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// // User deleting their own account
+    /// contract.delete_user(env.clone(), user_address, user_address);
+    /// 
+    /// // Admin deleting another user's account
+    /// contract.delete_user(env.clone(), admin_address, user_to_delete);
+    /// ```
+    ///
+    /// # Edge Cases
+    ///
+    /// * **Already inactive**: Will panic if trying to delete an already inactive user
+    /// * **Permission denied**: Non-admin users can only delete their own accounts
+    /// * **Data preservation**: User data is preserved but marked as inactive
+    /// * **Irreversible**: Once deactivated, user cannot be reactivated through this contract
+    pub fn delete_user(env: Env, caller: Address, user_id: Address) {
+        functions::delete_user::delete_user(env, caller, user_id)
+    }
+
+    /// Lists all registered users with pagination and filtering (admin-only)
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `caller` - Address performing the call (must be admin)
+    /// * `page` - Zero-based page index
+    /// * `page_size` - Number of items per page (must be > 0)
+    /// * `role_filter` - Optional role filter
+    /// * `country_filter` - Optional country filter
+    /// * `status_filter` - Optional status filter
+    ///
+    /// # Returns
+    /// * `Vec<LightProfile>` - Filtered and paginated lightweight user profiles
+    ///
+    /// # Panics
+    /// * If caller is not an admin
+    /// * If page_size is 0 or exceeds maximum allowed
+    /// * If system is not initialized
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// // Get first page with 10 users
+    /// let users = contract.list_all_users(
+    ///     env.clone(),
+    ///     admin_address,
+    ///     0,  // page 0
+    ///     10, // page size
+    ///     None, None, None // no filters
+    /// );
+    /// 
+    /// // Filter by role and country
+    /// let students = contract.list_all_users(
+    ///     env.clone(),
+    ///     admin_address,
+    ///     0, 20,
+    ///     Some(UserRole::Student),
+    ///     Some("US".try_into().unwrap()),
+    ///     None
+    /// );
+    /// ```
+    ///
+    /// # Edge Cases
+    ///
+    /// * **Empty results**: Returns empty vector if no users match filters
+    /// * **Large page sizes**: Limited by system configuration (max 1000)
+    /// * **Invalid page**: Returns empty vector for non-existent pages
+    /// * **Multiple filters**: All filters are applied with AND logic
+    pub fn list_all_users(
+        env: Env,
+        caller: Address,
+        page: u32,
+        page_size: u32,
+        role_filter: Option<UserRole>,
+        country_filter: Option<String>,
+        status_filter: Option<UserStatus>,
+    ) -> Vec<LightProfile> {
+        // Convert old parameters to new UserFilter struct for backward compatibility
+        let filter = if role_filter.is_some() || country_filter.is_some() || status_filter.is_some() {
+            Some(UserFilter {
+                role: role_filter,
+                country: country_filter,
+                status: status_filter,
+                search_text: None,
+            })
+        } else {
+            None
+        };
+
+        functions::list_all_registered_users::list_all_users(
+            env,
+            caller,
+            page,
+            page_size,
+            filter,
+        )
+    }
+
+    /// Lists all registered users with advanced filtering including text search (admin-only).
+    ///
+    /// This is the new version that supports text search functionality.
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `caller` - Address performing the call (must be admin)
+    /// * `page` - Zero-based page index
+    /// * `page_size` - Number of items per page
+    /// * `role_filter` - Optional role filter
+    /// * `country_filter` - Optional country filter
+    /// * `status_filter` - Optional status filter
+    /// * `search_text` - Optional text search in name and profession
+    ///
+    /// # Returns
+    /// * `Vec<LightProfile>` - Filtered and paginated lightweight user profiles
+    pub fn list_all_users_advanced(
+        env: Env,
+        caller: Address,
+        page: u32,
+        page_size: u32,
+        role_filter: Option<UserRole>,
+        country_filter: Option<String>,
+        status_filter: Option<UserStatus>,
+        search_text: Option<String>,
+    ) -> Vec<LightProfile> {
+        // Convert parameters to internal UserFilter struct
+        let filter = if role_filter.is_some() || country_filter.is_some() || status_filter.is_some() || search_text.is_some() {
+            Some(UserFilter {
+                role: role_filter,
+                country: country_filter,
+                status: status_filter,
+                search_text,
+            })
+        } else {
+            None
+        };
+
+        functions::list_all_registered_users::list_all_users(
+            env,
+            caller,
+            page,
+            page_size,
+            filter,
+        )
+    }
+
+    /// Lists all registered users with cursor-based pagination and filtering (admin-only)
+    ///
+    /// This function implements efficient cursor-based pagination to avoid gas limit issues
+    /// when dealing with large datasets. It returns a PaginatedResult with metadata for
+    /// efficient navigation.
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `caller` - Address performing the call (must be admin)
+    /// * `pagination` - Pagination parameters including cursor and limit
+    /// * `role_filter` - Optional filter for user role
+    /// * `status_filter` - Optional filter for user status
+    ///
+    /// # Returns
+    /// * `PaginatedLightProfiles` - Paginated results with navigation metadata
+    pub fn list_all_users_cursor(
+        env: Env,
+        caller: Address,
+        pagination: PaginationParams,
+        role_filter: Option<UserRole>,
+        status_filter: Option<UserStatus>,
+    ) -> PaginatedLightProfiles {
+        functions::list_all_registered_users::list_all_users_cursor(
+            env,
+            caller,
+            pagination,
+            role_filter,
+            status_filter,
+        )
+    }
+
+    /// Initialize the admin system (one-time only)
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `initializer` - Address performing the initialization
+    /// * `super_admin` - Address that will become the super admin
+    /// * `max_page_size` - Optional maximum page size (default: 100, max: 1000)
+    ///
+    /// # Returns
+    /// * `AdminConfig` - The created admin configuration
+    ///
+    /// # Panics
+    /// * If system has already been initialized
+    /// * If max_page_size exceeds 1000
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// // Initialize with default settings
+    /// let config = contract.initialize_system(
+    ///     env.clone(),
+    ///     deployer_address,
+    ///     super_admin_address,
+    ///     None
+    /// );
+    /// 
+    /// // Initialize with custom page size
+    /// let config = contract.initialize_system(
+    ///     env.clone(),
+    ///     deployer_address,
+    ///     super_admin_address,
+    ///     Some(500)
+    /// );
+    /// ```
+    ///
+    /// # Edge Cases
+    ///
+    /// * **Double initialization**: Will panic if called more than once
+    /// * **Invalid page size**: Will panic if max_page_size > 1000
+    /// * **Super admin privileges**: Super admin cannot be removed after initialization
+    pub fn initialize_system(
+        env: Env,
+        initializer: Address,
+        super_admin: Address,
+        max_page_size: Option<u32>,
+    ) -> AdminConfig {
+        functions::admin_management::initialize_system(env, initializer, super_admin, max_page_size)
+    }
+
+    /// Add a new admin (super admin only)
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `caller` - Address performing the call (must be super admin)
+    /// * `new_admin` - Address to be added as admin
+    ///
+    /// # Panics
+    /// * If caller is not the super admin
+    /// * If system is not initialized
+    /// * If new_admin is already an admin
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// // Super admin adding a new admin
+    /// contract.add_admin(env.clone(), super_admin_address, new_admin_address);
+    /// ```
+    ///
+    /// # Edge Cases
+    ///
+    /// * **Already admin**: Will panic if trying to add an existing admin
+    /// * **Self-promotion**: Super admin cannot add themselves (redundant)
+    /// * **Non-existent user**: Can add admin privileges to any address
+    pub fn add_admin(env: Env, caller: Address, new_admin: Address) {
+        functions::admin_management::add_admin(env, caller, new_admin)
+    }
+
+    /// Remove an admin (super admin only)
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `caller` - Address performing the call (must be super admin)
+    /// * `admin_to_remove` - Address to be removed from admins
+    ///
+    /// # Panics
+    /// * If caller is not the super admin
+    /// * If system is not initialized
+    /// * If admin_to_remove is not an admin
+    /// * If trying to remove the super admin
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// // Super admin removing another admin
+    /// contract.remove_admin(env.clone(), super_admin_address, admin_to_remove);
+    /// ```
+    ///
+    /// # Edge Cases
+    ///
+    /// * **Super admin protection**: Cannot remove the super admin
+    /// * **Non-admin**: Will panic if trying to remove a non-admin address
+    /// * **Self-removal**: Super admin cannot remove themselves
+    pub fn remove_admin(env: Env, caller: Address, admin_to_remove: Address) {
+        functions::admin_management::remove_admin(env, caller, admin_to_remove)
+    }
+
+    /// Get list of all admins (admin only)
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    /// * `caller` - Address performing the call (must be admin)
+    ///
+    /// # Returns
+    /// * `Vec<Address>` - List of all admin addresses including super admin
+    ///
+    /// # Panics
+    /// * If caller is not an admin
+    /// * If system is not initialized
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// // Get all admin addresses
+    /// let admins = contract.get_admins(env.clone(), admin_address);
+    /// for admin in admins {
+    ///     // Process each admin address
+    /// }
+    /// ```
+    ///
+    /// # Edge Cases
+    ///
+    /// * **Empty list**: Returns vector with only super admin if no other admins exist
+    /// * **Admin only**: Only admins can view the admin list
+    /// * **Order**: Super admin is typically first in the list
+    pub fn get_admins(env: Env, caller: Address) -> Vec<Address> {
+        functions::admin_management::get_admins(env, caller)
+    }
+
+    /// Check if the system is initialized
+    ///
+    /// # Arguments
+    /// * `env` - Soroban environment
+    ///
+    /// # Returns
+    /// * `bool` - True if system is initialized
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// // Check if admin system is ready
+    /// let is_initialized = contract.is_system_initialized(env.clone());
+    /// if !is_initialized {
+    ///     // Initialize the system first
+    ///     contract.initialize_system(env, deployer, super_admin, None);
+    /// }
+    /// ```
+    ///
+    /// # Edge Cases
+    ///
+    /// * **Fresh deployment**: Returns `false` for newly deployed contracts
+    /// * **Public access**: Anyone can check initialization status
+    /// * **One-time check**: Once initialized, always returns `true`
+    pub fn is_system_initialized(env: Env) -> bool {
+        functions::admin_management::is_system_initialized(env)
     }
 
     /// Get the current contract version
@@ -163,38 +665,5 @@ impl UserManagement {
         functions::backup_recovery::import_user_data(env, caller, backup_data)
     }
 
-    /// Initialize the user management system
-    pub fn initialize_system(env: Env, initializer: Address, super_admin: Address, max_page_size: Option<u32>) {
-        functions::admin_management::initialize_system(env, initializer, super_admin, max_page_size);
-    }
-
-    /// Check if the system is initialized
-    pub fn is_system_initialized(env: Env) -> bool {
-        functions::admin_management::is_system_initialized(env)
-    }
-
-    /// Add an admin to the system
-    pub fn add_admin(env: Env, caller: Address, new_admin: Address) {
-        functions::admin_management::add_admin(env, caller, new_admin)
-    }
-
-    /// Remove an admin from the system
-    pub fn remove_admin(env: Env, caller: Address, admin_to_remove: Address) {
-        functions::admin_management::remove_admin(env, caller, admin_to_remove)
-    }
-
-    /// Get list of all admins
-    pub fn get_admins(env: Env, caller: Address) -> Vec<Address> {
-        functions::admin_management::get_admins(env, caller)
-    }
-
-    /// Delete a user from the system
-    pub fn delete_user(env: Env, caller: Address, user_to_delete: Address) {
-        functions::delete_user::delete_user(env, caller, user_to_delete)
-    }
-
-    /// Edit user profile
-    pub fn edit_user_profile(env: Env, caller: Address, user: Address, updates: schema::ProfileUpdateParams) -> UserProfile {
-        functions::edit_user_profile::edit_user_profile(env, caller, user, updates)
-    }
+    // NOTE: Removed legacy duplicate wrappers that caused redefinitions.
 }

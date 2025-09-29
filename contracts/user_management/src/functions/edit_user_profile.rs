@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use crate::error::{handle_error, Error};
-use crate::functions::is_admin::is_admin;
-use crate::schema::{DataKey, LightProfile, ProfileUpdateParams, UserProfile};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
-use super::utils::url_validation;
+use crate::error::{handle_error, Error};
+use crate::functions::is_admin::is_admin;
+use crate::functions::utils::url_validation;
+use crate::schema::{DataKey, LightProfile, ProfileUpdateParams, UserProfile};
 
 // Event symbol for user profile update
 const USER_UPDATED_EVENT: Symbol = symbol_short!("usrUpdt");
@@ -16,13 +16,11 @@ const MAX_NAME_LENGTH: usize = 100;
 const MAX_PROFESSION_LENGTH: usize = 100;
 const MAX_COUNTRY_LENGTH: usize = 56; // Longest country name
 
-
 /// Validates string content for security (reused from create_user_profile)
 fn validate_string_content(_env: &Env, s: &String, max_len: usize) -> bool {
     if s.len() > max_len as u32 {
         return false;
     }
-    
     true
 }
 
@@ -38,30 +36,6 @@ fn check_edit_permission(env: &Env, caller: &Address, user_id: &Address) -> bool
     is_admin(env.clone(), caller.clone())
 }
 
-/// Edit an existing user profile
-///
-/// Updates an existing user profile with new values for allowed fields.
-/// Only the user themselves or administrators can perform updates.
-/// Email and role fields cannot be updated through this function.
-///
-/// # Arguments
-/// * `env` - Soroban environment
-/// * `caller` - Address of the user performing the update
-/// * `user_id` - Address of the user whose profile is being updated
-/// * `updates` - ProfileUpdateParams containing fields to update
-///
-/// # Returns
-/// * `UserProfile` - The updated user profile
-///
-/// # Panics
-/// * If caller authentication fails
-/// * If user profile doesn't exist
-/// * If caller lacks permission to edit
-/// * If any field validation fails
-/// * If user is inactive
-///
-/// # Events
-/// Emits a user update event upon successful profile update
 pub fn edit_user_profile(
     env: Env,
     caller: Address,

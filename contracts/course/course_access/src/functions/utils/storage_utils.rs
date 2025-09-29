@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use soroban_sdk::{Address, Env, String, Vec, symbol_short};
+
 use crate::error::{handle_error, Error};
 use crate::schema::{CourseAccess, CourseUsers, UserCourses};
 use crate::functions::config::{TTL_BUMP, TTL_TTL};
-use soroban_sdk::{Address, Env, String, Vec, symbol_short};
 
 const TEMP_TTL: u32 = 900; // 15 minutes
 
-/// Efficiently get or create UserCourses record
+
 pub fn get_or_create_user_courses(
     env: &Env,
     user: &Address,
@@ -36,7 +37,7 @@ pub fn get_or_create_user_courses(
     user_courses
 }
 
-/// Efficiently get or create CourseUsers record
+
 pub fn get_or_create_course_users(
     env: &Env,
     course_id: &String,
@@ -57,14 +58,14 @@ pub fn get_or_create_course_users(
             users: Vec::new(env),
         });
 
-    // Cache result
+
     env.storage().temporary().set(&temp_key, &course_users);
     env.storage().temporary().extend_ttl(&temp_key, 0, TEMP_TTL);
 
     course_users
 }
 
-/// Update both user courses and course users in a single atomic operation
+
 pub fn update_access_mappings(
     env: &Env,
     course_id: &String,
@@ -104,7 +105,7 @@ pub fn update_access_mappings(
     env.storage().temporary().set(&temp_course_key, &course_users);
 }
 
-/// Check if a user has access to a course with caching
+
 pub fn has_course_access(
     env: &Env,
     course_id: &String,
@@ -133,7 +134,7 @@ pub fn has_course_access(
     has_access
 }
 
-/// Clear access-related caches for a course
+
 pub fn invalidate_course_access_cache(
     env: &Env,
     course_id: &String,
@@ -142,7 +143,6 @@ pub fn invalidate_course_access_cache(
     env.storage().temporary().remove(&temp_users_key);
 }
 
-/// Clear access-related caches for a user
 pub fn invalidate_user_access_cache(
     env: &Env,
     user: &Address,

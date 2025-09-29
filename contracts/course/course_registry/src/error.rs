@@ -40,7 +40,6 @@ pub enum Error {
     InvalidCourseDescription = 26,
     InvalidCategoryName = 27,
     EmptyCategory = 28,
-    // Removed InvalidInput - replaced with specific validation errors below
     InvalidTitleLength = 29,
     InvalidLanguageLength = 43,
     InvalidThumbnailUrlLength = 44,
@@ -56,6 +55,9 @@ pub enum Error {
     InvalidPrice100 = 54,
     AlreadyInitialized = 55,
     DuplicatePrerequisite = 56,
+    // Rate limiting errors
+    CourseRateLimitExceeded = 57,
+    CourseRateLimitNotConfigured = 58,
 }
 
 pub fn handle_error(env: &Env, error: Error) -> ! {

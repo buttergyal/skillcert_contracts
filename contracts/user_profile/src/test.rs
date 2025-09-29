@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use crate::{UserProfile, UserProfileContract, UserProfileContractClient};
 use soroban_sdk::{testutils::Address as _, Address, Env, String, Symbol};
+
+use crate::{UserProfile, UserProfileContract, UserProfileContractClient};
 
 /// Helper function to create a test user profile
 fn create_test_profile(env: &Env, address: Address) -> UserProfile {
@@ -21,7 +22,7 @@ fn create_test_profile(env: &Env, address: Address) -> UserProfile {
 
 /// Helper function to save a profile to storage
 fn save_profile_to_storage(env: &Env, profile: &UserProfile) {
-    let key = Symbol::new(env, "profile");
+    let key: Symbol = Symbol::new(env, "profile");
     env.storage()
         .instance()
         .set(&(key, profile.address.clone()), profile);
@@ -29,12 +30,12 @@ fn save_profile_to_storage(env: &Env, profile: &UserProfile) {
 
 #[test]
 fn test_get_user_profile_success() {
-    let env = Env::default();
-    let contract_id = env.register(UserProfileContract, {});
-    let client = UserProfileContractClient::new(&env, &contract_id);
+    let env: Env = Env::default();
+    let contract_id: Address = env.register(UserProfileContract, {});
+    let client: UserProfileContractClient<'_> = UserProfileContractClient::new(&env, &contract_id);
 
-    let user_address = Address::generate(&env);
-    let profile = create_test_profile(&env, user_address.clone());
+    let user_address: Address = Address::generate(&env);
+    let profile: UserProfile = create_test_profile(&env, user_address.clone());
 
     // Save profile to storage
     env.as_contract(&contract_id, || {
@@ -42,18 +43,18 @@ fn test_get_user_profile_success() {
     });
 
     // Test getting the profile
-    let result = client.get_user_profile(&user_address);
+    let result: UserProfile = client.get_user_profile(&user_address);
     assert_eq!(result, profile);
 }
 
 #[test]
 #[should_panic(expected = "escalating error to panic")]
 fn test_get_user_profile_not_found() {
-    let env = Env::default();
-    let contract_id = env.register(UserProfileContract, {});
-    let client = UserProfileContractClient::new(&env, &contract_id);
+    let env: Env = Env::default();
+    let contract_id: Address = env.register(UserProfileContract, {});
+    let client: UserProfileContractClient<'_> = UserProfileContractClient::new(&env, &contract_id);
 
-    let user_address = Address::generate(&env);
+    let user_address: Address = Address::generate(&env);
 
     // Try to get a profile that doesn't exist - should panic with UserProfileNotFound error (code 1)
     client.get_user_profile(&user_address);
@@ -61,13 +62,13 @@ fn test_get_user_profile_not_found() {
 
 #[test]
 fn test_get_user_profile_with_privacy_public_profile() {
-    let env = Env::default();
-    let contract_id = env.register(UserProfileContract, {});
-    let client = UserProfileContractClient::new(&env, &contract_id);
+    let env: Env = Env::default();
+    let contract_id: Address = env.register(UserProfileContract, {});
+    let client: UserProfileContractClient<'_>= UserProfileContractClient::new(&env, &contract_id);
 
-    let user_address = Address::generate(&env);
-    let requester_address = Address::generate(&env);
-    let mut profile = create_test_profile(&env, user_address.clone());
+    let user_address: Address = Address::generate(&env);
+    let requester_address: Address = Address::generate(&env);
+    let mut profile: UserProfile = create_test_profile(&env, user_address.clone());
     profile.privacy_public = true;
 
     // Save profile to storage
@@ -76,19 +77,19 @@ fn test_get_user_profile_with_privacy_public_profile() {
     });
 
     // Test getting the profile with privacy (should show email for public profile)
-    let result = client.get_user_profile_with_privacy(&user_address, &requester_address);
+    let result: UserProfile = client.get_user_profile_with_privacy(&user_address, &requester_address);
     assert_eq!(result.email, profile.email);
     assert_eq!(result.privacy_public, true);
 }
 
 #[test]
 fn test_get_user_profile_with_privacy_private_profile_owner() {
-    let env = Env::default();
-    let contract_id = env.register(UserProfileContract, {});
-    let client = UserProfileContractClient::new(&env, &contract_id);
+    let env: Env = Env::default();
+    let contract_id: Address = env.register(UserProfileContract, {});
+    let client: UserProfileContractClient<'_> = UserProfileContractClient::new(&env, &contract_id);
 
-    let user_address = Address::generate(&env);
-    let mut profile = create_test_profile(&env, user_address.clone());
+    let user_address: Address = Address::generate(&env);
+    let mut profile: UserProfile = create_test_profile(&env, user_address.clone());
     profile.privacy_public = false;
 
     // Save profile to storage
@@ -97,20 +98,20 @@ fn test_get_user_profile_with_privacy_private_profile_owner() {
     });
 
     // Test getting the profile with privacy (owner should see email)
-    let result = client.get_user_profile_with_privacy(&user_address, &user_address);
+    let result: UserProfile = client.get_user_profile_with_privacy(&user_address, &user_address);
     assert_eq!(result.email, profile.email);
     assert_eq!(result.privacy_public, false);
 }
 
 #[test]
 fn test_get_user_profile_with_privacy_private_profile_other_user() {
-    let env = Env::default();
-    let contract_id = env.register(UserProfileContract, {});
-    let client = UserProfileContractClient::new(&env, &contract_id);
+    let env: Env = Env::default();
+    let contract_id: Address = env.register(UserProfileContract, {});
+    let client: UserProfileContractClient<'_> = UserProfileContractClient::new(&env, &contract_id);
 
-    let user_address = Address::generate(&env);
-    let requester_address = Address::generate(&env);
-    let mut profile = create_test_profile(&env, user_address.clone());
+    let user_address: Address = Address::generate(&env);
+    let requester_address: Address = Address::generate(&env);
+    let mut profile: UserProfile = create_test_profile(&env, user_address.clone());
     profile.privacy_public = false;
 
     // Save profile to storage
@@ -119,20 +120,20 @@ fn test_get_user_profile_with_privacy_private_profile_other_user() {
     });
 
     // Test getting the profile with privacy (other user should not see email)
-    let result = client.get_user_profile_with_privacy(&user_address, &requester_address);
+    let result: UserProfile = client.get_user_profile_with_privacy(&user_address, &requester_address);
     assert_eq!(result.email, None); // Email should be hidden
     assert_eq!(result.privacy_public, false);
 }
 
 #[test]
 fn test_get_user_profile_with_privacy_public_profile_other_user() {
-    let env = Env::default();
-    let contract_id = env.register(UserProfileContract, {});
-    let client = UserProfileContractClient::new(&env, &contract_id);
+    let env: Env = Env::default();
+    let contract_id: Address = env.register(UserProfileContract, {});
+    let client: UserProfileContractClient<'_> = UserProfileContractClient::new(&env, &contract_id);
 
-    let user_address = Address::generate(&env);
-    let requester_address = Address::generate(&env);
-    let profile = create_test_profile(&env, user_address.clone());
+    let user_address: Address = Address::generate(&env);
+    let requester_address: Address = Address::generate(&env);
+    let profile: UserProfile = create_test_profile(&env, user_address.clone());
 
     // Save profile to storage
     env.as_contract(&contract_id, || {
@@ -140,19 +141,19 @@ fn test_get_user_profile_with_privacy_public_profile_other_user() {
     });
 
     // Test getting the profile with privacy (other user should see email for public profile)
-    let result = client.get_user_profile_with_privacy(&user_address, &requester_address);
+    let result: UserProfile = client.get_user_profile_with_privacy(&user_address, &requester_address);
     assert_eq!(result.email, profile.email);
     assert_eq!(result.privacy_public, true);
 }
 
 #[test]
 fn test_get_user_profile_with_privacy_same_user() {
-    let env = Env::default();
-    let contract_id = env.register(UserProfileContract, {});
-    let client = UserProfileContractClient::new(&env, &contract_id);
+    let env: Env = Env::default();
+    let contract_id: Address = env.register(UserProfileContract, {});
+    let client: UserProfileContractClient<'_> = UserProfileContractClient::new(&env, &contract_id);
 
-    let user_address = Address::generate(&env);
-    let profile = create_test_profile(&env, user_address.clone());
+    let user_address: Address = Address::generate(&env);
+    let profile: UserProfile = create_test_profile(&env, user_address.clone());
 
     // Save profile to storage
     env.as_contract(&contract_id, || {
@@ -160,7 +161,7 @@ fn test_get_user_profile_with_privacy_same_user() {
     });
 
     // Test getting the profile with privacy (same user should always see their own data)
-    let result = client.get_user_profile_with_privacy(&user_address, &user_address);
+    let result: UserProfile = client.get_user_profile_with_privacy(&user_address, &user_address);
     assert_eq!(result.email, profile.email);
     assert_eq!(result, profile);
 }
@@ -168,12 +169,12 @@ fn test_get_user_profile_with_privacy_same_user() {
 #[test]
 #[should_panic(expected = "escalating error to panic")]
 fn test_get_user_profile_with_privacy_not_found() {
-    let env = Env::default();
-    let contract_id = env.register(UserProfileContract, {});
-    let client = UserProfileContractClient::new(&env, &contract_id);
+    let env: Env = Env::default();
+    let contract_id: Address = env.register(UserProfileContract, {});
+    let client: UserProfileContractClient<'_> = UserProfileContractClient::new(&env, &contract_id);
 
-    let user_address = Address::generate(&env);
-    let requester_address = Address::generate(&env);
+    let user_address: Address = Address::generate(&env);
+    let requester_address: Address = Address::generate(&env);
 
     // Try to get a profile that doesn't exist - should panic with UserProfileNotFound error (code 1)
     client.get_user_profile_with_privacy(&user_address, &requester_address);
@@ -181,12 +182,12 @@ fn test_get_user_profile_with_privacy_not_found() {
 
 #[test]
 fn test_profile_data_integrity() {
-    let env = Env::default();
-    let contract_id = env.register(UserProfileContract, {});
-    let client = UserProfileContractClient::new(&env, &contract_id);
+    let env: Env = Env::default();
+    let contract_id: Address = env.register(UserProfileContract, {});
+    let client: UserProfileContractClient<'_> = UserProfileContractClient::new(&env, &contract_id);
 
-    let user_address = Address::generate(&env);
-    let mut profile = create_test_profile(&env, user_address.clone());
+    let user_address: Address = Address::generate(&env);
+    let mut profile: UserProfile = create_test_profile(&env, user_address.clone());
     profile.privacy_public = false;
     profile.email = None; // Test with no email
 
@@ -196,7 +197,7 @@ fn test_profile_data_integrity() {
     });
 
     // Test that all data is preserved correctly
-    let result = client.get_user_profile(&user_address);
+    let result: UserProfile = client.get_user_profile(&user_address);
     assert_eq!(result.address, profile.address);
     assert_eq!(result.name, profile.name);
     assert_eq!(result.email, profile.email);
@@ -210,15 +211,15 @@ fn test_profile_data_integrity() {
 
 #[test]
 fn test_multiple_users_profiles() {
-    let env = Env::default();
-    let contract_id = env.register(UserProfileContract, {});
-    let client = UserProfileContractClient::new(&env, &contract_id);
+    let env: Env = Env::default();
+    let contract_id: Address = env.register(UserProfileContract, {});
+    let client: UserProfileContractClient<'_> = UserProfileContractClient::new(&env, &contract_id);
 
-    let user1_address = Address::generate(&env);
-    let user2_address = Address::generate(&env);
+    let user1_address: Address = Address::generate(&env);
+    let user2_address: Address = Address::generate(&env);
 
-    let profile1 = create_test_profile(&env, user1_address.clone());
-    let mut profile2 = create_test_profile(&env, user2_address.clone());
+    let profile1: UserProfile = create_test_profile(&env, user1_address.clone());
+    let mut profile2: UserProfile = create_test_profile(&env, user2_address.clone());
     profile2.name = String::from_str(&env, "Jane Smith");
     profile2.email = Some(String::from_str(&env, "jane.smith@example.com"));
 
@@ -229,8 +230,8 @@ fn test_multiple_users_profiles() {
     });
 
     // Test getting both profiles
-    let result1 = client.get_user_profile(&user1_address);
-    let result2 = client.get_user_profile(&user2_address);
+    let result1: UserProfile = client.get_user_profile(&user1_address);
+    let result2: UserProfile = client.get_user_profile(&user2_address);
 
     assert_eq!(result1, profile1);
     assert_eq!(result2, profile2);

@@ -22,6 +22,7 @@ src/
 - test.rs: Basic tests to verify function availability
 
 ## Getting Started
+
 1. Profile Retrieval: Use get_user_profile for internal access
 2. Privacy-Aware Access: Use get_user_profile_with_privacy for user-facing features
 3. Integration: Connect with user_management contract for complete user lifecycle

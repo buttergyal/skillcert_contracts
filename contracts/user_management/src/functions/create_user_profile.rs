@@ -3,10 +3,10 @@
 
 use crate::error::{handle_error, Error};
 use crate::schema::{DataKey, LightProfile, UserProfile, UserRole, UserStatus};
-use core::iter::Iterator;
+use crate::functions::utils::rate_limit_utils::check_user_creation_rate_limit;
+use crate::functions::utils::url_validation;
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
-
-use super::utils::url_validation;
+use core::iter::Iterator;
 
 // Event symbol for user creation
 const USER_CREATED_EVENT: Symbol = symbol_short!("usrCrtd");
@@ -111,6 +111,23 @@ fn add_to_users_index(env: &Env, user: &Address) {
 pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> UserProfile {
     // Require authentication for the user
     user.require_auth();
+
+    // Check rate limiting before proceeding (use default config if system not initialized)
+    let admin_config_key = DataKey::AdminConfig;
+    let rate_config = match env
+        .storage()
+        .persistent()
+        .get::<DataKey, crate::schema::AdminConfig>(&admin_config_key)
+    {
+        Some(config) => config.rate_limit_config,
+        None => {
+            // If system not initialized, use default rate limiting
+            use crate::functions::utils::rate_limit_utils::get_default_rate_limit_config;
+            get_default_rate_limit_config()
+        }
+    };
+    
+    check_user_creation_rate_limit(&env, &user, &rate_config);
 
     // Check if user profile already exists
     let storage_key: DataKey = DataKey::UserProfile(user.clone());

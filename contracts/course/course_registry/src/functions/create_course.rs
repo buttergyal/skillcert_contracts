@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use super::utils::{to_lowercase, trim, u32_to_string};
+use super::course_rate_limit_utils::check_course_creation_rate_limit;
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol, Vec};
-
 use crate::error::{handle_error, Error};
 use crate::schema::{Course, CourseLevel};
-use super::utils::{to_lowercase, trim, u32_to_string};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const TITLE_KEY: Symbol = symbol_short!("title");
@@ -27,6 +27,9 @@ pub fn create_course(
     duration_hours: Option<u32>,
 ) -> Course {
     creator.require_auth();
+
+    // Check rate limiting before proceeding with course creation
+    check_course_creation_rate_limit(&env, &creator);
 
     // ensure the title is not empty and not just whitespace
     let trimmed_title: String = trim(&env, &title);

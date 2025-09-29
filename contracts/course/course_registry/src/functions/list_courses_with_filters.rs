@@ -1,8 +1,17 @@
 use crate::error::{handle_error, Error};
 use crate::functions::utils::u32_to_string;
 
-use soroban_sdk::{symbol_short, Env, Symbol, Vec, String};
 use crate::schema::{Course, CourseFilters, MAX_EMPTY_CHECKS};
+use soroban_sdk::{symbol_short, Env, Symbol, Vec, String};
+
+/// Helper function to check if a Soroban String contains a substring
+/// For now, this implements exact match only due to Soroban String limitations
+/// TODO: Implement proper substring search when Soroban provides better string utilities
+fn string_contains(haystack: &String, needle: &String) -> bool {
+    // For now, only exact match is supported
+    // This can be enhanced later when Soroban provides better string utilities
+    haystack == needle
+}
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 
@@ -73,6 +82,7 @@ pub fn list_courses_with_filters(
         // - Category filter
         // - Level filter
         // - Duration filter (min/max, only if course has duration)
+        // - Text search filter (title and description)
         let passes_filters: bool = filters.min_price.map_or(true, |min| course.price >= min)
             && filters.max_price.map_or(true, |max| course.price <= max)
             && filters
@@ -82,13 +92,18 @@ pub fn list_courses_with_filters(
             && filters
                 .level
                 .as_ref()
-                .is_none_or(|lvl| course.level.as_ref() == Some(lvl))
-            && filters
-                .min_duration
-                .is_none_or(|min| course.duration_hours.is_some_and(|d| d >= min))
-            && filters
-                .max_duration
-                .is_none_or(|max| course.duration_hours.is_some_and(|d| d <= max));
+                .map_or(true, |lvl| course.level.as_ref() == Some(lvl))
+            && filters.min_duration.map_or(true, |min| {
+                course.duration_hours.map_or(false, |d| d >= min)
+            })
+            && filters.max_duration.map_or(true, |max| {
+                course.duration_hours.map_or(false, |d| d <= max)
+            })
+            && filters.search_text.as_ref().map_or(true, |search| {
+                // Text search in title and description
+                // Note: Case-sensitive search due to Soroban String limitations
+                string_contains(&course.title, search) || string_contains(&course.description, search)
+            });
 
         // If course passes all filters
         if passes_filters {
@@ -133,6 +148,7 @@ mod test {
             level: None,
             min_duration: None,
             max_duration: None,
+            search_text: None,
         };
 
         let results = client.list_courses_with_filters(&filters, &None, &None);
@@ -184,6 +200,7 @@ mod test {
             level: None,
             min_duration: None,
             max_duration: None,
+            search_text: None,
         };
 
         let results = client.list_courses_with_filters(&filters, &None, &None);
@@ -221,6 +238,7 @@ mod test {
             level: None,
             min_duration: None,
             max_duration: None,
+            search_text: None,
         };
 
         let results = client.list_courses_with_filters(&filters, &None, &None);
@@ -257,9 +275,105 @@ mod test {
             level: None,
             min_duration: None,
             max_duration: None,
+            search_text: None,
         };
 
         let results = client.list_courses_with_filters(&filters, &Some(0), &None);
         assert_eq!(results.len(), 0);
+    }
+
+    #[test]
+    fn test_text_search_filter() {
+        let env = Env::default();
+        env.mock_all_auths();
+
+        let contract_id = env.register(CourseRegistry, ());
+        let client = CourseRegistryClient::new(&env, &contract_id);
+        let creator = Address::generate(&env);
+
+        // Create courses with different titles and descriptions
+        let course1 = client.create_course(
+            &creator,
+            &String::from_str(&env, "Rust Programming"),
+            &String::from_str(&env, "Learn Rust language fundamentals"),
+            &100,
+            &None,
+            &None,
+            &None,
+            &None,
+            &None,
+        );
+
+        let course2 = client.create_course(
+            &creator,
+            &String::from_str(&env, "JavaScript Basics"),
+            &String::from_str(&env, "Introduction to web development"),
+            &150,
+            &None,
+            &None,
+            &None,
+            &None,
+            &None,
+        );
+
+        // Publish both courses
+        use crate::schema::EditCourseParams;
+        let publish_params = EditCourseParams {
+            new_title: None,
+            new_description: None,
+            new_price: None,
+            new_category: None,
+            new_language: None,
+            new_thumbnail_url: None,
+            new_published: Some(true),
+            new_level: None,
+            new_duration_hours: None,
+        };
+        client.edit_course(&creator, &course1.id, &publish_params);
+        client.edit_course(&creator, &course2.id, &publish_params);
+
+        // Search for exact title match - should return only first course
+        let exact_title_filters = CourseFilters {
+            min_price: None,
+            max_price: None,
+            category: None,
+            level: None,
+            min_duration: None,
+            max_duration: None,
+            search_text: Some(String::from_str(&env, "Rust Programming")),
+        };
+
+        let exact_title_results = client.list_courses_with_filters(&exact_title_filters, &None, &None);
+        assert_eq!(exact_title_results.len(), 1);
+        assert_eq!(exact_title_results.get(0).unwrap().title, String::from_str(&env, "Rust Programming"));
+
+        // Search for exact description match - should return only second course
+        let exact_desc_filters = CourseFilters {
+            min_price: None,
+            max_price: None,
+            category: None,
+            level: None,
+            min_duration: None,
+            max_duration: None,
+            search_text: Some(String::from_str(&env, "Introduction to web development")),
+        };
+
+        let exact_desc_results = client.list_courses_with_filters(&exact_desc_filters, &None, &None);
+        assert_eq!(exact_desc_results.len(), 1);
+        assert_eq!(exact_desc_results.get(0).unwrap().title, String::from_str(&env, "JavaScript Basics"));
+
+        // Search for non-existent term
+        let none_filters = CourseFilters {
+            min_price: None,
+            max_price: None,
+            category: None,
+            level: None,
+            min_duration: None,
+            max_duration: None,
+            search_text: Some(String::from_str(&env, "Python")),
+        };
+
+        let none_results = client.list_courses_with_filters(&none_filters, &None, &None);
+        assert_eq!(none_results.len(), 0);
     }
 }

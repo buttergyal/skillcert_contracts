@@ -9,6 +9,7 @@ Before running the deployment scripts, ensure the following tools are installed:
 ### Required Tools
 
 **Docker** - Required to run the Stellar local network
+
 ```bash
 # Install Docker Desktop on macOS/Windows or Docker on Linux
 # Verify installation:
@@ -16,6 +17,7 @@ docker --version
 ```
 
 **Stellar CLI** - Used to interact with the Stellar network and contracts
+
 ```bash
 # Install via Cargo:
 cargo install stellar-cli
@@ -25,6 +27,7 @@ stellar --version
 ```
 
 **Rust and Cargo** - Needed to build the contract WASM files
+
 ```bash
 # Install Rust: https://rustup.rs/
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
@@ -38,6 +41,7 @@ rustc --version
 ```
 
 **jq** (Recommended) - Simplifies JSON parsing for contract.json
+
 ```bash
 # macOS:
 brew install jq
@@ -55,6 +59,7 @@ jq --version
 ### Repository Setup
 
 Clone and navigate to the repository:
+
 ```bash
 git clone https://github.com/SkillCert/skillcert_contracts/
 cd skillcert_contracts
@@ -101,7 +106,8 @@ chmod +x scripts/build_contracts.sh
    - `target/wasm32v1-none/release/user_management.wasm`
 
 **Expected Output:**
-```
+
+```text
 ✅ Docker is running
 ✅ Stellar container started
 ✅ Network configured: local
@@ -127,6 +133,7 @@ chmod +x scripts/deploy_contracts.sh
 4. **Saves Contract IDs**: Creates `contract.json` with all deployed contract addresses
 
 **Generated contract.json:**
+
 ```json
 {
   "course_access_contract": "CBF3FNVSN3EQKOCK7AVWHDUEUPPAOQCFUVO3RR7ABSAVG3CQH4HVDYRD",
@@ -136,7 +143,8 @@ chmod +x scripts/deploy_contracts.sh
 ```
 
 **Expected Output:**
-```
+
+```text
 Deploying Course Access Contract...
 Course Access Contract ID: CBF3FNVSN3EQKOCK7AVWHDUEUPPAOQCFUVO3RR7ABSAVG3CQH4HVDYRD
 Deploying Course Registry Contract...
@@ -145,7 +153,6 @@ Deploying User Management Contract...
 User Management Contract ID: CDAF4MNVSN3EQKOCK7AVWHDUEUPPAOQCFUVO3RR7ABSAVG3CQH4HVEXAMPLE
 ✅ Saving contract addresses to contract.json...
 ```
-
 
 ### Step 3: Test Contract Functions
 
@@ -167,6 +174,7 @@ chmod +x scripts/invoke_examples.sh
 **Example Operations:**
 
 **Create Course:**
+
 ```bash
 stellar contract invoke \
   --id $(jq -r '.course_registry_contract' contract.json) \
@@ -183,6 +191,7 @@ stellar contract invoke \
 ```
 
 **Grant Course Access:**
+
 ```bash
 stellar contract invoke \
   --id $(jq -r '.course_access_contract' contract.json) \
@@ -194,6 +203,7 @@ stellar contract invoke \
 ```
 
 **Get Courses by Instructor:**
+
 ```bash
 stellar contract invoke \
   --id $(jq -r '.course_registry_contract' contract.json) \
@@ -202,7 +212,6 @@ stellar contract invoke \
   -- get_courses_by_instructor \
   --instructor $(stellar keys public-key default)
 ```
-
 
 ## 🔄 Complete Workflow Example
 
@@ -227,6 +236,7 @@ cat contract.json
 ### Manual Contract Interactions
 
 **Create a Custom Course:**
+
 ```bash
 stellar contract invoke \
   --id $(jq -r '.course_registry_contract' contract.json) \
@@ -243,6 +253,7 @@ stellar contract invoke \
 ```
 
 **Create User Profile:**
+
 ```bash
 stellar contract invoke \
   --id $(jq -r '.user_management_contract' contract.json) \
@@ -256,6 +267,7 @@ stellar contract invoke \
 ```
 
 **List All Courses:**
+
 ```bash
 stellar contract invoke \
   --id $(jq -r '.course_registry_contract' contract.json) \
@@ -267,17 +279,20 @@ stellar contract invoke \
 ### Useful Commands
 
 **Check Account Balance:**
+
 ```bash
 stellar keys fund default --network local
 stellar account balance --id default --network local
 ```
 
 **Get Contract Info:**
+
 ```bash
 stellar contract inspect --id $(jq -r '.course_registry_contract' contract.json) --network local
 ```
 
 **View Transaction History:**
+
 ```bash
 stellar events --start-ledger 1 --network local
 ```
@@ -289,6 +304,7 @@ stellar events --start-ledger 1 --network local
 #### Docker Issues
 
 **Problem**: `Cannot connect to the Docker daemon`
+
 ```bash
 # Solution: Start Docker service
 # macOS/Windows: Start Docker Desktop
@@ -297,6 +313,7 @@ docker --version  # Verify Docker is running
 ```
 
 **Problem**: `docker start stellar` fails with "No such container"
+
 ```bash
 # Solution: Create the Stellar container first
 stellar network start local
@@ -307,6 +324,7 @@ docker run -d --name stellar -p 8000:8000 stellar/quickstart:testing --local
 #### Build Issues
 
 **Problem**: `rustup target add wasm32v1-none` fails
+
 ```bash
 # Solution: Update Rust and add target
 rustup update
@@ -314,6 +332,7 @@ rustup target add wasm32v1-none
 ```
 
 **Problem**: `cargo build` fails with dependency errors
+
 ```bash
 # Solution: Clean and rebuild
 cargo clean
@@ -323,6 +342,7 @@ cargo build --target wasm32v1-none --release
 #### Deployment Issues
 
 **Problem**: `Error: Failed to capture Contract ID`
+
 ```bash
 # Solution: Check WASM files exist
 ls -la target/wasm32v1-none/release/*.wasm
@@ -332,6 +352,7 @@ stellar keys fund default --network local
 ```
 
 **Problem**: `Insufficient funds` during deployment
+
 ```bash
 # Solution: Fund the default account
 stellar keys fund default --network local
@@ -343,6 +364,7 @@ stellar account balance --id default --network local
 #### Network Issues
 
 **Problem**: `connection refused` when invoking contracts
+
 ```bash
 # Solution: Ensure Stellar network is running
 stellar network ls
@@ -353,6 +375,7 @@ docker ps | grep stellar
 ```
 
 **Problem**: `Invalid network passphrase`
+
 ```bash
 # Solution: Reset network configuration
 stellar network remove local
