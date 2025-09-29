@@ -1047,4 +1047,5 @@ impl CourseRegistry {
     pub fn get_migration_status(env: Env) -> String {
         functions::contract_versioning::get_migration_status(&env)
     }
+
 }
