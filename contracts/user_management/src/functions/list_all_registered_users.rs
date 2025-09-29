@@ -6,9 +6,7 @@ use crate::schema::{AdminConfig, DataKey, LightProfile, PaginatedLightProfiles, 
 use core::iter::Iterator;
 use soroban_sdk::{Address, Env, String, Vec};
 
-/// Helper function to check if a Soroban String contains a substring
-/// For now, this implements exact match only due to Soroban String limitations
-/// TODO: Implement proper substring search when Soroban provides better string utilities
+
 fn string_contains(haystack: &String, needle: &String) -> bool {
     // For now, only exact match is supported
     // This can be enhanced later when Soroban provides better string utilities
@@ -18,22 +16,7 @@ fn string_contains(haystack: &String, needle: &String) -> bool {
 /// Security constants
 const MAX_PAGE_SIZE_ABSOLUTE: u32 = 1000;
 
-/// Lists all registered users with pagination and filtering (admin-only).
-///
-/// Arguments:
-/// - env: Soroban environment
-/// - caller: address performing the call (must be admin)
-/// - page: zero-based page index
-/// - page_size: number of items per page (must be > 0)
-/// - filter: optional filter criteria for role, country, status, and text search
-///
-/// Returns:
-/// - Vec<LightProfile> containing filtered and paginated lightweight profiles
-///
-/// Storage expectations:
-/// - DataKey::UsersIndex -> Vec<Address>   // ordered list of registered user addresses
-/// - DataKey::UserProfileLight(Address) -> LightProfile  // lightweight profile data
-/// - DataKey::Admins -> Vec<Address>      // list of admin addresses
+
 pub fn list_all_users(
     env: Env,
     caller: Address,

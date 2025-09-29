@@ -7,9 +7,7 @@ use crate::error::{handle_error, Error};
 use crate::schema::{DataKey, UserProfile};
 use core::iter::Iterator;
 
-/// Get User by ID
-/// - Only the profile owner or an admin can access it.
-/// - Returns the full profile (assuming no sensitive data like passwords are stored in UserProfile).
+
 pub fn get_user_by_id(env: Env, requester: Address, user_id: Address) -> UserProfile {
     // Require authentication for the requester
     requester.require_auth();

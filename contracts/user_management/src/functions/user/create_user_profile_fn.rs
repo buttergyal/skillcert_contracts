@@ -9,25 +9,7 @@ use crate::error::{Error, handle_error};
 const USER_CREATED_EVENT: Symbol = symbol_short!("usrCrtd");
 const MAX_STRING_LENGTH: u32 = 320;
 
-/// Create a new user profile
-///
-/// This function creates a new user profile using a UserProfile struct.
-/// It validates mandatory fields (full_name and contact_email) and saves the profile.
-///
-/// # Arguments
-/// * `env` - Soroban environment
-/// * `user` - Address of the user whose profile is being created
-/// * `profile` - UserProfile struct containing all profile data
-///
-/// # Returns
-/// * `UserProfile` - The created user profile
-///
-/// # Panics
-/// * If mandatory fields are empty or invalid
-/// * If email format is invalid
-/// * If email is already taken
-/// * If user authentication fails
-/// * If user profile already exists
+
 pub fn create_user_profile(env: Env, user: Address, profile: UserProfile) -> UserProfile {
     // Require authentication for the user
     user.require_auth();

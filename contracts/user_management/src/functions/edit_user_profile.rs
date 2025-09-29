@@ -36,30 +36,6 @@ fn check_edit_permission(env: &Env, caller: &Address, user_id: &Address) -> bool
     is_admin(env.clone(), caller.clone())
 }
 
-/// Edit an existing user profile
-///
-/// Updates an existing user profile with new values for allowed fields.
-/// Only the user themselves or administrators can perform updates.
-/// Email and role fields cannot be updated through this function.
-///
-/// # Arguments
-/// * `env` - Soroban environment
-/// * `caller` - Address of the user performing the update
-/// * `user_id` - Address of the user whose profile is being updated
-/// * `updates` - ProfileUpdateParams containing fields to update
-///
-/// # Returns
-/// * `UserProfile` - The updated user profile
-///
-/// # Panics
-/// * If caller authentication fails
-/// * If user profile doesn't exist
-/// * If caller lacks permission to edit
-/// * If any field validation fails
-/// * If user is inactive
-///
-/// # Events
-/// Emits a user update event upon successful profile update
 pub fn edit_user_profile(
     env: Env,
     caller: Address,

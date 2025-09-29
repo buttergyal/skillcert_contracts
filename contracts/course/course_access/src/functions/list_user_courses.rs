@@ -5,22 +5,7 @@ use soroban_sdk::{Address, Env, Vec};
 
 use crate::schema::{DataKey, UserCourses};
 
-/// List all courses that a specific user has access to.
-///
-/// This function retrieves all courses that the specified user is enrolled in
-/// or has been granted access to. If the user has no courses, it returns
-/// an empty UserCourses struct.
-///
-/// # Arguments
-///
-/// * `env` - The Soroban environment
-/// * `user` - The address of the user to query courses for
-///
-/// # Returns
-///
-/// Returns a `UserCourses` struct containing the user's address and a list
-/// of course IDs they have access to. If no courses are found, returns
-/// an empty list.
+
 pub fn list_user_courses(env: Env, user: Address) -> UserCourses {
     let key: DataKey = DataKey::UserCourses(user.clone());
     let res: UserCourses = env.storage().persistent().get(&key).unwrap_or(UserCourses {
