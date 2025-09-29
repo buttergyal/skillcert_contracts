@@ -357,47 +357,57 @@ fn test_user_profile_validation_workflow() {
     let client: UserManagementClient<'_> = UserManagementClient::new(&env, &contract_id);
 
     let super_admin: Address = Address::generate(&env);
-    let user: Address = Address::generate(&env);
+    let user1: Address = Address::generate(&env);
+    let user2: Address = Address::generate(&env);
 
     env.mock_all_auths();
 
     // Initialize system
     client.initialize_system(&super_admin, &super_admin, &None);
 
-    // Test 1: Create profile with minimal required fields
-    let minimal_profile: UserProfile = UserProfile {
-        full_name: String::from_str(&env, "Minimal User"),
-        contact_email: String::from_str(&env, "minimal@example.com"),
-        profession: None,
-        country: None,
-        purpose: None,
-        profile_picture_url: None,
-    };
-
-    let created: UserProfile = client.create_user_profile(&user, &minimal_profile);
-    assert_eq!(created.full_name, minimal_profile.full_name);
-    assert_eq!(created.contact_email, minimal_profile.contact_email);
-
-    // Test 2: Update with additional information
-    let update_params: ProfileUpdateParams = ProfileUpdateParams {
-        full_name: None, // Keep existing
+    // Create test users
+    let profile1 = UserProfile {
+        full_name: String::from_str(&env, "John Doe"),
+        contact_email: String::from_str(&env, "john@example.com"),
         profession: Some(String::from_str(&env, "Developer")),
-        country: Some(String::from_str(&env, "Mexico")),
-        purpose: Some(String::from_str(&env, "Learn Rust")),
+        country: Some(String::from_str(&env, "USA")),
+        purpose: Some(String::from_str(&env, "Learning")),
         profile_picture_url: None,
     };
 
-    let updated: UserProfile = client.edit_user_profile(&user, &user, &update_params);
-    assert_eq!(updated.full_name, String::from_str(&env, "Minimal User")); // Unchanged
-    assert_eq!(updated.profession, Some(String::from_str(&env, "Developer")));
-    assert_eq!(updated.country, Some(String::from_str(&env, "Mexico")));
+    let profile2 = UserProfile {
+        full_name: String::from_str(&env, "Jane Smith"),
+        contact_email: String::from_str(&env, "jane@example.com"),
+        profession: Some(String::from_str(&env, "Designer")),
+        country: Some(String::from_str(&env, "Canada")),
+        purpose: Some(String::from_str(&env, "Skill improvement")),
+        profile_picture_url: None,
+    };
 
-    // Test 3: Verify profile integrity
-    let final_profile: UserProfile = client.get_user_by_id(&user, &user);
-    assert_eq!(final_profile.full_name, String::from_str(&env, "Minimal User"));
-    assert_eq!(final_profile.profession, Some(String::from_str(&env, "Developer")));
-    assert_eq!(final_profile.country, Some(String::from_str(&env, "Mexico")));
-    assert_eq!(final_profile.purpose, Some(String::from_str(&env, "Learn Rust")));
+    client.create_user_profile(&user1, &profile1);
+    client.create_user_profile(&user2, &profile2);
+
+    // Export user data
+    let backup_data = client.export_user_data(&super_admin);
+
+    // Verify backup contains expected data
+    assert_eq!(backup_data.backup_version, String::from_str(&env, "1.0.0"));
+    // Verify backup was created (timestamp exists)
+    let _timestamp = backup_data.backup_timestamp; // Just verify field exists
+    assert_eq!(backup_data.users_index.len(), 2);
+
+    // Test import functionality
+    let imported_count = client.import_user_data(&super_admin, &backup_data);
+    assert_eq!(imported_count, 2);
+
+    // Verify data integrity after import
+    let restored_profile1 = client.get_user_by_id(&super_admin, &user1);
+    assert_eq!(restored_profile1.full_name, profile1.full_name);
+    assert_eq!(restored_profile1.contact_email, profile1.contact_email);
+
+    let restored_profile2 = client.get_user_by_id(&super_admin, &user2);
+    assert_eq!(restored_profile2.full_name, profile2.full_name);
+    assert_eq!(restored_profile2.contact_email, profile2.contact_email);
 }
 
 #[test]

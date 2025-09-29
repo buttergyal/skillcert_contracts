@@ -145,3 +145,30 @@ pub struct EditCourseParams {
     pub new_level: Option<Option<CourseLevel>>,
     pub new_duration_hours: Option<Option<u32>>,
 }
+
+/// Backup data structure for course registry system.
+///
+/// Contains all course data, categories, modules, goals, and prerequisites
+/// for backup and recovery operations.
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct CourseBackupData {
+    /// All courses in the system
+    pub courses: soroban_sdk::Map<String, Course>,
+    /// All course categories
+    pub categories: soroban_sdk::Map<u128, CourseCategory>,
+    /// All course modules
+    pub modules: soroban_sdk::Map<String, CourseModule>,
+    /// All course goals mapped by (course_id, goal_id)
+    pub goals: soroban_sdk::Map<String, soroban_sdk::Vec<CourseGoal>>,
+    /// Course prerequisites mapping
+    pub prerequisites: soroban_sdk::Map<String, soroban_sdk::Vec<CourseId>>,
+    /// Category sequence counter
+    pub category_seq: u128,
+    /// List of admin addresses
+    pub admins: soroban_sdk::Vec<Address>,
+    /// Backup timestamp
+    pub backup_timestamp: u64,
+    /// Backup version for compatibility
+    pub backup_version: String,
+}

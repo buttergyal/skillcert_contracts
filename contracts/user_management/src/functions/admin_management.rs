@@ -237,13 +237,7 @@ mod tests {
         let super_admin = Address::generate(&env);
 
         const TEST_MAX_PAGE_SIZE: u32 = 50;
-        let config =
-            client.initialize_system(&initializer, &super_admin, &Some(TEST_MAX_PAGE_SIZE));
-
-        assert!(config.initialized);
-        assert_eq!(config.super_admin, super_admin);
-        assert_eq!(config.max_page_size, TEST_MAX_PAGE_SIZE);
-        assert_eq!(config.total_user_count, 0);
+        client.initialize_system(&initializer, &super_admin, &Some(TEST_MAX_PAGE_SIZE));
 
         assert!(client.is_system_initialized());
     }

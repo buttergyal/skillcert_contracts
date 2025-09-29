@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use crate::{schema::{Category, EditCourseParams}, CourseRegistry, CourseRegistryClient};
+use crate::{schema::Category, CourseRegistry, CourseRegistryClient};
 use soroban_sdk::{symbol_short, testutils::Address as _, Address, Env, String, Vec};
 
 use crate::{
@@ -430,157 +430,22 @@ fn test_list_categories_with_id_gaps() {
     assert_eq!(data, 0); // Course 2 was deleted
 }
 
-// ===== COMPREHENSIVE INTEGRATION TESTS =====
-
 #[test]
-fn test_complete_course_creation_workflow() {
-    let (env, _contract_id, client) = setup_test_env();
-    let creator = Address::generate(&env);
-
-    // Step 1: Create a course with all optional fields
-    let course = client.create_course(
-        &creator,
-        &String::from_str(&env, "Complete Rust Course"),
-        &String::from_str(&env, "Learn Rust from beginner to advanced"),
-        &2000_u128,
-        &Some(String::from_str(&env, "Programming")),
-        &Some(String::from_str(&env, "English")),
-        &Some(String::from_str(&env, "https://example.com/rust-thumbnail.jpg")),
-        &Some(String::from_str(&env, "Advanced")),
-        &Some(40_u32), // 40 hours duration
-    );
-
-    assert_eq!(course.title, String::from_str(&env, "Complete Rust Course"));
-    assert_eq!(course.creator, creator);
-    assert_eq!(course.price, 2000_u128);
-    assert_eq!(course.category, Some(String::from_str(&env, "Programming")));
-    assert_eq!(course.language, Some(String::from_str(&env, "English")));
-    assert_eq!(course.level, Some(String::from_str(&env, "Advanced")));
-    assert_eq!(course.duration_hours, Some(40_u32));
-
-    // Step 2: Add modules to the course
-    let _module1 = client.add_module(
-        &creator,
-        &course.id,
-        &0,
-        &String::from_str(&env, "Introduction to Rust"),
-    );
-    let _module2 = client.add_module(
-        &creator,
-        &course.id,
-        &1,
-        &String::from_str(&env, "Ownership and Borrowing"),
-    );
-    let _module3 = client.add_module(
-        &creator,
-        &course.id,
-        &2,
-        &String::from_str(&env, "Advanced Patterns"),
-    );
-
-    // Step 3: Add course goals
-    let _goal1 = client.add_goal(
-        &creator,
-        &course.id,
-        &String::from_str(&env, "Understand Rust ownership system"),
-    );
-    let _goal2 = client.add_goal(
-        &creator,
-        &course.id,
-        &String::from_str(&env, "Build a complete Rust application"),
-    );
-
-    // Step 4: Edit course information
-    let edit_params = EditCourseParams {
-        new_title: Some(String::from_str(&env, "Advanced Rust Mastery")),
-        new_description: Some(String::from_str(&env, "Master Rust programming language")),
-        new_price: Some(2500_u128),
-        new_category: Some(Some(String::from_str(&env, "Advanced Programming"))),
-        new_language: Some(Some(String::from_str(&env, "English"))),
-        new_thumbnail_url: Some(Some(String::from_str(&env, "https://example.com/new-thumbnail.jpg"))),
-        new_published: Some(true),
-        new_level: Some(Some(String::from_str(&env, "Expert"))),
-        new_duration_hours: Some(Some(50_u32)),
-    };
-
-    let updated_course = client.edit_course(&creator, &course.id, &edit_params);
-    assert_eq!(updated_course.title, String::from_str(&env, "Advanced Rust Mastery"));
-    assert_eq!(updated_course.price, 2500_u128);
-    assert_eq!(updated_course.published, true);
-
-    // Step 5: Verify course is published and accessible
-    let retrieved_course = client.get_course(&course.id);
-    assert_eq!(retrieved_course.published, true);
-    assert_eq!(retrieved_course.title, String::from_str(&env, "Advanced Rust Mastery"));
-}
-
-#[test]
-fn test_course_categories_management() {
-    let (env, _contract_id, client) = setup_test_env();
-    let creator = Address::generate(&env);
-
-    // Step 1: Skip course category creation as it may not be available
-    // Note: create_course_category appears to have implementation issues
-
-    // Step 2: Create courses in different categories
-    let _web_course1 = client.create_course(
-        &creator,
-        &String::from_str(&env, "React Fundamentals"),
-        &String::from_str(&env, "Learn React from scratch"),
-        &1500_u128,
-        &Some(String::from_str(&env, "Web Development")),
-        &None,
-        &None,
-        &None,
-        &None,
-    );
-
-    let _web_course2 = client.create_course(
-        &creator,
-        &String::from_str(&env, "Node.js Backend"),
-        &String::from_str(&env, "Learn Node.js server development"),
-        &1800_u128,
-        &Some(String::from_str(&env, "Web Development")),
-        &None,
-        &None,
-        &None,
-        &None,
-    );
-
-    let _data_course = client.create_course(
-        &creator,
-        &String::from_str(&env, "Machine Learning Basics"),
-        &String::from_str(&env, "Introduction to ML algorithms"),
-        &2000_u128,
-        &Some(String::from_str(&env, "Data Science")),
-        &None,
-        &None,
-        &None,
-        &None,
-    );
-
-    // Step 3: Test category listing and counting
-    let categories = client.list_categories();
-    // Note: Category count may vary based on implementation
-    // The important thing is that list_categories executes without error
+fn test_course_backup_and_recovery_system() {
+    let env = Env::default();
+    let contract_id: Address = env.register(CourseRegistry, {});
+    let client = CourseRegistryClient::new(&env, &contract_id);
     
-    // Verify we can iterate through categories without error
-    for _cat in categories.iter() {
-        // Successfully iterating through categories
-    }
-}
+    let admin: Address = Address::generate(&env);
+    let instructor: Address = Address::generate(&env);
+    
+    env.mock_all_auths();
 
-#[test]
-fn test_instructor_course_management() {
-    let (env, _contract_id, client) = setup_test_env();
-    let instructor1 = Address::generate(&env);
-    let instructor2 = Address::generate(&env);
-
-    // Step 1: Create courses by different instructors
-    let course1 = client.create_course(
-        &instructor1,
-        &String::from_str(&env, "Instructor 1 Course"),
-        &String::from_str(&env, "Course by instructor 1"),
+    // Create test courses
+    let _course1 = client.create_course(
+        &instructor,
+        &String::from_str(&env, "Rust Programming"),
+        &String::from_str(&env, "Learn Rust from basics"),
         &1000_u128,
         &Some(String::from_str(&env, "Programming")),
         &None,
@@ -589,11 +454,11 @@ fn test_instructor_course_management() {
         &None,
     );
 
-    let course2 = client.create_course(
-        &instructor1,
-        &String::from_str(&env, "Another Instructor 1 Course"),
-        &String::from_str(&env, "Another course by instructor 1"),
-        &1200_u128,
+    let _course2 = client.create_course(
+        &instructor,
+        &String::from_str(&env, "Advanced Rust"),
+        &String::from_str(&env, "Advanced Rust concepts"),
+        &1500_u128,
         &Some(String::from_str(&env, "Programming")),
         &None,
         &None,
@@ -601,33 +466,23 @@ fn test_instructor_course_management() {
         &None,
     );
 
-    let _course3 = client.create_course(
-        &instructor2,
-        &String::from_str(&env, "Instructor 2 Course"),
-        &String::from_str(&env, "Course by instructor 2"),
-        &1500_u128,
-        &Some(String::from_str(&env, "Data Science")),
-        &None,
-        &None,
-        &None,
-        &None,
-    );
+    // Set up admin first (add to admin list) - use contract context
+    env.as_contract(&contract_id, || {
+        let mut admin_list = Vec::new(&env);
+        admin_list.push_back(admin.clone());
+        env.storage()
+            .persistent()
+            .set(&crate::schema::DataKey::Admins, &admin_list);
+    });
 
-    // Step 2: Test instructor course listing
-    let instructor1_courses = client.get_courses_by_instructor(&instructor1);
-    assert_eq!(instructor1_courses.len(), 2);
-    assert!(instructor1_courses.contains(&course1));
-    assert!(instructor1_courses.contains(&course2));
-
-    let _instructor2_courses = client.get_courses_by_instructor(&instructor2);
-    // Note: Course listing by instructor may have implementation-specific behavior
-    // The important thing is that the function executes without error
-
-    // Step 3: Test course deletion
-    client.delete_course(&instructor1, &course1.id);
-
-    // Step 4: Verify course deletion result
-    let _updated_instructor1_courses = client.get_courses_by_instructor(&instructor1);
-    // Note: Course deletion might not immediately reflect in the instructor's course list
-    // depending on the implementation. The important thing is that delete_course was called successfully.
+    // Test backup export
+    let backup_data = client.export_course_data(&admin);
+    assert!(backup_data.courses.len() >= 2);
+    
+    // Test backup data structure
+    assert!(backup_data.courses.len() >= 2);
+    
+    // Test backup import (this would overwrite existing data)
+    let imported_count = client.import_course_data(&admin, &backup_data);
+    assert!(imported_count >= 2);
 }

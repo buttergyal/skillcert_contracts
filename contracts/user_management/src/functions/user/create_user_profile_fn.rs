@@ -1,7 +1,7 @@
 
 use soroban_sdk::{Address, Env, Symbol, symbol_short};
-use crate::models::{
-    user::UserProfile, DataKey
+use crate::schema::{
+    UserProfile, DataKey
 };
 use crate::error::{Error, handle_error};
 
