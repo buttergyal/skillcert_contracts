@@ -75,6 +75,46 @@ impl UserManagement {
         })
     }
 
+    /// Retrieve a user profile by their address.
+    ///
+    /// This function fetches a complete user profile using the user's blockchain address.
+    /// Access may be restricted based on the requester's permissions.
+    ///
+    /// # Arguments
+    ///
+    /// * `env` - The Soroban environment
+    /// * `requester` - The address of the user requesting the profile
+    /// * `user_id` - The address of the user whose profile is being requested
+    ///
+    /// # Returns
+    ///
+    /// Returns the requested `UserProfile`.
+    ///
+    /// # Panics
+    ///
+    /// * If the user profile doesn't exist
+    /// * If the requester doesn't have permission to view the profile
+    /// * If the requester is not the user themselves or an admin
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// // Get your own profile
+    /// let my_profile = contract.get_user_by_id(env.clone(), my_address, my_address);
+    /// 
+    /// // Admin getting any user's profile
+    /// let user_profile = contract.get_user_by_id(env.clone(), admin_address, user_address);
+    /// ```
+    ///
+    /// # Edge Cases
+    ///
+    /// * **Non-existent user**: Will panic with appropriate error message
+    /// * **Inactive user**: Returns profile but status will be `UserStatus::Inactive`
+    /// * **Permission denied**: Non-admin users can only view their own profiles
+    pub fn get_user_by_id(env: Env, requester: Address, user_id: Address) -> UserProfile {
+        functions::get_user_by_id::get_user_by_id(env, requester, user_id)
+    }
+
     /// Create a new user profile
     ///
     /// Creates a new user profile using a UserProfile struct.
