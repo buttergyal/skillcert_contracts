@@ -5,7 +5,7 @@ use soroban_sdk::{symbol_short, vec, Address, Env, String, Symbol, Vec};
 
 use crate::error::{handle_error, Error};
 use crate::schema::{Course, CourseModule};
-use super::utils::{concat_strings, to_lowercase, u32_to_string};
+use crate::functions::utils::{concat_strings, to_lowercase, u32_to_string};
 
 const COURSE_KEY: Symbol = symbol_short!("course");
 const MODULE_KEY: Symbol = symbol_short!("module");

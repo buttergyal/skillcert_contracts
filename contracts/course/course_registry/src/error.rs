@@ -40,7 +40,6 @@ pub enum Error {
     InvalidCourseDescription = 26,
     InvalidCategoryName = 27,
     EmptyCategory = 28,
-    // Removed InvalidInput - replaced with specific validation errors below
     InvalidTitleLength = 29,
     InvalidLanguageLength = 43,
     InvalidThumbnailUrlLength = 44,

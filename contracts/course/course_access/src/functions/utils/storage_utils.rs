@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
+use soroban_sdk::{Address, Env, String, Vec, symbol_short};
+
 use crate::error::{handle_error, Error};
 use crate::schema::{CourseAccess, CourseUsers, UserCourses};
 use crate::functions::config::{TTL_BUMP, TTL_TTL};
-use soroban_sdk::{Address, Env, String, Vec, symbol_short};
 
 const TEMP_TTL: u32 = 900; // 15 minutes
 

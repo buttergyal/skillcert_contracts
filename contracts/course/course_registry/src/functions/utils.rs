@@ -2,7 +2,6 @@
 // Copyright (c) 2025 SkillCert
 
 use soroban_sdk::{vec, Bytes, Env, String, Vec};
-pub use crate::schema::{Course, CourseModule};
 
 pub fn generate_unique_id(env: &Env) -> String {
     let ts: u64 = env.ledger().timestamp();
@@ -29,8 +28,8 @@ pub fn generate_unique_id(env: &Env) -> String {
 
 pub fn to_lowercase(env: &Env, s: &String) -> String {
     let len: u32 = s.len();
-    let mut buffer = [0u8; 1024];
-    let slice = &mut buffer[..len as usize];
+    let mut buffer: [u8; 1024] = [0u8; 1024];
+    let slice: &mut [u8] = &mut buffer[..len as usize];
     s.copy_into_slice(slice);
     let mut result_bytes = Bytes::new(env);
 

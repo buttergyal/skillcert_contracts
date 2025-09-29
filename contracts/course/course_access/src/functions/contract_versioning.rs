@@ -37,16 +37,16 @@ pub fn get_version_history(env: &Env) -> Vec<String> {
 
 /// Store a new version in the history
 fn store_version_in_history(env: &Env, version: String) {
-    let mut history = get_version_history(env);
+    let mut history: Vec<String> = get_version_history(env);
     history.push_back(version.clone());
     
-    let key = String::from_str(env, VERSION_HISTORY_KEY);
+    let key: String = String::from_str(env, VERSION_HISTORY_KEY);
     env.storage().instance().set(&key, &history);
 }
 
 /// Check if a version exists in the history
 fn version_exists_in_history(env: &Env, version: &String) -> bool {
-    let history = get_version_history(env);
+    let history: Vec<String> = get_version_history(env);
     for v in history.iter() {
         if &v == version {
             return true;
@@ -57,7 +57,7 @@ fn version_exists_in_history(env: &Env, version: &String) -> bool {
 
 /// Get migration status information
 pub fn get_migration_status(env: &Env) -> String {
-    let key = String::from_str(env, MIGRATION_STATUS_KEY);
+    let key: String = String::from_str(env, MIGRATION_STATUS_KEY);
     env.storage()
         .instance()
         .get::<String, String>(&key)
@@ -119,14 +119,14 @@ pub fn migrate_access_data(
     }
     
     // Perform migration based on version differences
-    let migration_result = perform_access_data_migration(env, &from_version, &to_version);
+    let migration_result: bool = perform_access_data_migration(env, &from_version, &to_version);
     
     if migration_result {
         // Update version history with new version
         store_version_in_history(env, to_version.clone());
         
         // Set successful migration status
-        let status = String::from_str(env, "Migration completed successfully");
+        let status: String = String::from_str(env, "Migration completed successfully");
         set_migration_status(env, status);
         
         // Emit migration event

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use crate::error::{handle_error, Error};
-use crate::functions::is_admin::is_admin;
-use crate::schema::{DataKey, LightProfile, ProfileUpdateParams, UserProfile};
 use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
-use super::utils::url_validation;
+use crate::error::{handle_error, Error};
+use crate::functions::is_admin::is_admin;
+use crate::functions::utils::url_validation;
+use crate::schema::{DataKey, LightProfile, ProfileUpdateParams, UserProfile};
 
 // Event symbol for user profile update
 const USER_UPDATED_EVENT: Symbol = symbol_short!("usrUpdt");
@@ -16,13 +16,11 @@ const MAX_NAME_LENGTH: usize = 100;
 const MAX_PROFESSION_LENGTH: usize = 100;
 const MAX_COUNTRY_LENGTH: usize = 56; // Longest country name
 
-
 /// Validates string content for security (reused from create_user_profile)
 fn validate_string_content(_env: &Env, s: &String, max_len: usize) -> bool {
     if s.len() > max_len as u32 {
         return false;
     }
-    
     true
 }
 

@@ -1,18 +1,19 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 SkillCert
 
-use crate::schema::{UserProfile, ProfileUpdateParams};
+use soroban_sdk::{testutils::Address as _, Address, Env, String, Vec};
+
+use crate::schema::{UserProfile, ProfileUpdateParams, LightProfile, AdminConfig};
 use crate::{UserManagement, UserManagementClient};
-use soroban_sdk::{testutils::Address as _, Address, Env, String};
 
 #[test]
 fn test_create_user_profile_integration() {
-    let env = Env::default();
+    let env: Env = Env::default();
     let contract_id: Address = env.register(UserManagement, {});
-    let client = UserManagementClient::new(&env, &contract_id);
+    let client: UserManagementClient<'_> = UserManagementClient::new(&env, &contract_id);
     let user: Address = Address::generate(&env);
 
-    let profile = UserProfile {
+    let profile: UserProfile = UserProfile {
         full_name: String::from_str(&env, "Alice Johnson"),
         contact_email: String::from_str(&env, "alice@example.com"),
         profession: Some(String::from_str(&env, "Data Scientist")),
@@ -24,7 +25,7 @@ fn test_create_user_profile_integration() {
     // Mock authentication
     env.mock_all_auths();
 
-    let created_profile = client.create_user_profile(&user, &profile);
+    let created_profile: UserProfile = client.create_user_profile(&user, &profile);
 
     // Verify the returned profile
     assert_eq!(created_profile.full_name, profile.full_name);
@@ -36,13 +37,13 @@ fn test_create_user_profile_integration() {
 
 #[test]
 fn test_get_user_by_id_self_access() {
-    let env = Env::default();
+    let env: Env = Env::default();
     let contract_id: Address = env.register(UserManagement, {});
-    let client = UserManagementClient::new(&env, &contract_id);
+    let client: UserManagementClient<'_> = UserManagementClient::new(&env, &contract_id);
     let user: Address = Address::generate(&env);
 
     // First create a profile
-    let profile = UserProfile {
+    let profile: UserProfile = UserProfile {
         full_name: String::from_str(&env, "Bob Wilson"),
         contact_email: String::from_str(&env, "bob@example.com"),
         profession: Some(String::from_str(&env, "Software Engineer")),
@@ -56,7 +57,7 @@ fn test_get_user_by_id_self_access() {
     client.create_user_profile(&user, &profile);
 
     // User retrieves their own profile (self-access)
-    let retrieved_profile = client.get_user_by_id(&user, &user);
+    let retrieved_profile: UserProfile = client.get_user_by_id(&user, &user);
 
     assert_eq!(retrieved_profile.full_name, profile.full_name);
     assert_eq!(retrieved_profile.contact_email, profile.contact_email);
@@ -67,9 +68,9 @@ fn test_get_user_by_id_self_access() {
 
 #[test]
 fn test_get_user_by_id_admin_access() {
-    let env = Env::default();
+    let env: Env = Env::default();
     let contract_id: Address = env.register(UserManagement, {});
-    let client = UserManagementClient::new(&env, &contract_id);
+    let client: UserManagementClient<'_> = UserManagementClient::new(&env, &contract_id);
     let user: Address = Address::generate(&env);
     let admin: Address = Address::generate(&env);
 
@@ -79,7 +80,7 @@ fn test_get_user_by_id_admin_access() {
     client.initialize_system(&admin, &admin, &None);
 
     // First create a profile
-    let profile = UserProfile {
+    let profile: UserProfile = UserProfile {
         full_name: String::from_str(&env, "Bob Wilson"),
         contact_email: String::from_str(&env, "bob@example.com"),
         profession: Some(String::from_str(&env, "Software Engineer")),
@@ -91,7 +92,7 @@ fn test_get_user_by_id_admin_access() {
     client.create_user_profile(&user, &profile);
 
     // Admin retrieves user's profile
-    let retrieved_profile = client.get_user_by_id(&admin, &user);
+    let retrieved_profile: UserProfile = client.get_user_by_id(&admin, &user);
 
     assert_eq!(retrieved_profile.full_name, profile.full_name);
     assert_eq!(retrieved_profile.contact_email, profile.contact_email);
@@ -102,9 +103,9 @@ fn test_get_user_by_id_admin_access() {
 
 #[test]
 fn test_list_all_users_basic() {
-    let env = Env::default();
+    let env: Env = Env::default();
     let contract_id: Address = env.register(UserManagement, {});
-    let client = UserManagementClient::new(&env, &contract_id);
+    let client: UserManagementClient<'_> = UserManagementClient::new(&env, &contract_id);
 
     // Initialize system first
     let super_admin: Address = Address::generate(&env);
@@ -120,7 +121,7 @@ fn test_list_all_users_basic() {
 
     for (name, email, profession) in test_data.iter() {
         let user: Address = Address::generate(&env);
-        let profile = UserProfile {
+        let profile: UserProfile = UserProfile {
             full_name: String::from_str(&env, name),
             contact_email: String::from_str(&env, email),
             profession: Some(String::from_str(&env, profession)),
@@ -133,7 +134,7 @@ fn test_list_all_users_basic() {
     }
 
     // Test basic listing
-    let users = client.list_all_users(
+    let users: Vec<LightProfile> = client.list_all_users(
         &super_admin,
         &0,    // page
         &10,   // page_size
@@ -147,13 +148,13 @@ fn test_list_all_users_basic() {
 
 #[test]
 fn test_delete_user() {
-    let env = Env::default();
+    let env: Env = Env::default();
     let contract_id: Address = env.register(UserManagement, {});
-    let client = UserManagementClient::new(&env, &contract_id);
+    let client: UserManagementClient<'_> = UserManagementClient::new(&env, &contract_id);
     let user: Address = Address::generate(&env);
 
     // Create a profile first
-    let profile = UserProfile {
+    let profile: UserProfile = UserProfile {
         full_name: String::from_str(&env, "Test User"),
         contact_email: String::from_str(&env, "test@example.com"),
         profession: Some(String::from_str(&env, "Tester")),
@@ -175,9 +176,9 @@ fn test_delete_user() {
 
 #[test]
 fn test_admin_functionality() {
-    let env = Env::default();
+    let env: Env = Env::default();
     let contract_id: Address = env.register(UserManagement, {});
-    let client = UserManagementClient::new(&env, &contract_id);
+    let client: UserManagementClient<'_> = UserManagementClient::new(&env, &contract_id);
 
     let super_admin: Address = Address::generate(&env);
     let new_admin: Address = Address::generate(&env);
@@ -185,7 +186,7 @@ fn test_admin_functionality() {
     env.mock_all_auths();
 
     // Initialize system
-    let config = client.initialize_system(&super_admin, &super_admin, &None);
+    let config: AdminConfig = client.initialize_system(&super_admin, &super_admin, &None);
     assert_eq!(config.super_admin, super_admin);
     assert!(config.initialized);
 
@@ -193,7 +194,7 @@ fn test_admin_functionality() {
     client.add_admin(&super_admin, &new_admin);
 
     // Verify admin was added
-    let admins = client.get_admins(&super_admin);
+    let admins: Vec<Address> = client.get_admins(&super_admin);
     assert!(admins.contains(&new_admin));
     assert!(admins.contains(&super_admin));
 
@@ -214,9 +215,9 @@ fn test_admin_functionality() {
 
 #[test]
 fn test_complete_user_lifecycle() {
-    let env = Env::default();
+    let env: Env = Env::default();
     let contract_id: Address = env.register(UserManagement, {});
-    let client = UserManagementClient::new(&env, &contract_id);
+    let client: UserManagementClient<'_> = UserManagementClient::new(&env, &contract_id);
 
     let super_admin: Address = Address::generate(&env);
     let user: Address = Address::generate(&env);
@@ -224,11 +225,11 @@ fn test_complete_user_lifecycle() {
     env.mock_all_auths();
 
     // Step 1: Initialize system
-    let config = client.initialize_system(&super_admin, &super_admin, &None);
+    let config: AdminConfig = client.initialize_system(&super_admin, &super_admin, &None);
     assert!(config.initialized);
 
     // Step 2: Create user profile
-    let initial_profile = UserProfile {
+    let initial_profile: UserProfile = UserProfile {
         full_name: String::from_str(&env, "John Doe"),
         contact_email: String::from_str(&env, "john@example.com"),
         profession: Some(String::from_str(&env, "Software Engineer")),
@@ -237,11 +238,11 @@ fn test_complete_user_lifecycle() {
         profile_picture_url: None,
     };
 
-    let created_profile = client.create_user_profile(&user, &initial_profile);
+    let created_profile: UserProfile = client.create_user_profile(&user, &initial_profile);
     assert_eq!(created_profile.full_name, initial_profile.full_name);
 
     // Step 3: Edit user profile
-    let update_params = ProfileUpdateParams {
+    let update_params: ProfileUpdateParams = ProfileUpdateParams {
         full_name: Some(String::from_str(&env, "John Smith")),
         profession: Some(String::from_str(&env, "Senior Software Engineer")),
         country: Some(String::from_str(&env, "Canada")),
@@ -249,17 +250,17 @@ fn test_complete_user_lifecycle() {
         profile_picture_url: None,
     };
 
-    let updated_profile = client.edit_user_profile(&user, &user, &update_params);
+    let updated_profile: UserProfile = client.edit_user_profile(&user, &user, &update_params);
     assert_eq!(updated_profile.full_name, String::from_str(&env, "John Smith"));
     assert_eq!(updated_profile.profession, Some(String::from_str(&env, "Senior Software Engineer")));
 
     // Step 4: Verify profile changes
-    let retrieved_profile = client.get_user_by_id(&user, &user);
+    let retrieved_profile: UserProfile = client.get_user_by_id(&user, &user);
     assert_eq!(retrieved_profile.full_name, String::from_str(&env, "John Smith"));
     assert_eq!(retrieved_profile.country, Some(String::from_str(&env, "Canada")));
 
     // Step 5: Admin can view user profile
-    let admin_view = client.get_user_by_id(&super_admin, &user);
+    let admin_view: UserProfile = client.get_user_by_id(&super_admin, &user);
     assert_eq!(admin_view.full_name, String::from_str(&env, "John Smith"));
 
     // Step 6: User can delete their own profile
@@ -272,9 +273,9 @@ fn test_complete_user_lifecycle() {
 
 #[test]
 fn test_multi_user_admin_workflow() {
-    let env = Env::default();
+    let env: Env = Env::default();
     let contract_id: Address = env.register(UserManagement, {});
-    let client = UserManagementClient::new(&env, &contract_id);
+    let client: UserManagementClient<'_> = UserManagementClient::new(&env, &contract_id);
 
     let super_admin: Address = Address::generate(&env);
     let admin1: Address = Address::generate(&env);
@@ -293,15 +294,15 @@ fn test_multi_user_admin_workflow() {
     client.add_admin(&super_admin, &admin2);
 
     // Step 3: Create multiple users with different profiles
-    let users_data = [
+    let users_data: [(&'static str, &'static str, &'static str, &'static str); 3] = [
         ("Alice Johnson", "alice@example.com", "Data Scientist", "United States"),
         ("Bob Wilson", "bob@example.com", "Software Engineer", "Canada"),
         ("Carol Davis", "carol@example.com", "Teacher", "United Kingdom"),
     ];
 
     for (i, (name, email, profession, country)) in users_data.iter().enumerate() {
-        let user = if i == 0 { user1.clone() } else if i == 1 { user2.clone() } else { user3.clone() };
-        let profile = UserProfile {
+        let user: Address = if i == 0 { user1.clone() } else if i == 1 { user2.clone() } else { user3.clone() };
+        let profile: UserProfile = UserProfile {
             full_name: String::from_str(&env, name),
             contact_email: String::from_str(&env, email),
             profession: Some(String::from_str(&env, profession)),
@@ -313,7 +314,7 @@ fn test_multi_user_admin_workflow() {
     }
 
     // Step 4: Test admin can list all users
-    let all_users = client.list_all_users(
+    let all_users: Vec<LightProfile> = client.list_all_users(
         &super_admin,
         &0,    // page
         &10,   // page_size
@@ -324,7 +325,7 @@ fn test_multi_user_admin_workflow() {
     assert_eq!(all_users.len(), 3);
 
     // Step 5: Test filtering by country
-    let _us_users = client.list_all_users(
+    let _us_users: Vec<LightProfile> = client.list_all_users(
         &super_admin,
         &0,
         &10,
@@ -336,14 +337,14 @@ fn test_multi_user_admin_workflow() {
     // The important thing is that the filtering function executes without error
 
     // Step 6: Test admin management
-    let admins = client.get_admins(&super_admin);
+    let admins: Vec<Address> = client.get_admins(&super_admin);
     assert_eq!(admins.len(), 3); // super_admin + admin1 + admin2
     assert!(admins.contains(&admin1));
     assert!(admins.contains(&admin2));
 
     // Step 7: Remove one admin
     client.remove_admin(&super_admin, &admin1);
-    let admins_after = client.get_admins(&super_admin);
+    let admins_after: Vec<Address> = client.get_admins(&super_admin);
     assert_eq!(admins_after.len(), 2);
     assert!(!admins_after.contains(&admin1));
     assert!(admins_after.contains(&admin2));
@@ -351,9 +352,9 @@ fn test_multi_user_admin_workflow() {
 
 #[test]
 fn test_user_profile_validation_workflow() {
-    let env = Env::default();
+    let env: Env = Env::default();
     let contract_id: Address = env.register(UserManagement, {});
-    let client = UserManagementClient::new(&env, &contract_id);
+    let client: UserManagementClient<'_> = UserManagementClient::new(&env, &contract_id);
 
     let super_admin: Address = Address::generate(&env);
     let user: Address = Address::generate(&env);
@@ -364,7 +365,7 @@ fn test_user_profile_validation_workflow() {
     client.initialize_system(&super_admin, &super_admin, &None);
 
     // Test 1: Create profile with minimal required fields
-    let minimal_profile = UserProfile {
+    let minimal_profile: UserProfile = UserProfile {
         full_name: String::from_str(&env, "Minimal User"),
         contact_email: String::from_str(&env, "minimal@example.com"),
         profession: None,
@@ -373,12 +374,12 @@ fn test_user_profile_validation_workflow() {
         profile_picture_url: None,
     };
 
-    let created = client.create_user_profile(&user, &minimal_profile);
+    let created: UserProfile = client.create_user_profile(&user, &minimal_profile);
     assert_eq!(created.full_name, minimal_profile.full_name);
     assert_eq!(created.contact_email, minimal_profile.contact_email);
 
     // Test 2: Update with additional information
-    let update_params = ProfileUpdateParams {
+    let update_params: ProfileUpdateParams = ProfileUpdateParams {
         full_name: None, // Keep existing
         profession: Some(String::from_str(&env, "Developer")),
         country: Some(String::from_str(&env, "Mexico")),
@@ -386,13 +387,13 @@ fn test_user_profile_validation_workflow() {
         profile_picture_url: None,
     };
 
-    let updated = client.edit_user_profile(&user, &user, &update_params);
+    let updated: UserProfile = client.edit_user_profile(&user, &user, &update_params);
     assert_eq!(updated.full_name, String::from_str(&env, "Minimal User")); // Unchanged
     assert_eq!(updated.profession, Some(String::from_str(&env, "Developer")));
     assert_eq!(updated.country, Some(String::from_str(&env, "Mexico")));
 
     // Test 3: Verify profile integrity
-    let final_profile = client.get_user_by_id(&user, &user);
+    let final_profile: UserProfile = client.get_user_by_id(&user, &user);
     assert_eq!(final_profile.full_name, String::from_str(&env, "Minimal User"));
     assert_eq!(final_profile.profession, Some(String::from_str(&env, "Developer")));
     assert_eq!(final_profile.country, Some(String::from_str(&env, "Mexico")));
@@ -401,9 +402,9 @@ fn test_user_profile_validation_workflow() {
 
 #[test]
 fn test_pagination_and_filtering_integration() {
-    let env = Env::default();
+    let env: Env = Env::default();
     let contract_id: Address = env.register(UserManagement, {});
-    let client = UserManagementClient::new(&env, &contract_id);
+    let client: UserManagementClient<'_> = UserManagementClient::new(&env, &contract_id);
 
     let super_admin: Address = Address::generate(&env);
     env.mock_all_auths();
@@ -412,7 +413,7 @@ fn test_pagination_and_filtering_integration() {
     client.initialize_system(&super_admin, &super_admin, &None);
 
     // Create multiple users with different attributes
-    let test_users = [
+    let test_users: [(&'static str, &'static str, &'static str, &'static str); 5] = [
         ("Alice", "alice@us.com", "Engineer", "United States"),
         ("Bob", "bob@ca.com", "Scientist", "Canada"),
         ("Carol", "carol@us.com", "Teacher", "United States"),
@@ -422,7 +423,7 @@ fn test_pagination_and_filtering_integration() {
 
     for (name, email, profession, country) in test_users.iter() {
         let user: Address = Address::generate(&env);
-        let profile = UserProfile {
+        let profile: UserProfile = UserProfile {
             full_name: String::from_str(&env, name),
             contact_email: String::from_str(&env, email),
             profession: Some(String::from_str(&env, profession)),
@@ -434,7 +435,7 @@ fn test_pagination_and_filtering_integration() {
     }
 
     // Test 1: Basic pagination
-    let page1 = client.list_all_users(&super_admin, &0, &2, &None, &None, &None);
+    let page1: Vec<LightProfile> = client.list_all_users(&super_admin, &0, &2, &None, &None, &None);
     assert_eq!(page1.len(), 2);
 
     let page2 = client.list_all_users(&super_admin, &1, &2, &None, &None, &None);
@@ -444,7 +445,7 @@ fn test_pagination_and_filtering_integration() {
     assert_eq!(page3.len(), 1);
 
     // Test 2: Country filtering
-    let _us_users = client.list_all_users(
+    let _us_users: Vec<LightProfile> = client.list_all_users(
         &super_admin,
         &0,
         &10,
@@ -456,7 +457,7 @@ fn test_pagination_and_filtering_integration() {
     // The important thing is that the filtering function executes without error
 
     // Test 3: Empty results
-    let _france_users = client.list_all_users(
+    let _france_users: Vec<LightProfile> = client.list_all_users(
         &super_admin,
         &0,
         &10,
@@ -470,9 +471,9 @@ fn test_pagination_and_filtering_integration() {
 
 #[test]
 fn test_error_handling_and_edge_cases() {
-    let env = Env::default();
+    let env: Env = Env::default();
     let contract_id: Address = env.register(UserManagement, {});
-    let client = UserManagementClient::new(&env, &contract_id);
+    let client: UserManagementClient<'_> = UserManagementClient::new(&env, &contract_id);
 
     let super_admin: Address = Address::generate(&env);
     let user: Address = Address::generate(&env);
@@ -488,7 +489,7 @@ fn test_error_handling_and_edge_cases() {
     // The test verifies the system is properly initialized
 
     // Test 2: Create user profile
-    let profile = UserProfile {
+    let profile: UserProfile = UserProfile {
         full_name: String::from_str(&env, "Test User"),
         contact_email: String::from_str(&env, "test@example.com"),
         profession: Some(String::from_str(&env, "Tester")),
@@ -500,7 +501,7 @@ fn test_error_handling_and_edge_cases() {
     client.create_user_profile(&user, &profile);
 
     // Test 3: Verify profile exists
-    let retrieved = client.get_user_by_id(&user, &user);
+    let retrieved: UserProfile = client.get_user_by_id(&user, &user);
     assert_eq!(retrieved.full_name, String::from_str(&env, "Test User"));
 
     // Test 4: Test self-deletion
@@ -508,7 +509,7 @@ fn test_error_handling_and_edge_cases() {
 
     // Test 5: Verify system still works after user deletion
     let new_user: Address = Address::generate(&env);
-    let new_profile = UserProfile {
+    let new_profile: UserProfile = UserProfile {
         full_name: String::from_str(&env, "New User"),
         contact_email: String::from_str(&env, "new@example.com"),
         profession: Some(String::from_str(&env, "New Profession")),
@@ -517,6 +518,6 @@ fn test_error_handling_and_edge_cases() {
         profile_picture_url: None,
     };
 
-    let created = client.create_user_profile(&new_user, &new_profile);
+    let created: UserProfile = client.create_user_profile(&new_user, &new_profile);
     assert_eq!(created.full_name, String::from_str(&env, "New User"));
 }

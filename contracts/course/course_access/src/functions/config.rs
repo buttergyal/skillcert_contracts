@@ -4,6 +4,7 @@
 use soroban_sdk::{Address, Env, Symbol, symbol_short};
 use soroban_sdk::storage::Instance;
 
+use crate::error::{Error, handle_error};
 use crate::schema::{KEY_COURSE_REG_ADDR, KEY_USER_MGMT_ADDR};
 
 const INIT_EVENT: Symbol = symbol_short!("initialz");
@@ -45,11 +46,10 @@ pub fn initialize(
         .get::<_, bool>(&((KEY_INIT,),))
         .unwrap_or(false)
     {
-        // TODO: Implement graceful initialization error handling instead of panic
-        panic!("already initialized");
+        handle_error(&env, Error::Initialized);
     }
 
-    let inst = env.storage().instance();
+    let inst: Instance = env.storage().instance();
     inst.set(&(KEY_OWNER,), &caller);
     inst.set(&(KEY_USER_MGMT_ADDR,), &user_mgmt_addr);
     inst.set(&(KEY_COURSE_REG_ADDR,), &course_registry_addr);
@@ -110,6 +110,6 @@ pub fn set_contract_addrs(
         .publish((UPDATE_ADDRESS_EVENT,), (caller, user_mgmt_addr, course_registry_addr));
 }
 
-/// TTL configuration constants for persistent storage entries
+/* /// TTL configuration constants for persistent storage entries
 pub const TTL_TTL: u32 = 1000; // time-to-live
-pub const TTL_BUMP: u32 = 100; // bump amount on access
+pub const TTL_BUMP: u32 = 100; // bump amount on access */

@@ -16,9 +16,9 @@ pub enum Error {
     InvalidCourseId = 7,
     InvalidUser = 8,
     EmptyCourseId = 9,
-    // Removed InvalidInput - replaced with specific validation errors below
     InvalidTransferData = 10,
     SameUserTransfer = 11,
+    Initialized = 12
 }
 
 pub fn handle_error(env: &Env, error: Error) -> ! {

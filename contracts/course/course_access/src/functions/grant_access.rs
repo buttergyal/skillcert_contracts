@@ -54,7 +54,7 @@ pub fn course_access_grant_access(env: Env, course_id: String, user: Address) {
     }
 
     // Update CourseUsers
-    let course_users_key = DataKey::CourseUsers(course_id.clone());
+    let course_users_key: DataKey = DataKey::CourseUsers(course_id.clone());
     let mut course_users: CourseUsers = env
         .storage()
         .persistent()
