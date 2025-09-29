@@ -55,6 +55,9 @@ pub enum Error {
     InvalidPrice100 = 54,
     AlreadyInitialized = 55,
     DuplicatePrerequisite = 56,
+    // Rate limiting errors
+    CourseRateLimitExceeded = 57,
+    CourseRateLimitNotConfigured = 58,
 }
 
 pub fn handle_error(env: &Env, error: Error) -> ! {

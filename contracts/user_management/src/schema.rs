@@ -8,6 +8,10 @@ pub const DEFAULT_MAX_PAGE_SIZE: u32 = 100;
 pub const ABSOLUTE_MAX_PAGE_SIZE: u32 = 1000;
 pub const MAX_ADMINS: u32 = 10;
 
+/// Rate limiting constants
+pub const DEFAULT_RATE_LIMIT_WINDOW: u64 = 3600; // 1 hour in seconds
+pub const DEFAULT_MAX_USER_CREATIONS_PER_WINDOW: u32 = 5; // Max user creations per hour per address
+
 /// Password validation constants
 pub const MIN_PASSWORD_LENGTH: u32 = 8;
 pub const MAX_PASSWORD_LENGTH: u32 = 128;
@@ -195,6 +199,30 @@ pub struct LightProfile {
     pub user_address: Address,
 }
 
+/// Rate limiting configuration for user operations.
+///
+/// Tracks rate limiting settings and current usage for spam protection.
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct RateLimitConfig {
+    /// Time window for rate limiting in seconds
+    pub window_seconds: u64,
+    /// Maximum operations allowed per window
+    pub max_operations_per_window: u32,
+}
+
+/// Rate limiting tracking data for a specific address.
+///
+/// Stores the current usage count and window start time for rate limiting.
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct RateLimitData {
+    /// Current count of operations in this window
+    pub count: u32,
+    /// Timestamp when the current window started
+    pub window_start: u64,
+}
+
 /// Administrative configuration for the user management system.
 ///
 /// Contains system-wide settings and administrative information.
@@ -209,6 +237,8 @@ pub struct AdminConfig {
     pub max_page_size: u32,
     /// Total number of registered users
     pub total_user_count: u32,
+    /// Rate limiting configuration for user creation
+    pub rate_limit_config: RateLimitConfig,
 }
 
 /// Pagination parameters for cursor-based pagination.
@@ -264,6 +294,8 @@ pub enum DataKey {
     UserRole(Address),
     /// Key for storing administrative configuration
     AdminConfig,
+    /// Key for storing rate limiting data per address: address -> RateLimitData
+    RateLimit(Address),
     /// Key for storing role-based permissions: role -> RolePermissions
     RolePermissions(UserRole),
     /// Key for storing user-specific permission overrides: user_address -> UserPermissions
