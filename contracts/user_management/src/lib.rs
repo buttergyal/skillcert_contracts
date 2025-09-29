@@ -9,10 +9,11 @@ pub const VERSION: &str = "1.0.0";
 pub mod error;
 pub mod functions;
 pub mod models;
+pub mod schema;
 
 use error::Error;
-use models::user::UserProfile;
-use soroban_sdk::{contract, contractimpl, Address, Env, String};
+use schema::UserProfile;
+use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
 
 /// User Management Contract
 ///
@@ -160,5 +161,40 @@ impl UserManagement {
     /// * If import operation fails
     pub fn import_user_data(env: Env, caller: Address, backup_data: crate::schema::UserBackupData) -> u32 {
         functions::backup_recovery::import_user_data(env, caller, backup_data)
+    }
+
+    /// Initialize the user management system
+    pub fn initialize_system(env: Env, initializer: Address, super_admin: Address, max_page_size: Option<u32>) {
+        functions::admin_management::initialize_system(env, initializer, super_admin, max_page_size);
+    }
+
+    /// Check if the system is initialized
+    pub fn is_system_initialized(env: Env) -> bool {
+        functions::admin_management::is_system_initialized(env)
+    }
+
+    /// Add an admin to the system
+    pub fn add_admin(env: Env, caller: Address, new_admin: Address) {
+        functions::admin_management::add_admin(env, caller, new_admin)
+    }
+
+    /// Remove an admin from the system
+    pub fn remove_admin(env: Env, caller: Address, admin_to_remove: Address) {
+        functions::admin_management::remove_admin(env, caller, admin_to_remove)
+    }
+
+    /// Get list of all admins
+    pub fn get_admins(env: Env, caller: Address) -> Vec<Address> {
+        functions::admin_management::get_admins(env, caller)
+    }
+
+    /// Delete a user from the system
+    pub fn delete_user(env: Env, caller: Address, user_to_delete: Address) {
+        functions::delete_user::delete_user(env, caller, user_to_delete)
+    }
+
+    /// Edit user profile
+    pub fn edit_user_profile(env: Env, caller: Address, user: Address, updates: schema::ProfileUpdateParams) -> UserProfile {
+        functions::edit_user_profile::edit_user_profile(env, caller, user, updates)
     }
 }
