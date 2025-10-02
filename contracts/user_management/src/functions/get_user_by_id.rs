@@ -7,7 +7,21 @@ use crate::error::{handle_error, Error};
 use crate::schema::{DataKey, UserProfile};
 use core::iter::Iterator;
 
-
+/// Retrieves a user profile by user ID.
+///
+/// # Arguments
+///
+/// * `env` - Soroban environment.
+/// * `requester` - The address of the requester (must be authenticated).
+/// * `user_id` - The address of the user whose profile is to be retrieved.
+///
+/// # Returns
+///
+/// * `UserProfile` - The user profile associated with the provided user ID.
+///
+/// # Panics
+///
+/// * Panics if the requester is not authorized or if the profile does not exist.
 pub fn get_user_by_id(env: Env, requester: Address, user_id: Address) -> UserProfile {
     // Require authentication for the requester
     requester.require_auth();
@@ -28,6 +42,16 @@ pub fn get_user_by_id(env: Env, requester: Address, user_id: Address) -> UserPro
     profile
 }
 
+/// Checks whether the given address is an admin.
+///
+/// # Arguments
+///
+/// * `env` - Soroban environment.
+/// * `who` - The address to check for admin status.
+///
+/// # Returns
+///
+/// * `bool` - True if the address is an admin, otherwise false.
 fn is_admin(env: &Env, who: &Address) -> bool {
     // Use the secure admin check from admin_management module
     use crate::schema::AdminConfig;
