@@ -8,6 +8,17 @@ use soroban_sdk::{symbol_short, Address, Env, Symbol, Vec};
 
 const ACCESS_LISTED_EVENT: Symbol = symbol_short!("acListed");
 
+/// Brief description: Checks if the given address is the creator of the course.
+///
+/// # Arguments
+///
+/// * `env` - Soroban environment reference used to access persistent storage.
+/// * `course_id` - The unique identifier of the course.
+/// * `who` - The address being checked against the stored creator.
+///
+/// # Returns
+///
+/// * `bool` - Returns `true` if the provided address is the creator of the course, otherwise `false`.
 fn is_creator(env: &Env, course_id: u128, who: &Address) -> bool {
     // Retrieve the creator address for the course from storage
     let creator: Address = env
@@ -18,6 +29,17 @@ fn is_creator(env: &Env, course_id: u128, who: &Address) -> bool {
     creator == *who
 }
 
+/// Brief description: Determines if a caller can list course access for a given course.
+///
+/// # Arguments
+///
+/// * `env` - Soroban environment reference for access control checks.
+/// * `caller` - The address requesting to list users with access.
+/// * `course_id` - The unique identifier of the course.
+///
+/// # Returns
+///
+/// * `bool` - Returns `true` if the caller is allowed to list access (creator, RBAC permission, or admin), otherwise `false`.
 fn can_list_course_access(env: &Env, caller: &Address, course_id: u128) -> bool {
     // Course creator always has access
     if is_creator(env, course_id, caller) {
@@ -38,7 +60,19 @@ fn can_list_course_access(env: &Env, caller: &Address, course_id: u128) -> bool 
     is_admin(env, caller)
 }
 
-
+/// Brief description: Lists all users who currently have access to a given course.
+///
+/// # Arguments
+///
+/// * `env` - Soroban environment instance used for authentication, storage, and events.
+/// * `caller` - The address requesting the access list; must be authorized and permitted.
+/// * `course_id` - The unique identifier of the course.
+///
+/// # Returns
+///
+/// * `Vec<Address>` - A list of addresses that currently have access to the specified course.
+///   On success, returns the list of user addresses.
+///   On failure, publishes an error event and may terminate execution with `Error::AccessDenied`.
 pub fn list_users_with_access(env: Env, caller: Address, course_id: u128) -> Vec<Address> {
     // Require the caller to be authenticated
     caller.require_auth();
