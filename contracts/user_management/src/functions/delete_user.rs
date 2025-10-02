@@ -9,7 +9,17 @@ use soroban_sdk::{symbol_short, Address, Env, Symbol};
 // Event symbol for user deactivation
 const USER_DEACTIVATED_EVENT: Symbol = symbol_short!("usrDeact");
 
-
+/// Deletes a user by marking their status as inactive.
+/// 
+/// # Arguments
+/// 
+/// * `env` - The environment in which the operation is performed.
+/// * `caller` - The address of the caller initiating the deletion.
+/// * `user_id` - The address of the user to be deleted.
+///
+/// # Returns
+/// 
+/// * Result<(), Error> - Success if the user is deleted; otherwise returns an error.
 pub fn delete_user(env: Env, caller: Address, user_id: Address) {
     // Require authentication for the caller
     caller.require_auth();
@@ -55,7 +65,16 @@ pub fn delete_user(env: Env, caller: Address, user_id: Address) {
         .publish((USER_DEACTIVATED_EVENT, &caller), user_id.clone());
 }
 
-/// Check if the caller is an admin
+/// Checks if the caller is an admin.
+/// 
+/// # Arguments
+/// 
+/// * `env` - The environment to query the admin configuration.
+/// * `who` - The address of the caller to check.
+///
+/// # Returns
+/// 
+/// * `bool` - True if the caller is an admin; otherwise, false.
 fn is_admin(env: &Env, who: &Address) -> bool {
     // Check if system is initialized
     let config: Option<AdminConfig> = env.storage().persistent().get(&DataKey::AdminConfig);
@@ -80,7 +99,16 @@ fn is_admin(env: &Env, who: &Address) -> bool {
     }
 }
 
-/// Validate that a user exists by checking their profile
+/// Validates that a user exists by checking their profile.
+/// 
+/// # Arguments
+/// 
+/// * `env` - The environment in which the operation is performed.
+/// * `user_id` - The address of the user to validate.
+///
+/// # Returns
+/// 
+/// * `Result<UserProfile, ()>` - Ok containing UserProfile if the user exists; otherwise, an error.
 fn validate_user_exists(env: &Env, user_id: &Address) -> Result<UserProfile, ()> {
     env.storage()
         .persistent()
