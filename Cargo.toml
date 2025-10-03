@@ -5,7 +5,8 @@ members = [
   "contracts/course/course_access",
   "contracts/user_profile",
   "contracts/test_contract",
-  "contracts/user_management"
+  "contracts/user_management",
+  "contracts/schema_export"
 ]
 
 [workspace.dependencies]
