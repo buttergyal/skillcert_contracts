@@ -1,0 +1,614 @@
+[
+  {
+    "type": "enum",
+    "doc": "",
+    "name": "Error",
+    "cases": [
+      {
+        "doc": "",
+        "name": "UserAlreadyHasAccess",
+        "value": 1
+      },
+      {
+        "doc": "",
+        "name": "UserNoAccessCourse",
+        "value": 2
+      },
+      {
+        "doc": "",
+        "name": "Unauthorized",
+        "value": 3
+      },
+      {
+        "doc": "",
+        "name": "NameRequired",
+        "value": 4
+      },
+      {
+        "doc": "",
+        "name": "EmailRequired",
+        "value": 5
+      },
+      {
+        "doc": "",
+        "name": "CountryRequired",
+        "value": 6
+      },
+      {
+        "doc": "",
+        "name": "InvalidCourseId",
+        "value": 7
+      },
+      {
+        "doc": "",
+        "name": "InvalidUser",
+        "value": 8
+      },
+      {
+        "doc": "",
+        "name": "EmptyCourseId",
+        "value": 9
+      },
+      {
+        "doc": "",
+        "name": "InvalidTransferData",
+        "value": 10
+      },
+      {
+        "doc": "",
+        "name": "SameUserTransfer",
+        "value": 11
+      },
+      {
+        "doc": "",
+        "name": "Initialized",
+        "value": 12
+      }
+    ]
+  },
+  {
+    "type": "enum",
+    "doc": "Errors that can occur during contract versioning operations",
+    "name": "VersioningError",
+    "cases": [
+      {
+        "doc": "Invalid version format",
+        "name": "InvalidVersion",
+        "value": 1
+      },
+      {
+        "doc": "Version not found in history",
+        "name": "VersionNotFound",
+        "value": 2
+      },
+      {
+        "doc": "Migration not compatible",
+        "name": "MigrationNotCompatible",
+        "value": 3
+      },
+      {
+        "doc": "Migration already completed",
+        "name": "MigrationAlreadyCompleted",
+        "value": 4
+      },
+      {
+        "doc": "Unauthorized migration attempt",
+        "name": "UnauthorizedMigration",
+        "value": 5
+      },
+      {
+        "doc": "Migration failed",
+        "name": "MigrationFailed",
+        "value": 6
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "Represents access permission for a user to a specific course.\n\nThis struct defines the relationship between a user and a course\nthey have been granted access to.",
+    "name": "CourseAccess",
+    "fields": [
+      {
+        "doc": "The unique identifier of the course",
+        "name": "course_id",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "The address of the user who has access",
+        "name": "user",
+        "value": {
+          "type": "address"
+        }
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "Contains all courses that a specific user has access to.\n\nThis struct is used to efficiently query and return all courses\naccessible by a particular user.",
+    "name": "UserCourses",
+    "fields": [
+      {
+        "doc": "List of course IDs the user has access to",
+        "name": "courses",
+        "value": {
+          "type": "vec",
+          "element": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "The address of the user",
+        "name": "user",
+        "value": {
+          "type": "address"
+        }
+      }
+    ]
+  },
+  {
+    "type": "union",
+    "doc": "Storage keys for different data types in the contract.\n\nThis enum defines the various keys used to store and retrieve\ndata from the contract's persistent storage.",
+    "name": "DataKey",
+    "cases": [
+      {
+        "doc": "Key for storing course access: (course_id, user) -> CourseAccess",
+        "name": "CourseAccess",
+        "values": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "doc": "Key for storing user profile: user -> UserProfile",
+        "name": "UserProfile",
+        "values": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "doc": "Key for storing courses per user: user -> UserCourses",
+        "name": "UserCourses",
+        "values": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "doc": "Key for storing users per course: course_id -> CourseUsers",
+        "name": "CourseUsers",
+        "values": [
+          {
+            "type": "string"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "Represents a user's profile information.\n\nThis struct contains all the personal and professional information\nthat users can store on-chain as part of their profile.",
+    "name": "UserProfile",
+    "fields": [
+      {
+        "doc": "The user's country of residence",
+        "name": "country",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "The user's email address",
+        "name": "email",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "Optional learning goals or objectives",
+        "name": "goals",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "The user's full name",
+        "name": "name",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "Optional profession or job title",
+        "name": "profession",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "Contains all users who have access to a specific course.\n\nThis struct is used to efficiently query and return all users\nwho have been granted access to a particular course.",
+    "name": "CourseUsers",
+    "fields": [
+      {
+        "doc": "The unique identifier of the course",
+        "name": "course",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "List of user addresses who have access to the course",
+        "name": "users",
+        "value": {
+          "type": "vec",
+          "element": {
+            "type": "address"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "One-time constructor to set owner and config addresses.\n\nInitializes the contract with the necessary external contract addresses.\nThis function can only be called once during contract deployment.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `caller` - The address of the contract deployer/owner\n* `user_mgmt_addr` - Address of the user management contract\n* `course_registry_addr` - Address of the course registry contract\n\n# Panics\n\n* Fails if the contract has already been initialized\n* If any of the provided addresses are invalid\n\n# Examples\n\n```rust\n// Initialize contract during deployment\ncontract.initialize(\nenv.clone(),\ndeployer_address,\nuser_mgmt_contract_address,\ncourse_registry_contract_address\n);\n```\n\n# Edge Cases\n\n* **Double initialization**: Will panic if called more than once\n* **Invalid addresses**: Contract addresses must be valid\n* **Deployment only**: Should only be called during contract deployment",
+    "name": "initialize",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "caller",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "user_mgmt_addr",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "course_registry_addr",
+        "value": {
+          "type": "address"
+        }
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "doc": "Grant access to a specific user for a given course.\n\nAllows a user to access a specific course. Only authorized users\n(course creators or admins) can grant access.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `course_id` - The unique identifier of the course\n* `user` - The address of the user to grant access to\n\n# Panics\n\n* If course doesn't exist\n* If caller is not authorized (not course creator or admin)\n* If user already has access\n\n# Examples\n\n```rust\n// Course creator granting access\ncontract.grant_access(\nenv.clone(),\n\"course_123\".try_into().unwrap(),\nstudent_address\n);\n\n// Admin granting access\ncontract.grant_access(\nenv.clone(),\n\"course_456\".try_into().unwrap(),\nstudent_address\n);\n```\n\n# Edge Cases\n\n* **Already has access**: Will panic if user already has access\n* **Non-existent course**: Will panic if course doesn't exist\n* **Permission denied**: Only course creators and admins can grant access\n* **User validation**: User address must be valid",
+    "name": "grant_access",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "course_id",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "user",
+        "value": {
+          "type": "address"
+        }
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "doc": "Revoke access for a specific user from a course.\n\nRemoves a user's access to a specific course. Only authorized users\n(course creators or admins) can revoke access.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `course_id` - The unique identifier of the course\n* `user` - The address of the user to revoke access from\n\n# Returns\n\nReturns `true` if access was successfully revoked, `false` otherwise.\n\n# Panics\n\n* If course doesn't exist\n* If caller is not authorized (not course creator or admin)\n\n# Examples\n\n```rust\n// Revoke access from a user\nlet success = contract.revoke_access(\nenv.clone(),\n\"course_123\".try_into().unwrap(),\nstudent_address\n);\n\nif success {\nprintln!(\"Access revoked successfully\");\n} else {\nprintln!(\"User didn't have access\");\n}\n```\n\n# Edge Cases\n\n* **No access to revoke**: Returns `false` if user didn't have access\n* **Non-existent course**: Will panic if course doesn't exist\n* **Permission denied**: Only course creators and admins can revoke access\n* **Idempotent**: Safe to call multiple ",
+    "name": "revoke_access",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "course_id",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "user",
+        "value": {
+          "type": "address"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "bool"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Save or update a user's profile on-chain.\n\nStores user profile information in the contract storage.\nThis includes personal and professional information.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `name` - The user's full name\n* `email` - The user's email address\n* `profession` - Optional profession/job title\n* `goals` - Optional learning goals or objectives\n* `country` - The user's country of residence\n\n# Panics\n\n* If name, email, or country are empty\n* If email format is invalid\n\n# Examples\n\n```rust\n// Save user profile\ncontract.save_user_profile(\nenv.clone(),\n\"John Doe\".try_into().unwrap(),\n\"john@example.com\".try_into().unwrap(),\nSome(\"Software Developer\".try_into().unwrap()),\nSome(\"Learn Rust programming\".try_into().unwrap()),\n\"US\".try_into().unwrap()\n);\n\n// Save minimal profile\ncontract.save_user_profile(\nenv.clone(),\n\"Jane Smith\".try_into().unwrap(),\n\"jane@example.com\".try_into().unwrap(),\nNone,\nNone,\n\"CA\".try_into().unwrap()\n);\n```\n\n# Edge Cases\n\n* **Empty required fields**: Name, email, and coun",
+    "name": "save_user_profile",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "name",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "email",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "profession",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "goals",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "country",
+        "value": {
+          "type": "string"
+        }
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "doc": "List all courses a user has access to.\n\nRetrieves all courses that the specified user is enrolled in\nor has been granted access to.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `user` - The address of the user to query\n\n# Returns\n\nReturns a `UserCourses` struct containing the list of accessible courses.\n\n# Examples\n\n```rust\n// Get user's accessible courses\nlet user_courses = contract.list_user_courses(env.clone(), user_address);\n\nfor course_id in user_courses.course_ids {\nprintln!(\"User has access to course: {}\", course_id);\n}\n```\n\n# Edge Cases\n\n* **No access**: Returns empty list if user has no course access\n* **Non-existent user**: Returns empty list for non-existent users\n* **Public access**: Anyone can query user courses\n* **Revoked courses**: Only includes currently accessible courses",
+    "name": "list_user_courses",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "user",
+        "value": {
+          "type": "address"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "custom",
+        "name": "UserCourses"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "List all users who have access to a course.\n\nRetrieves all users who have been granted access to the specified course.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `course_id` - The unique identifier of the course\n\n# Returns\n\nReturns a `CourseUsers` struct containing the list of users with access.\n\n# Examples\n\n```rust\n// Get all users with access to a course\nlet course_users = contract.list_course_access(env.clone(), \"course_123\".try_into().unwrap());\n\nfor user in course_users.users {\nprintln!(\"User with access: {}\", user);\n}\n```\n\n# Edge Cases\n\n* **No users**: Returns empty list if no users have access\n* **Non-existent course**: Returns empty list for non-existent courses\n* **Public access**: Anyone can query course access\n* **Real-time data**: Always returns current access status",
+    "name": "list_course_access",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "course_id",
+        "value": {
+          "type": "string"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "custom",
+        "name": "CourseUsers"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Revoke all user access for a course.\n\nRemoves access for all users from the specified course.\nOnly admin or course creator is allowed to perform this operation.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `user` - The address of the user requesting the operation\n* `course_id` - The unique identifier of the course\n\n# Returns\n\nReturns the number of users affected by the revocation and emits an event.\n\n# Panics\n\n* If course doesn't exist\n* If caller is not authorized (not course creator or admin)\n\n# Examples\n\n```rust\n// Revoke all access for a course\nlet affected_users = contract.revoke_all_access(\nenv.clone(),\nadmin_address,\n\"course_123\".try_into().unwrap()\n);\n\nprintln!(\"Revoked access for {} users\", affected_users);\n```\n\n# Edge Cases\n\n* **No users**: Returns 0 if no users had access\n* **Non-existent course**: Will panic if course doesn't exist\n* **Permission denied**: Only course creators and admins can perform this\n* **Bulk operation**: Efficiently removes all access in one transaction",
+    "name": "revoke_all_access",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "user",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "course_id",
+        "value": {
+          "type": "string"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "u32"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Configure external contract addresses used for auth checks.\n\nUpdates the addresses of external contracts that this contract\ndepends on for authentication and authorization checks.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `caller` - The address of the user making the configuration change\n* `user_mgmt_addr` - Address of the user management contract\n* `course_registry_addr` - Address of the course registry contract\n\n# Panics\n\n* If caller is not the contract owner\n* If any of the provided addresses are invalid\n\n# Storage\n\nStores the addresses in instance storage keys: (\"user_mgmt_addr\",) and (\"course_registry_addr\",)\n\n# Examples\n\n```rust\n// Update contract addresses\ncontract.set_config(\nenv.clone(),\ncontract_owner_address,\nnew_user_mgmt_address,\nnew_course_registry_address\n);\n```\n\n# Edge Cases\n\n* **Owner only**: Only contract owner can update addresses\n* **Invalid addresses**: Will panic if addresses are invalid\n* **Runtime updates**: Can be called after contract deployment\n* **Immediate effect**: Change",
+    "name": "set_config",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "caller",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "user_mgmt_addr",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "course_registry_addr",
+        "value": {
+          "type": "address"
+        }
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "doc": "Get the current contract version\n\nReturns the semantic version of the current contract deployment.\nThis is useful for tracking contract upgrades and compatibility.\n\n# Arguments\n* `_env` - The Soroban environment (unused)\n\n# Returns\n* `String` - The current contract version",
+    "name": "get_contract_version",
+    "inputs": [],
+    "outputs": [
+      {
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Get contract version history\n\nReturns a list of all versions that have been deployed for this contract.\nThis helps track the evolution of the contract over time.\n\n# Arguments\n* `env` - The Soroban environment\n\n# Returns\n* `Vec<String>` - Vector of version strings in chronological order",
+    "name": "get_version_history",
+    "inputs": [],
+    "outputs": [
+      {
+        "type": "vec",
+        "element": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Check compatibility between contract versions\n\nDetermines if data from one version can be safely used with another version.\nThis is crucial for migration processes and backward compatibility.\n\n# Arguments\n* `env` - The Soroban environment\n* `from_version` - The source version to check compatibility from\n* `to_version` - The target version to check compatibility to\n\n# Returns\n* `bool` - True if the versions are compatible, false otherwise",
+    "name": "is_version_compatible",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "from_version",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "to_version",
+        "value": {
+          "type": "string"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "bool"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Migrate access data between contract versions\n\nPerforms data migration from one contract version to another.\nThis function handles the transformation of course access data structures\nwhen upgrading contract versions.\n\n# Arguments\n* `env` - The Soroban environment\n* `caller` - The address performing the migration (must be admin)\n* `from_version` - The source version to migrate from\n* `to_version` - The target version to migrate to\n\n# Returns\n* `bool` - True if migration was successful, false otherwise\n\n# Events\nEmits a migration event upon successful completion",
+    "name": "migrate_access_data",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "caller",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "from_version",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "to_version",
+        "value": {
+          "type": "string"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "bool"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Get migration status for the current contract\n\nReturns information about the current migration status and any\npending migrations that need to be completed.\n\n# Arguments\n* `env` - The Soroban environment\n\n# Returns\n* `String` - Migration status information",
+    "name": "get_migration_status",
+    "inputs": [],
+    "outputs": [
+      {
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "",
+    "name": "transfer_course",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "course_id",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "from",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "to",
+        "value": {
+          "type": "address"
+        }
+      }
+    ],
+    "outputs": []
+  }
+]

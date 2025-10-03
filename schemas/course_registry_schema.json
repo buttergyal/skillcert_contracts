@@ -1,0 +1,1771 @@
+[
+  {
+    "type": "enum",
+    "doc": "",
+    "name": "Error",
+    "cases": [
+      {
+        "doc": "",
+        "name": "OnlyCreatorCanAddGoals",
+        "value": 1
+      },
+      {
+        "doc": "",
+        "name": "EmptyGoalContent",
+        "value": 2
+      },
+      {
+        "doc": "",
+        "name": "CourseIdNotExist",
+        "value": 3
+      },
+      {
+        "doc": "",
+        "name": "OnlyCreatorCanArchive",
+        "value": 4
+      },
+      {
+        "doc": "",
+        "name": "CourseAlreadyArchived",
+        "value": 5
+      },
+      {
+        "doc": "",
+        "name": "Unauthorized",
+        "value": 6
+      },
+      {
+        "doc": "",
+        "name": "NameRequired",
+        "value": 7
+      },
+      {
+        "doc": "",
+        "name": "EmptyCourseTitle",
+        "value": 8
+      },
+      {
+        "doc": "",
+        "name": "InvalidPrice",
+        "value": 9
+      },
+      {
+        "doc": "",
+        "name": "DuplicateCourseTitle",
+        "value": 10
+      },
+      {
+        "doc": "",
+        "name": "DuplicateCourseId",
+        "value": 11
+      },
+      {
+        "doc": "",
+        "name": "OnlyCreatorCanEditPrereqs",
+        "value": 12
+      },
+      {
+        "doc": "",
+        "name": "PrereqCourseNotFound",
+        "value": 13
+      },
+      {
+        "doc": "",
+        "name": "SelfPrerequisite",
+        "value": 14
+      },
+      {
+        "doc": "",
+        "name": "CircularDependency",
+        "value": 15
+      },
+      {
+        "doc": "",
+        "name": "EmptyCourseId",
+        "value": 16
+      },
+      {
+        "doc": "",
+        "name": "CourseNotFound",
+        "value": 17
+      },
+      {
+        "doc": "",
+        "name": "EmptyNewGoalContent",
+        "value": 18
+      },
+      {
+        "doc": "",
+        "name": "EmptyGoalId",
+        "value": 19
+      },
+      {
+        "doc": "",
+        "name": "GoalCourseMismatch",
+        "value": 20
+      },
+      {
+        "doc": "",
+        "name": "ModuleNotFound",
+        "value": 21
+      },
+      {
+        "doc": "",
+        "name": "UnauthorizedCaller",
+        "value": 401
+      },
+      {
+        "doc": "",
+        "name": "UnauthorizedCourseAccess",
+        "value": 402
+      },
+      {
+        "doc": "",
+        "name": "InvalidAdminOperation",
+        "value": 403
+      },
+      {
+        "doc": "",
+        "name": "EmptyModuleTitle",
+        "value": 404
+      },
+      {
+        "doc": "",
+        "name": "DuplicateModulePosition",
+        "value": 405
+      },
+      {
+        "doc": "",
+        "name": "EmptyModuleId",
+        "value": 22
+      },
+      {
+        "doc": "",
+        "name": "PrereqNotInList",
+        "value": 23
+      },
+      {
+        "doc": "",
+        "name": "InvalidModulePosition",
+        "value": 24
+      },
+      {
+        "doc": "",
+        "name": "InvalidModuleTitle",
+        "value": 25
+      },
+      {
+        "doc": "",
+        "name": "InvalidCourseDescription",
+        "value": 26
+      },
+      {
+        "doc": "",
+        "name": "InvalidCategoryName",
+        "value": 27
+      },
+      {
+        "doc": "",
+        "name": "EmptyCategory",
+        "value": 28
+      },
+      {
+        "doc": "",
+        "name": "InvalidTitleLength",
+        "value": 29
+      },
+      {
+        "doc": "",
+        "name": "InvalidLanguageLength",
+        "value": 43
+      },
+      {
+        "doc": "",
+        "name": "InvalidThumbnailUrlLength",
+        "value": 44
+      },
+      {
+        "doc": "",
+        "name": "InvalidDurationValue",
+        "value": 45
+      },
+      {
+        "doc": "",
+        "name": "InvalidLimitValue",
+        "value": 46
+      },
+      {
+        "doc": "",
+        "name": "InvalidOffsetValue",
+        "value": 47
+      },
+      {
+        "doc": "",
+        "name": "InvalidGoalContent",
+        "value": 48
+      },
+      {
+        "doc": "",
+        "name": "InvalidPrerequisiteId",
+        "value": 49
+      },
+      {
+        "doc": "",
+        "name": "EmptyPrerequisiteList",
+        "value": 50
+      },
+      {
+        "doc": "",
+        "name": "TooManyPrerequisites",
+        "value": 51
+      },
+      {
+        "doc": "",
+        "name": "EmptyPrerequisiteId",
+        "value": 52
+      },
+      {
+        "doc": "",
+        "name": "InvalidCourseId",
+        "value": 53
+      },
+      {
+        "doc": "",
+        "name": "InvalidPrice100",
+        "value": 54
+      },
+      {
+        "doc": "",
+        "name": "AlreadyInitialized",
+        "value": 55
+      },
+      {
+        "doc": "",
+        "name": "DuplicatePrerequisite",
+        "value": 56
+      },
+      {
+        "doc": "",
+        "name": "CourseRateLimitExceeded",
+        "value": 57
+      },
+      {
+        "doc": "",
+        "name": "CourseRateLimitNotConfigured",
+        "value": 58
+      }
+    ]
+  },
+  {
+    "type": "enum",
+    "doc": "Errors that can occur during contract versioning operations",
+    "name": "VersioningError",
+    "cases": [
+      {
+        "doc": "Invalid version format",
+        "name": "InvalidVersion",
+        "value": 1
+      },
+      {
+        "doc": "Version not found in history",
+        "name": "VersionNotFound",
+        "value": 2
+      },
+      {
+        "doc": "Migration not compatible",
+        "name": "MigrationNotCompatible",
+        "value": 3
+      },
+      {
+        "doc": "Migration already completed",
+        "name": "MigrationAlreadyCompleted",
+        "value": 4
+      },
+      {
+        "doc": "Unauthorized migration attempt",
+        "name": "UnauthorizedMigration",
+        "value": 5
+      },
+      {
+        "doc": "Migration failed",
+        "name": "MigrationFailed",
+        "value": 6
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "",
+    "name": "CourseModule",
+    "fields": [
+      {
+        "doc": "",
+        "name": "course_id",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "created_at",
+        "value": {
+          "type": "u64"
+        }
+      },
+      {
+        "doc": "",
+        "name": "id",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "position",
+        "value": {
+          "type": "u32"
+        }
+      },
+      {
+        "doc": "",
+        "name": "title",
+        "value": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "",
+    "name": "CourseGoal",
+    "fields": [
+      {
+        "doc": "",
+        "name": "content",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "course_id",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "created_at",
+        "value": {
+          "type": "u64"
+        }
+      },
+      {
+        "doc": "",
+        "name": "created_by",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "goal_id",
+        "value": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "Rate limiting configuration for course operations.\n\nTracks rate limiting settings for spam protection in course creation.",
+    "name": "CourseRateLimitConfig",
+    "fields": [
+      {
+        "doc": "Maximum course creations allowed per window",
+        "name": "max_courses_per_window",
+        "value": {
+          "type": "u32"
+        }
+      },
+      {
+        "doc": "Time window for rate limiting in seconds",
+        "name": "window_seconds",
+        "value": {
+          "type": "u64"
+        }
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "Rate limiting tracking data for course operations per address.\n\nStores the current usage count and window start time for course rate limiting.",
+    "name": "CourseRateLimitData",
+    "fields": [
+      {
+        "doc": "Current count of course creations in this window",
+        "name": "count",
+        "value": {
+          "type": "u32"
+        }
+      },
+      {
+        "doc": "Timestamp when the current window started",
+        "name": "window_start",
+        "value": {
+          "type": "u64"
+        }
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "",
+    "name": "CourseCategory",
+    "fields": [
+      {
+        "doc": "",
+        "name": "description",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "id",
+        "value": {
+          "type": "u128"
+        }
+      },
+      {
+        "doc": "",
+        "name": "name",
+        "value": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "type": "union",
+    "doc": "",
+    "name": "DataKey",
+    "cases": [
+      {
+        "doc": "",
+        "name": "Module",
+        "values": [
+          {
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "doc": "",
+        "name": "Courses",
+        "values": []
+      },
+      {
+        "doc": "",
+        "name": "CourseGoalList",
+        "values": [
+          {
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "doc": "",
+        "name": "CourseGoal",
+        "values": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "doc": "",
+        "name": "CoursePrerequisites",
+        "values": [
+          {
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "doc": "",
+        "name": "CategorySeq",
+        "values": []
+      },
+      {
+        "doc": "",
+        "name": "CourseCategory",
+        "values": [
+          {
+            "type": "u128"
+          }
+        ]
+      },
+      {
+        "doc": "",
+        "name": "Admins",
+        "values": []
+      },
+      {
+        "doc": "Key for storing course rate limiting configuration",
+        "name": "CourseRateLimitConfig",
+        "values": []
+      },
+      {
+        "doc": "Key for storing course rate limiting data per address: address -> CourseRateLimitData",
+        "name": "CourseRateLimit",
+        "values": [
+          {
+            "type": "address"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "",
+    "name": "Course",
+    "fields": [
+      {
+        "doc": "",
+        "name": "category",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "creator",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "description",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "duration_hours",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "u32"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "id",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "is_archived",
+        "value": {
+          "type": "bool"
+        }
+      },
+      {
+        "doc": "",
+        "name": "language",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "level",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "custom",
+            "name": "CourseLevel"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "prerequisites",
+        "value": {
+          "type": "vec",
+          "element": {
+            "type": "custom",
+            "name": "CourseId"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "price",
+        "value": {
+          "type": "u128"
+        }
+      },
+      {
+        "doc": "",
+        "name": "published",
+        "value": {
+          "type": "bool"
+        }
+      },
+      {
+        "doc": "",
+        "name": "thumbnail_url",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "title",
+        "value": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "",
+    "name": "CourseId",
+    "fields": [
+      {
+        "doc": "",
+        "name": "count",
+        "value": {
+          "type": "u128"
+        }
+      },
+      {
+        "doc": "",
+        "name": "id",
+        "value": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "",
+    "name": "Category",
+    "fields": [
+      {
+        "doc": "",
+        "name": "count",
+        "value": {
+          "type": "u128"
+        }
+      },
+      {
+        "doc": "",
+        "name": "name",
+        "value": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "",
+    "name": "CourseFilters",
+    "fields": [
+      {
+        "doc": "",
+        "name": "category",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "level",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "custom",
+            "name": "CourseLevel"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "max_duration",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "u32"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "max_price",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "u128"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "min_duration",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "u32"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "min_price",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "u128"
+          }
+        }
+      },
+      {
+        "doc": "Text search in course title and description",
+        "name": "search_text",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "",
+    "name": "EditCourseParams",
+    "fields": [
+      {
+        "doc": "",
+        "name": "new_category",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "option",
+            "value": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "new_description",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "new_duration_hours",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "option",
+            "value": {
+              "type": "u32"
+            }
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "new_language",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "option",
+            "value": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "new_level",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "option",
+            "value": {
+              "type": "custom",
+              "name": "CourseLevel"
+            }
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "new_price",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "u128"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "new_published",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "bool"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "new_thumbnail_url",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "option",
+            "value": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "new_title",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "Backup data structure for course registry system.\n\nContains all course data, categories, modules, goals, and prerequisites\nfor backup and recovery operations.",
+    "name": "CourseBackupData",
+    "fields": [
+      {
+        "doc": "List of admin addresses",
+        "name": "admins",
+        "value": {
+          "type": "vec",
+          "element": {
+            "type": "address"
+          }
+        }
+      },
+      {
+        "doc": "Backup timestamp",
+        "name": "backup_timestamp",
+        "value": {
+          "type": "u64"
+        }
+      },
+      {
+        "doc": "Backup version for compatibility",
+        "name": "backup_version",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "All course categories",
+        "name": "categories",
+        "value": {
+          "type": "map",
+          "key": {
+            "type": "u128"
+          },
+          "value": {
+            "type": "custom",
+            "name": "CourseCategory"
+          }
+        }
+      },
+      {
+        "doc": "Category sequence counter",
+        "name": "category_seq",
+        "value": {
+          "type": "u128"
+        }
+      },
+      {
+        "doc": "All courses in the system",
+        "name": "courses",
+        "value": {
+          "type": "map",
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": "custom",
+            "name": "Course"
+          }
+        }
+      },
+      {
+        "doc": "All course goals mapped by (course_id, goal_id)",
+        "name": "goals",
+        "value": {
+          "type": "map",
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": "vec",
+            "element": {
+              "type": "custom",
+              "name": "CourseGoal"
+            }
+          }
+        }
+      },
+      {
+        "doc": "All course modules",
+        "name": "modules",
+        "value": {
+          "type": "map",
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": "custom",
+            "name": "CourseModule"
+          }
+        }
+      },
+      {
+        "doc": "Course prerequisites mapping",
+        "name": "prerequisites",
+        "value": {
+          "type": "map",
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": "vec",
+            "element": {
+              "type": "custom",
+              "name": "CourseId"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Create a new course in the registry.\n\nThis function creates a new course with the specified metadata and\nreturns the created course object with a unique identifier.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `creator` - The address of the course creator\n* `title` - The course title\n* `description` - The course description\n* `price` - The course price in the platform's currency\n* `category` - Optional course category\n* `language` - Optional course language\n* `thumbnail_url` - Optional URL for the course thumbnail image\n* `level` - Optional course difficulty level\n* `duration_hours` - Optional estimated duration in hours\n\n# Returns\n\nReturns the created `Course` object with all metadata and a unique ID.\n\n# Panics\n\n* If title or description are empty\n* If creator address is invalid\n* If price exceeds maximum allowed value\n\n# Examples\n\n```rust\nlet course = contract.create_course(\nenv.clone(),\ninstructor_address,\n\"Rust Programming Basics\".try_into().unwrap(),\n\"Learn Rust from scratch\".try_into().unwrap(),\n50",
+    "name": "create_course",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "creator",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "title",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "description",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "price",
+        "value": {
+          "type": "u128"
+        }
+      },
+      {
+        "doc": "",
+        "name": "category",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "language",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "thumbnail_url",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "level",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "custom",
+            "name": "CourseLevel"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "duration_hours",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "u32"
+          }
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "custom",
+        "name": "Course"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Create a new course category.\n\nThis function creates a new category that can be used to classify courses.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `caller` - The address of the user creating the category\n* `name` - The name of the category\n* `description` - Optional description of the category\n\n# Returns\n\nReturns the unique ID of the created category.\n\n# Panics\n\n* If category name is empty\n* If category with same name already exists\n\n# Examples\n\n```rust\n// Create a programming category\nlet category_id = contract.create_course_category(\nenv.clone(),\nadmin_address,\n\"Programming\".try_into().unwrap(),\nSome(\"Computer programming courses\".try_into().unwrap())\n);\n```\n\n# Edge Cases\n\n* **Duplicate names**: Cannot create categories with existing names\n* **Empty names**: Category name cannot be empty\n* **Unique IDs**: Each category gets a unique auto-generated ID",
+    "name": "create_course_category",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "caller",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "name",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "description",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "u128"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Retrieve a course by its ID.\n\nThis function fetches a course's complete information using its unique identifier.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `course_id` - The unique identifier of the course to retrieve\n\n# Returns\n\nReturns the `Course` object containing all course metadata.\n\n# Panics\n\n* If course with given ID doesn't exist\n* If course_id is invalid or empty\n\n# Examples\n\n```rust\n// Get course by ID\nlet course = contract.get_course(env.clone(), \"course_123\".try_into().unwrap());\nprintln!(\"Course title: {}\", course.title);\n```\n\n# Edge Cases\n\n* **Non-existent course**: Will panic if course ID doesn't exist\n* **Archived courses**: Still retrievable but marked as archived\n* **Public access**: Anyone can retrieve course information",
+    "name": "get_course",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "course_id",
+        "value": {
+          "type": "string"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "custom",
+        "name": "Course"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Retrieve a course category by its ID.\n\nThis function fetches a category's information using its unique identifier.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `category_id` - The unique identifier of the category to retrieve\n\n# Returns\n\nReturns `Some(CourseCategory)` if found, `None` if the category doesn't exist.\n\n# Examples\n\n```rust\n// Get category by ID\nif let Some(category) = contract.get_course_category(env.clone(), 1) {\nprintln!(\"Category: {}\", category.name);\n} else {\nprintln!(\"Category not found\");\n}\n```\n\n# Edge Cases\n\n* **Non-existent category**: Returns `None` instead of panicking\n* **Invalid ID**: Returns `None` for invalid category IDs\n* **Public access**: Anyone can retrieve category information",
+    "name": "get_course_category",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "category_id",
+        "value": {
+          "type": "u128"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "option",
+        "value": {
+          "type": "custom",
+          "name": "CourseCategory"
+        }
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Get all courses created by a specific instructor.\n\nThis function retrieves all courses that were created by the specified instructor.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `instructor` - The address of the instructor to query courses for\n\n# Returns\n\nReturns a vector of `Course` objects created by the instructor.\n\n# Examples\n\n```rust\n// Get all courses by an instructor\nlet instructor_courses = contract.get_courses_by_instructor(env.clone(), instructor_address);\nfor course in instructor_courses {\nprintln!(\"Course: {}\", course.title);\n}\n```\n\n# Edge Cases\n\n* **No courses**: Returns empty vector if instructor has no courses\n* **Archived courses**: Includes archived courses in results\n* **Public access**: Anyone can query instructor courses\n* **Invalid instructor**: Returns empty vector for non-existent instructors",
+    "name": "get_courses_by_instructor",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "instructor",
+        "value": {
+          "type": "address"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "vec",
+        "element": {
+          "type": "custom",
+          "name": "Course"
+        }
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Remove a module from a course.\n\nThis function removes a specific module from its associated course.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `module_id` - The unique identifier of the module to remove\n\n# Panics\n\nRemove a module from a course.\n\nThis function removes a specific module from its associated course.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `module_id` - The unique identifier of the module to remove\n\n# Panics\n\n* If the module doesn't exist\n* If the module_id is invalid or empty\n* If module removal operation fails\n\n# Examples\n\n```rust\n// Remove a module from a course\ncontract.remove_module(env.clone(), \"module_123\".try_into().unwrap());\n```\n\n# Edge Cases\n\n* **Non-existent module**: Will panic if module ID doesn't exist\n* **Invalid ID**: Will panic for invalid or empty module IDs\n* **Course updates**: Automatically updates course module count\n\nPanics if the module removal fails or if the module doesn't exist.",
+    "name": "remove_module",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "module_id",
+        "value": {
+          "type": "string"
+        }
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "doc": "Add a new module to a course.\n\nThis function creates and adds a new module to the specified course\nat the given position.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `course_id` - The unique identifier of the course to add the module to\n* `position` - The position where the module should be inserted\n* `title` - The title of the new module\n\n# Returns\n\nReturns the created `CourseModule` object.\n\n# Panics\n\n* If course doesn't exist\n* If caller is not the course creator\n* If module title is empty\n* If position is invalid\n\n# Examples\n\n```rust\n// Add a module at position 1\nlet module = contract.add_module(\nenv.clone(),\ncourse_creator_address,\n\"course_123\".try_into().unwrap(),\n1,\n\"Introduction to Variables\".try_into().unwrap()\n);\n```\n\n# Edge Cases\n\n* **Invalid position**: Position must be valid for the course\n* **Empty title**: Module title cannot be empty\n* **Creator only**: Only course creator can add modules\n* **Auto-generated ID**: Module gets unique auto-generated ID",
+    "name": "add_module",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "caller",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "course_id",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "position",
+        "value": {
+          "type": "u32"
+        }
+      },
+      {
+        "doc": "",
+        "name": "title",
+        "value": {
+          "type": "string"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "custom",
+        "name": "CourseModule"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Delete a course from the registry.\n\nThis function permanently removes a course from the registry.\nOnly the course creator can delete their own courses.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `creator` - The address of the course creator\n* `course_id` - The unique identifier of the course to delete\n\n# Panics\n\n* If course doesn't exist\n* If creator is not the actual course creator\n* If course_id is invalid or empty\n\n# Examples\n\n```rust\n// Course creator deleting their course\ncontract.delete_course(env.clone(), course_creator_address, \"course_123\".try_into().unwrap());\n```\n\n# Edge Cases\n\n* **Permission denied**: Only course creator can delete their courses\n* **Non-existent course**: Will panic if course doesn't exist\n* **Permanent deletion**: Course and all associated data are permanently removed\n* **Enrolled students**: Consider impact on enrolled students before deletion\n\nPanics if the deletion fails or if the creator is not authorized.",
+    "name": "delete_course",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "creator",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "course_id",
+        "value": {
+          "type": "string"
+        }
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "doc": "Simple hello world function for testing.\n\nThis is a basic function that returns a greeting message,\nprimarily used for testing contract deployment and basic functionality.\n\n# Arguments\n\n* `_env` - The Soroban environment (unused)\n\n# Returns\n\nReturns a greeting string.\n\n# Examples\n\n```rust\n// Test contract deployment\nlet greeting = contract.hello_world(env.clone());\nassert_eq!(greeting, \"Hello from Web3 👋\");\n```\n\n# Edge Cases\n\n* **Always succeeds**: This function never fails\n* **No dependencies**: Requires no external data or state\n* **Testing only**: Primarily intended for contract testing",
+    "name": "hello_world",
+    "inputs": [],
+    "outputs": [
+      {
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Edit an existing course goal.\n\nThis function allows the course creator to modify the content of an existing goal.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `creator` - The address of the course creator\n* `course_id` - The unique identifier of the course\n* `goal_id` - The unique identifier of the goal to edit\n* `new_content` - The new content for the goal\n\n# Returns\n\nReturns the updated `CourseGoal` object.\n\n# Panics\n\n* If course doesn't exist\n* If goal doesn't exist\n* If creator is not the course creator\n* If new_content is empty\n\n# Examples\n\n```rust\n// Edit a course goal\nlet updated_goal = contract.edit_goal(\nenv.clone(),\ncourse_creator_address,\n\"course_123\".try_into().unwrap(),\n\"goal_456\".try_into().unwrap(),\n\"Updated learning objective\".try_into().unwrap()\n);\n```\n\n# Edge Cases\n\n* **Empty content**: New content cannot be empty\n* **Creator only**: Only course creator can edit goals\n* **Non-existent goal**: Will panic if goal ID doesn't exist\n* **Content validation**: New content must meet validation ",
+    "name": "edit_goal",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "creator",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "course_id",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "goal_id",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "new_content",
+        "value": {
+          "type": "string"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "custom",
+        "name": "CourseGoal"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Add a new goal to a course.\n\nThis function creates and adds a new learning goal to the specified course.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `creator` - The address of the course creator\n* `course_id` - The unique identifier of the course\n* `content` - The content/description of the goal\n\n# Returns\n\nReturns the created `CourseGoal` object.\n\n# Panics\n\n* If course doesn't exist\n* If creator is not the course creator\n* If content is empty\n\n# Examples\n\n```rust\n// Add a learning goal to a course\nlet goal = contract.add_goal(\nenv.clone(),\ncourse_creator_address,\n\"course_123\".try_into().unwrap(),\n\"Students will learn basic programming concepts\".try_into().unwrap()\n);\n```\n\n# Edge Cases\n\n* **Empty content**: Goal content cannot be empty\n* **Creator only**: Only course creator can add goals\n* **Auto-generated ID**: Goal gets unique auto-generated ID\n* **Content validation**: Goal content must meet validation requirements",
+    "name": "add_goal",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "creator",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "course_id",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "content",
+        "value": {
+          "type": "string"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "custom",
+        "name": "CourseGoal"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Remove a goal from a course.\n\nThis function removes a specific learning goal from the course.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `caller` - The address of the user requesting the removal\n* `course_id` - The unique identifier of the course\n* `goal_id` - The unique identifier of the goal to remove\n\n# Panics\n\n* If course doesn't exist\n* If goal doesn't exist\n* If caller is not the course creator\n\n# Examples\n\n```rust\n// Remove a goal from a course\ncontract.remove_goal(\nenv.clone(),\ncourse_creator_address,\n\"course_123\".try_into().unwrap(),\n\"goal_456\".try_into().unwrap()\n);\n```\n\n# Edge Cases\n\n* **Creator only**: Only course creator can remove goals\n* **Non-existent goal**: Will panic if goal ID doesn't exist\n* **Permanent removal**: Goal is permanently deleted from course\n* **Goal count**: Automatically updates course goal count",
+    "name": "remove_goal",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "caller",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "course_id",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "goal_id",
+        "value": {
+          "type": "string"
+        }
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "doc": "Add prerequisites to a course.\n\nThis function adds prerequisite courses that must be completed\nbefore a student can enroll in the target course.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `creator` - The address of the course creator\n* `course_id` - The unique identifier of the course\n* `prerequisite_course_ids` - Vector of course IDs that are prerequisites\n\n# Panics\n\n* If course doesn't exist\n* If creator is not the course creator\n* If any prerequisite course doesn't exist\n* If trying to add self as prerequisite\n\n# Examples\n\n```rust\nlet mut prerequisites = Vec::new(&env);\nprerequisites.push_back(\"basic_rust\".try_into().unwrap());\nprerequisites.push_back(\"programming_fundamentals\".try_into().unwrap());\n\ncontract.add_prerequisite(\nenv.clone(),\ncourse_creator_address,\n\"advanced_rust\".try_into().unwrap(),\nprerequisites\n);\n```\n\n# Edge Cases\n\n* **Circular dependencies**: Cannot add self as prerequisite\n* **Non-existent courses**: All prerequisite courses must exist\n* **Creator only**: Only course creator ca",
+    "name": "add_prerequisite",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "creator",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "course_id",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "prerequisite_course_ids",
+        "value": {
+          "type": "vec",
+          "element": {
+            "type": "string"
+          }
+        }
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "doc": "Remove a prerequisite from a course.\n\nThis function removes a specific prerequisite course requirement\nfrom the target course.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `creator` - The address of the course creator\n* `course_id` - The unique identifier of the course\n* `prerequisite_course_id` - The ID of the prerequisite course to remove\n\n# Panics\n\n* If course doesn't exist\n* If creator is not the course creator\n* If prerequisite doesn't exist for the course\n\n# Examples\n\n```rust\n// Remove a prerequisite from a course\ncontract.remove_prerequisite(\nenv.clone(),\ncourse_creator_address,\n\"advanced_rust\".try_into().unwrap(),\n\"basic_rust\".try_into().unwrap()\n);\n```\n\n# Edge Cases\n\n* **Non-existent prerequisite**: Will panic if prerequisite doesn't exist\n* **Creator only**: Only course creator can remove prerequisites\n* **No effect**: Removing non-existent prerequisite has no effect\n* **Student impact**: Consider impact on enrolled students",
+    "name": "remove_prerequisite",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "creator",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "course_id",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "prerequisite_course_id",
+        "value": {
+          "type": "string"
+        }
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "doc": "Edit the prerequisites for a course.\n\nThis function replaces all existing prerequisites with a new set\nof prerequisite courses.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `creator` - The address of the course creator\n* `course_id` - The unique identifier of the course\n* `new_prerequisites` - Vector of new prerequisite course IDs\n\n# Panics\n\n* If course doesn't exist\n* If creator is not the course creator\n* If any prerequisite course doesn't exist\n* If trying to add self as prerequisite\n\n# Examples\n\n```rust\nlet mut new_prerequisites = Vec::new(&env);\nnew_prerequisites.push_back(\"updated_course_1\".try_into().unwrap());\nnew_prerequisites.push_back(\"updated_course_2\".try_into().unwrap());\n\ncontract.edit_prerequisite(\nenv.clone(),\ncourse_creator_address,\n\"target_course\".try_into().unwrap(),\nnew_prerequisites\n);\n```\n\n# Edge Cases\n\n* **Complete replacement**: All old prerequisites are removed\n* **Empty vector**: Can clear all prerequisites with empty vector\n* **Circular dependencies**: Cannot add self as prere",
+    "name": "edit_prerequisite",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "creator",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "course_id",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "new_prerequisites",
+        "value": {
+          "type": "vec",
+          "element": {
+            "type": "string"
+          }
+        }
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "doc": "Edit course information.\n\nThis function allows the course creator to update various aspects\nof the course using the provided parameters.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `creator` - The address of the course creator\n* `course_id` - The unique identifier of the course to edit\n* `params` - Parameters containing the fields to update\n\n# Returns\n\nReturns the updated `Course` object.\n\n# Panics\n\n* If course doesn't exist\n* If creator is not the course creator\n* If any field validation fails\n\n# Examples\n\n```rust\nlet params = EditCourseParams {\ntitle: Some(\"Updated Course Title\".try_into().unwrap()),\ndescription: Some(\"Updated description\".try_into().unwrap()),\nprice: Some(7500),\nlevel: Some(CourseLevel::Intermediate),\n..Default::default()\n};\n\nlet updated_course = contract.edit_course(\nenv.clone(),\ncourse_creator_address,\n\"course_123\".try_into().unwrap(),\nparams\n);\n```\n\n# Edge Cases\n\n* **Partial updates**: Only provided fields are updated\n* **Validation**: All fields must pass validation rules\n* **Cre",
+    "name": "edit_course",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "creator",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "course_id",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "params",
+        "value": {
+          "type": "custom",
+          "name": "EditCourseParams"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "custom",
+        "name": "Course"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Archive a course.\n\nThis function marks a course as archived, making it unavailable for new enrollments\nwhile preserving existing data and access for current students.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `creator` - The address of the course creator\n* `course_id` - The unique identifier of the course to archive\n\n# Returns\n\nReturns the updated `Course` object with archived status.\n\n# Panics\n\n* If course doesn't exist\n* If creator is not the course creator\n* If course is already archived\n\n# Examples\n\n```rust\n// Archive a course\nlet archived_course = contract.archive_course(\n&env,\ncourse_creator_address,\n\"course_123\".try_into().unwrap()\n);\n```\n\n# Edge Cases\n\n* **Already archived**: Will panic if course is already archived\n* **Creator only**: Only course creator can archive course\n* **Student access**: Current students retain access\n* **Reversible**: Course can be unarchived if needed",
+    "name": "archive_course",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "creator",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "course_id",
+        "value": {
+          "type": "string"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "custom",
+        "name": "Course"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Check if a user is the creator of a specific course.\n\nThis function verifies whether the specified user is the original creator\nof the given course.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `course_id` - The unique identifier of the course\n* `user` - The address of the user to check\n\n# Returns\n\nReturns `true` if the user is the course creator, `false` otherwise.\n\n# Panics\n\n* If course doesn't exist\n\n# Examples\n\n```rust\n// Check if user is course creator\nlet is_creator = contract.is_course_creator(\n&env,\n\"course_123\".try_into().unwrap(),\nuser_address\n);\n\nif is_creator {\n// User can edit this course\n}\n```\n\n# Edge Cases\n\n* **Non-existent course**: Will panic if course doesn't exist\n* **Public access**: Anyone can check creator status\n* **Creator verification**: Useful for permission checks",
+    "name": "is_course_creator",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "course_id",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "user",
+        "value": {
+          "type": "address"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "bool"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "List all available course categories.\n\nThis function retrieves all course categories that have been created\nin the system.\n\n# Arguments\n\n* `env` - The Soroban environment\n\n# Returns\n\nReturns a vector of all available `Category` objects.\n\n# Examples\n\n```rust\n// Get all categories\nlet categories = contract.list_categories(env.clone());\nfor category in categories {\nprintln!(\"Category: {}\", category.name);\n}\n```\n\n# Edge Cases\n\n* **Empty system**: Returns empty vector if no categories exist\n* **Public access**: Anyone can list categories\n* **Order**: Categories are returned in creation order",
+    "name": "list_categories",
+    "inputs": [],
+    "outputs": [
+      {
+        "type": "vec",
+        "element": {
+          "type": "custom",
+          "name": "Category"
+        }
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "List courses with filtering and pagination.\n\nThis function retrieves courses based on the provided filters\nwith optional pagination support.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `filters` - Filtering criteria for courses\n* `limit` - Optional maximum number of courses to return\n* `offset` - Optional number of courses to skip for pagination\n\n# Returns\n\nReturns a vector of `Course` objects matching the filter criteria.\n\n# Examples\n\n```rust\n// List first 10 courses\nlet courses = contract.list_courses_with_filters(\nenv.clone(),\nCourseFilters::default(),\nSome(10),\nSome(0)\n);\n\n// Filter by category\nlet mut filters = CourseFilters::default();\nfilters.category = Some(\"Programming\".try_into().unwrap());\nlet programming_courses = contract.list_courses_with_filters(\nenv.clone(),\nfilters,\nSome(20),\nNone\n);\n```\n\n# Edge Cases\n\n* **No matches**: Returns empty vector if no courses match filters\n* **Large limits**: Limit should be reasonable to avoid gas issues\n* **Public access**: Anyone can list courses\n* **Arch",
+    "name": "list_courses_with_filters",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "filters",
+        "value": {
+          "type": "custom",
+          "name": "CourseFilters"
+        }
+      },
+      {
+        "doc": "",
+        "name": "limit",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "u32"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "offset",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "u32"
+          }
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "vec",
+        "element": {
+          "type": "custom",
+          "name": "Course"
+        }
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Export all course data for backup purposes (admin only)\n\nThis function exports all course data including courses, categories,\nmodules, goals, and prerequisites for backup and recovery purposes.\n\n# Arguments\n* `env` - Soroban environment\n* `caller` - Address performing the export (must be admin)\n\n# Returns\n* `CourseBackupData` - Complete backup data structure\n\n# Panics\n* If caller is not an admin",
+    "name": "export_course_data",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "caller",
+        "value": {
+          "type": "address"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "custom",
+        "name": "CourseBackupData"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Import course data from backup (admin only)\n\nThis function imports course data from a backup structure.\nOnly admins can perform this operation. This will overwrite existing data.\n\n# Arguments\n* `env` - Soroban environment\n* `caller` - Address performing the import (must be admin)\n* `backup_data` - Backup data structure to import\n\n# Returns\n* `u32` - Number of courses imported\n\n# Panics\n* If caller is not an admin\n* If backup data is invalid\n* If import operation fails",
+    "name": "import_course_data",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "caller",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "backup_data",
+        "value": {
+          "type": "custom",
+          "name": "CourseBackupData"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "u32"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Get the current contract version\n\nReturns the semantic version of the current contract deployment.\nThis is useful for tracking contract upgrades and compatibility.\n\n# Arguments\n* `_env` - The Soroban environment (unused)\n\n# Returns\n* `String` - The current contract version",
+    "name": "get_contract_version",
+    "inputs": [],
+    "outputs": [
+      {
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Get contract version history\n\nReturns a list of all versions that have been deployed for this contract.\nThis helps track the evolution of the contract over time.\n\n# Arguments\n* `env` - The Soroban environment\n\n# Returns\n* `Vec<String>` - Vector of version strings in chronological order",
+    "name": "get_version_history",
+    "inputs": [],
+    "outputs": [
+      {
+        "type": "vec",
+        "element": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Check compatibility between contract versions\n\nDetermines if data from one version can be safely used with another version.\nThis is crucial for migration processes and backward compatibility.\n\n# Arguments\n* `env` - The Soroban environment\n* `from_version` - The source version to check compatibility from\n* `to_version` - The target version to check compatibility to\n\n# Returns\n* `bool` - True if the versions are compatible, false otherwise",
+    "name": "is_version_compatible",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "from_version",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "to_version",
+        "value": {
+          "type": "string"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "bool"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Migrate course data between contract versions\n\nPerforms data migration from one contract version to another.\nThis function handles the transformation of course data structures\nwhen upgrading contract versions.\n\n# Arguments\n* `env` - The Soroban environment\n* `caller` - The address performing the migration (must be course creator or admin)\n* `from_version` - The source version to migrate from\n* `to_version` - The target version to migrate to\n\n# Returns\n* `bool` - True if migration was successful, false otherwise\n\n# Events\nEmits a migration event upon successful completion",
+    "name": "migrate_course_data",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "caller",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "from_version",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "",
+        "name": "to_version",
+        "value": {
+          "type": "string"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "bool"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Get migration status for the current contract\n\nReturns information about the current migration status and any\npending migrations that need to be completed.\n\n# Arguments\n* `env` - The Soroban environment\n\n# Returns\n* `String` - Migration status information",
+    "name": "get_migration_status",
+    "inputs": [],
+    "outputs": [
+      {
+        "type": "string"
+      }
+    ]
+  }
+]

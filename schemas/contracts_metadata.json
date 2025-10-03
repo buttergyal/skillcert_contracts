@@ -1,0 +1,23 @@
+{
+  "contracts": {
+    "course_access": {
+      "wasm": "target/wasm32v1-none/release/course_access.wasm",
+      "schema": "schemas/course_access_schema.json",
+      "docs": "schemas/course_access_docs.md",
+      "typescript": "schemas/course_access-ts/"
+    },
+    "course_registry": {
+      "wasm": "target/wasm32v1-none/release/course_registry.wasm",
+      "schema": "schemas/course_registry_schema.json",
+      "docs": "schemas/course_registry_docs.md",
+      "typescript": "schemas/course_registry-ts/"
+    },
+    "user_management": {
+      "wasm": "target/wasm32v1-none/release/user_management.wasm",
+      "schema": "schemas/user_management_schema.json",
+      "docs": "schemas/user_management_docs.md",
+      "typescript": "schemas/user_management-ts/"
+    }
+  },
+  "generated_at": "2025-10-03T10:48:29Z"
+}

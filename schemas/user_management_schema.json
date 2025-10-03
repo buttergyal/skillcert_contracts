@@ -1,0 +1,1541 @@
+[
+  {
+    "type": "enum",
+    "doc": "",
+    "name": "Error",
+    "cases": [
+      {
+        "doc": "",
+        "name": "AlreadInitialized",
+        "value": 1
+      },
+      {
+        "doc": "",
+        "name": "InvalidMaxPageSize",
+        "value": 2
+      },
+      {
+        "doc": "",
+        "name": "SystemNotInitialized",
+        "value": 3
+      },
+      {
+        "doc": "",
+        "name": "AccessDenied",
+        "value": 4
+      },
+      {
+        "doc": "",
+        "name": "SuperAdminNotRegular",
+        "value": 5
+      },
+      {
+        "doc": "",
+        "name": "OperationFailed",
+        "value": 6
+      },
+      {
+        "doc": "",
+        "name": "MaxAdminsReached",
+        "value": 7
+      },
+      {
+        "doc": "",
+        "name": "CannotRemoveSuperAdmin",
+        "value": 8
+      },
+      {
+        "doc": "",
+        "name": "UserProfileExists",
+        "value": 9
+      },
+      {
+        "doc": "",
+        "name": "NameRequired",
+        "value": 10
+      },
+      {
+        "doc": "",
+        "name": "EmailRequired",
+        "value": 11
+      },
+      {
+        "doc": "",
+        "name": "CountryRequired",
+        "value": 12
+      },
+      {
+        "doc": "",
+        "name": "InvalidEmailFormat",
+        "value": 15
+      },
+      {
+        "doc": "",
+        "name": "EmailAlreadyExists",
+        "value": 16
+      },
+      {
+        "doc": "",
+        "name": "InvalidField",
+        "value": 17
+      },
+      {
+        "doc": "",
+        "name": "InvalidProfilePicURL",
+        "value": 19
+      },
+      {
+        "doc": "",
+        "name": "UserNotFound",
+        "value": 20
+      },
+      {
+        "doc": "",
+        "name": "UserProfileNotFound",
+        "value": 21
+      },
+      {
+        "doc": "",
+        "name": "InactiveUser",
+        "value": 22
+      },
+      {
+        "doc": "",
+        "name": "PageParamTooLarge",
+        "value": 23
+      },
+      {
+        "doc": "",
+        "name": "InvalidTitleLength",
+        "value": 24
+      },
+      {
+        "doc": "",
+        "name": "PasswordMismatch",
+        "value": 25
+      },
+      {
+        "doc": "",
+        "name": "RateLimitExceeded",
+        "value": 26
+      },
+      {
+        "doc": "",
+        "name": "RateLimitNotConfigured",
+        "value": 27
+      },
+      {
+        "doc": "",
+        "name": "PasswordTooShort",
+        "value": 28
+      },
+      {
+        "doc": "",
+        "name": "PasswordTooLong",
+        "value": 29
+      },
+      {
+        "doc": "",
+        "name": "PasswordMissingUppercase",
+        "value": 30
+      },
+      {
+        "doc": "",
+        "name": "PasswordMissingLowercase",
+        "value": 31
+      },
+      {
+        "doc": "",
+        "name": "PasswordMissingDigit",
+        "value": 32
+      },
+      {
+        "doc": "",
+        "name": "PasswordMissingSpecialChar",
+        "value": 33
+      },
+      {
+        "doc": "",
+        "name": "RequiredFieldMissing",
+        "value": 34
+      },
+      {
+        "doc": "",
+        "name": "Unauthorized",
+        "value": 35
+      }
+    ]
+  },
+  {
+    "type": "enum",
+    "doc": "Errors that can occur during contract versioning operations",
+    "name": "VersioningError",
+    "cases": [
+      {
+        "doc": "Invalid version format",
+        "name": "InvalidVersion",
+        "value": 1
+      },
+      {
+        "doc": "Version not found in history",
+        "name": "VersionNotFound",
+        "value": 2
+      },
+      {
+        "doc": "Migration not compatible",
+        "name": "MigrationNotCompatible",
+        "value": 3
+      },
+      {
+        "doc": "Migration already completed",
+        "name": "MigrationAlreadyCompleted",
+        "value": 4
+      },
+      {
+        "doc": "Unauthorized migration attempt",
+        "name": "UnauthorizedMigration",
+        "value": 5
+      },
+      {
+        "doc": "Migration failed",
+        "name": "MigrationFailed",
+        "value": 6
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "",
+    "name": "UserProfile",
+    "fields": [
+      {
+        "doc": "User's contact email address (required, must be unique)",
+        "name": "contact_email",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "User's country of residence (optional)",
+        "name": "country",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "User's full name (required)",
+        "name": "full_name",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "User's profession or job title (optional)",
+        "name": "profession",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "User's profile picture URL (optional)",
+        "name": "profile_picture_url",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "User's learning goals or purpose (optional)",
+        "name": "purpose",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "type": "union",
+    "doc": "Data keys for contract storage\n\nCurrently includes only UserProfile keyed by user Address",
+    "name": "DataKey",
+    "cases": [
+      {
+        "doc": "",
+        "name": "UserProfile",
+        "values": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "doc": "",
+        "name": "EmailIndex",
+        "values": [
+          {
+            "type": "string"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "User profile information matching UI definition.\n\nThis struct contains user profile data with required and optional fields\nas defined by the user interface requirements.",
+    "name": "UserProfile",
+    "fields": [
+      {
+        "doc": "User's contact email address (required, must be unique)",
+        "name": "contact_email",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "User's country of residence (optional)",
+        "name": "country",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "User's full name (required)",
+        "name": "full_name",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "User's profession or job title (optional)",
+        "name": "profession",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "User's profile picture URL (optional)",
+        "name": "profile_picture_url",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "User's learning goals or purpose (optional)",
+        "name": "purpose",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "Struct for profile update parameters\nOnly includes fields that can be updated",
+    "name": "ProfileUpdateParams",
+    "fields": [
+      {
+        "doc": "User's country of residence",
+        "name": "country",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "User's full name (optional update)",
+        "name": "full_name",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "User's profession or job title",
+        "name": "profession",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "User's profile picture URL",
+        "name": "profile_picture_url",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "User's learning goals or purpose",
+        "name": "purpose",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "type": "union",
+    "doc": "User roles in the SkillCert platform.\n\nDefines the different types of users and their permission levels.",
+    "name": "UserRole",
+    "cases": [
+      {
+        "doc": "Regular platform user who can enroll in courses",
+        "name": "Student",
+        "values": []
+      },
+      {
+        "doc": "User who can create and manage courses",
+        "name": "Instructor",
+        "values": []
+      },
+      {
+        "doc": "Platform administrator with elevated privileges",
+        "name": "Admin",
+        "values": []
+      },
+      {
+        "doc": "Super administrator with full system access",
+        "name": "SuperAdmin",
+        "values": []
+      },
+      {
+        "doc": "Content moderator with course content permissions",
+        "name": "Moderator",
+        "values": []
+      },
+      {
+        "doc": "Support staff with user assistance permissions",
+        "name": "Support",
+        "values": []
+      }
+    ]
+  },
+  {
+    "type": "union",
+    "doc": "Granular permissions for RBAC system.\n\nDefines specific actions that can be granted or denied to users.",
+    "name": "Permission",
+    "cases": [
+      {
+        "doc": "Can view user profiles",
+        "name": "ViewUsers",
+        "values": []
+      },
+      {
+        "doc": "Can edit user profiles (own or others)",
+        "name": "EditUsers",
+        "values": []
+      },
+      {
+        "doc": "Can delete/deactivate users",
+        "name": "DeleteUsers",
+        "values": []
+      },
+      {
+        "doc": "Can create new user accounts",
+        "name": "CreateUsers",
+        "values": []
+      },
+      {
+        "doc": "Can view course details",
+        "name": "ViewCourses",
+        "values": []
+      },
+      {
+        "doc": "Can create new courses",
+        "name": "CreateCourses",
+        "values": []
+      },
+      {
+        "doc": "Can edit course content",
+        "name": "EditCourses",
+        "values": []
+      },
+      {
+        "doc": "Can delete courses",
+        "name": "DeleteCourses",
+        "values": []
+      },
+      {
+        "doc": "Can manage course access (grant/revoke)",
+        "name": "ManageCourseAccess",
+        "values": []
+      },
+      {
+        "doc": "Can manage system configuration",
+        "name": "ManageSystem",
+        "values": []
+      },
+      {
+        "doc": "Can manage admin roles",
+        "name": "ManageAdmins",
+        "values": []
+      },
+      {
+        "doc": "Can view system analytics",
+        "name": "ViewAnalytics",
+        "values": []
+      },
+      {
+        "doc": "Can moderate content",
+        "name": "ModerateContent",
+        "values": []
+      },
+      {
+        "doc": "Can provide user support",
+        "name": "ProvideSupport",
+        "values": []
+      },
+      {
+        "doc": "Can view support tickets",
+        "name": "ViewSupport",
+        "values": []
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "Role-based permissions mapping.\n\nDefines which permissions are granted to each role by default.",
+    "name": "RolePermissions",
+    "fields": [
+      {
+        "doc": "List of permissions granted to this role",
+        "name": "permissions",
+        "value": {
+          "type": "vec",
+          "element": {
+            "type": "custom",
+            "name": "Permission"
+          }
+        }
+      },
+      {
+        "doc": "The role this permission set applies to",
+        "name": "role",
+        "value": {
+          "type": "custom",
+          "name": "UserRole"
+        }
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "User-specific permission overrides.\n\nAllows granting or revoking specific permissions to individual users.",
+    "name": "UserPermissions",
+    "fields": [
+      {
+        "doc": "Additional permissions granted beyond role defaults",
+        "name": "granted_permissions",
+        "value": {
+          "type": "vec",
+          "element": {
+            "type": "custom",
+            "name": "Permission"
+          }
+        }
+      },
+      {
+        "doc": "Permissions explicitly revoked from role defaults",
+        "name": "revoked_permissions",
+        "value": {
+          "type": "vec",
+          "element": {
+            "type": "custom",
+            "name": "Permission"
+          }
+        }
+      },
+      {
+        "doc": "The user address",
+        "name": "user",
+        "value": {
+          "type": "address"
+        }
+      }
+    ]
+  },
+  {
+    "type": "union",
+    "doc": "User account status.\n\nRepresents the current state of a user's account.",
+    "name": "UserStatus",
+    "cases": [
+      {
+        "doc": "User account is active and functional",
+        "name": "Active",
+        "values": []
+      },
+      {
+        "doc": "User account is deactivated",
+        "name": "Inactive",
+        "values": []
+      },
+      {
+        "doc": "User account is temporarily suspended",
+        "name": "Suspended",
+        "values": []
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "Lightweight user profile for listing operations.\n\nContains essential user information for efficient querying and display in user lists.",
+    "name": "LightProfile",
+    "fields": [
+      {
+        "doc": "User's country of residence",
+        "name": "country",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "User's full name",
+        "name": "full_name",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "User's profession or job title",
+        "name": "profession",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "User's role in the platform",
+        "name": "role",
+        "value": {
+          "type": "custom",
+          "name": "UserRole"
+        }
+      },
+      {
+        "doc": "User's account status",
+        "name": "status",
+        "value": {
+          "type": "custom",
+          "name": "UserStatus"
+        }
+      },
+      {
+        "doc": "User's blockchain address",
+        "name": "user_address",
+        "value": {
+          "type": "address"
+        }
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "Rate limiting configuration for user operations.\n\nTracks rate limiting settings and current usage for spam protection.",
+    "name": "RateLimitConfig",
+    "fields": [
+      {
+        "doc": "Maximum operations allowed per window",
+        "name": "max_operations_per_window",
+        "value": {
+          "type": "u32"
+        }
+      },
+      {
+        "doc": "Time window for rate limiting in seconds",
+        "name": "window_seconds",
+        "value": {
+          "type": "u64"
+        }
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "Rate limiting tracking data for a specific address.\n\nStores the current usage count and window start time for rate limiting.",
+    "name": "RateLimitData",
+    "fields": [
+      {
+        "doc": "Current count of operations in this window",
+        "name": "count",
+        "value": {
+          "type": "u32"
+        }
+      },
+      {
+        "doc": "Timestamp when the current window started",
+        "name": "window_start",
+        "value": {
+          "type": "u64"
+        }
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "Administrative configuration for the user management system.\n\nContains system-wide settings and administrative information.",
+    "name": "AdminConfig",
+    "fields": [
+      {
+        "doc": "Whether the system has been initialized",
+        "name": "initialized",
+        "value": {
+          "type": "bool"
+        }
+      },
+      {
+        "doc": "Maximum allowed page size for queries",
+        "name": "max_page_size",
+        "value": {
+          "type": "u32"
+        }
+      },
+      {
+        "doc": "Rate limiting configuration for user creation",
+        "name": "rate_limit_config",
+        "value": {
+          "type": "custom",
+          "name": "RateLimitConfig"
+        }
+      },
+      {
+        "doc": "Address of the super administrator",
+        "name": "super_admin",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "Total number of registered users",
+        "name": "total_user_count",
+        "value": {
+          "type": "u32"
+        }
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "Backup data structure for user management system.\n\nContains all user data and system configuration for backup and recovery operations.",
+    "name": "UserBackupData",
+    "fields": [
+      {
+        "doc": "Administrative configuration",
+        "name": "admin_config",
+        "value": {
+          "type": "custom",
+          "name": "AdminConfig"
+        }
+      },
+      {
+        "doc": "List of admin addresses",
+        "name": "admins",
+        "value": {
+          "type": "vec",
+          "element": {
+            "type": "address"
+          }
+        }
+      },
+      {
+        "doc": "Backup timestamp",
+        "name": "backup_timestamp",
+        "value": {
+          "type": "u64"
+        }
+      },
+      {
+        "doc": "Backup version for compatibility",
+        "name": "backup_version",
+        "value": {
+          "type": "string"
+        }
+      },
+      {
+        "doc": "Email to address mapping for uniqueness",
+        "name": "email_mappings",
+        "value": {
+          "type": "map",
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": "address"
+          }
+        }
+      },
+      {
+        "doc": "All lightweight profiles for efficient queries",
+        "name": "light_profiles",
+        "value": {
+          "type": "map",
+          "key": {
+            "type": "address"
+          },
+          "value": {
+            "type": "custom",
+            "name": "LightProfile"
+          }
+        }
+      },
+      {
+        "doc": "All user profiles in the system",
+        "name": "user_profiles",
+        "value": {
+          "type": "map",
+          "key": {
+            "type": "address"
+          },
+          "value": {
+            "type": "custom",
+            "name": "UserProfile"
+          }
+        }
+      },
+      {
+        "doc": "List of all registered user addresses",
+        "name": "users_index",
+        "value": {
+          "type": "vec",
+          "element": {
+            "type": "address"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "Pagination parameters for cursor-based pagination.\n\nUsed to implement efficient pagination that avoids gas limit issues\nwith large datasets by using cursor-based navigation.",
+    "name": "PaginationParams",
+    "fields": [
+      {
+        "doc": "Cursor for pagination (address of the last item from previous page)",
+        "name": "cursor",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "address"
+          }
+        }
+      },
+      {
+        "doc": "Maximum number of items to return per page",
+        "name": "limit",
+        "value": {
+          "type": "u32"
+        }
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "doc": "Pagination result with metadata for efficient navigation.\n\nContains the paginated data along with pagination metadata\nto enable cursor-based navigation.",
+    "name": "PaginatedLightProfiles",
+    "fields": [
+      {
+        "doc": "The paginated data items",
+        "name": "data",
+        "value": {
+          "type": "vec",
+          "element": {
+            "type": "custom",
+            "name": "LightProfile"
+          }
+        }
+      },
+      {
+        "doc": "Whether there are more pages available",
+        "name": "has_more",
+        "value": {
+          "type": "bool"
+        }
+      },
+      {
+        "doc": "Cursor for the next page (None if this is the last page)",
+        "name": "next_cursor",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "address"
+          }
+        }
+      },
+      {
+        "doc": "Total count of items matching the filter (optional, may be expensive to compute)",
+        "name": "total_count",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "u32"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "type": "union",
+    "doc": "Storage keys for different data types in the user management contract.\n\nThis enum defines the various keys used to store and retrieve\nuser data from the contract's persistent storage.",
+    "name": "DataKey",
+    "cases": [
+      {
+        "doc": "Key for storing complete user profiles: user_address -> UserProfile",
+        "name": "UserProfile",
+        "values": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "doc": "Key for storing admin flags: address -> bool",
+        "name": "Admin",
+        "values": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "doc": "Key for storing lightweight user profiles: user_address -> LightProfile",
+        "name": "UserProfileLight",
+        "values": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "doc": "Key for storing the list of all registered user addresses",
+        "name": "UsersIndex",
+        "values": []
+      },
+      {
+        "doc": "Key for email to address mapping to ensure email uniqueness: email -> Address",
+        "name": "EmailIndex",
+        "values": [
+          {
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "doc": "Key for storing the list of admin addresses",
+        "name": "Admins",
+        "values": []
+      },
+      {
+        "doc": "Key for storing user role assignments: user_address -> UserRole",
+        "name": "UserRole",
+        "values": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "doc": "Key for storing administrative configuration",
+        "name": "AdminConfig",
+        "values": []
+      },
+      {
+        "doc": "Key for storing rate limiting data per address: address -> RateLimitData",
+        "name": "RateLimit",
+        "values": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "doc": "Key for storing role-based permissions: role -> RolePermissions",
+        "name": "RolePermissions",
+        "values": [
+          {
+            "type": "custom",
+            "name": "UserRole"
+          }
+        ]
+      },
+      {
+        "doc": "Key for storing user-specific permission overrides: user_address -> UserPermissions",
+        "name": "UserPermissions",
+        "values": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "doc": "Key for storing default role permissions configuration",
+        "name": "DefaultRolePermissions",
+        "values": []
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Retrieve a user profile for the authenticated user.\n\nThis function fetches the complete user profile associated with the provided\nblockchain address. The user must be authenticated; otherwise, the function\nwill panic.\n\n### Arguments\n\n* `env` - The Soroban environment.\n* `user` - The address of the user whose profile is being requested.\n\n### Returns\n\nReturns the `UserProfile` corresponding to the authenticated user.\n\n### Panics\n\n* If the user is not authenticated (`require_auth` fails).\n* If the user profile does not exist (`UserNotFound` error).\n\n### Examples\n\n```rust\n// Assuming the user is authenticated in the environment\nlet profile = contract.get_user_profile(env.clone(), my_address);\nprintln!(\"User full name: {}\", profile.full_name);\n```\n\n### Notes\n\n* Only the user themselves can fetch their profile; there is no admin override\nin this function.\n* If the profile is not found in storage, the function will panic with\n`UserNotFound`.",
+    "name": "get_user_profile",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "user",
+        "value": {
+          "type": "address"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "result",
+        "value": {
+          "type": "custom",
+          "name": "UserProfile"
+        },
+        "error": {
+          "type": "error"
+        }
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Retrieve a user profile by their address.\n\nThis function fetches a complete user profile using the user's blockchain address.\nAccess may be restricted based on the requester's permissions.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `requester` - The address of the user requesting the profile\n* `user_id` - The address of the user whose profile is being requested\n\n# Returns\n\nReturns the requested `UserProfile`.\n\n# Panics\n\n* If the user profile doesn't exist\n* If the requester doesn't have permission to view the profile\n* If the requester is not the user themselves or an admin\n\n# Examples\n\n```rust\n// Get your own profile\nlet my_profile = contract.get_user_by_id(env.clone(), my_address, my_address);\n\n// Admin getting any user's profile\nlet user_profile = contract.get_user_by_id(env.clone(), admin_address, user_address);\n```\n\n# Edge Cases\n\n* **Non-existent user**: Will panic with appropriate error message\n* **Inactive user**: Returns profile but status will be `UserStatus::Inactive`\n* **Permission denied**:",
+    "name": "get_user_by_id",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "requester",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "user_id",
+        "value": {
+          "type": "address"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "custom",
+        "name": "UserProfile"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Create a new user profile\n\nCreates a new user profile using a UserProfile struct.\nValidates mandatory fields (full_name and contact_email) and saves the profile.\n\n# Arguments\n* `env` - Soroban environment\n* `user` - Address of the user whose profile is being created\n* `profile` - UserProfile struct containing all profile data\n\n# Returns\n* `UserProfile` - The created user profile\n\n# Panics\n* If mandatory fields (full_name, contact_email) are missing\n* If user profile already exists\n* If email format is invalid\n* If validation rules are violated\n\n# Events\nEmits a user creation event upon successful creation\n\n# Examples\n\n```rust\nlet profile = UserProfile {\nfull_name: \"John Doe\".try_into().unwrap(),\ncontact_email: \"john@example.com\".try_into().unwrap(),\nrole: UserRole::Student,\nstatus: UserStatus::Active,\ncountry: Some(\"US\".try_into().unwrap()),\n..Default::default()\n};\n\nlet created_profile = contract.create_user_profile(env, user_address, profile);\n```\n\n# Edge Cases\n\n* **Duplicate profile**: Will panic if user al",
+    "name": "create_user_profile",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "user",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "profile",
+        "value": {
+          "type": "custom",
+          "name": "UserProfile"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "custom",
+        "name": "UserProfile"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Edit an existing user profile\n\nUpdates an existing user profile with new values for allowed fields.\nOnly the user themselves or administrators can perform updates.\nEmail and role fields cannot be updated through this function.\n\n# Arguments\n* `env` - Soroban environment\n* `caller` - Address of the user performing the update\n* `user_id` - Address of the user whose profile is being updated\n* `updates` - ProfileUpdateParams containing fields to update\n\n# Returns\n* `UserProfile` - The updated user profile\n\n# Panics\n* If caller authentication fails\n* If user profile doesn't exist\n* If caller lacks permission to edit\n* If any field validation fails\n* If user is inactive\n\n# Events\nEmits a user update event upon successful profile update\n\n# Examples\n\n```rust\nlet updates = ProfileUpdateParams {\nfull_name: Some(\"Jane Doe\".try_into().unwrap()),\ncountry: Some(\"CA\".try_into().unwrap()),\nbio: Some(\"Updated bio\".try_into().unwrap()),\n..Default::default()\n};\n\nlet updated_profile = contract.edit_user_profile(env, caller_addres",
+    "name": "edit_user_profile",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "caller",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "user_id",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "updates",
+        "value": {
+          "type": "custom",
+          "name": "ProfileUpdateParams"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "custom",
+        "name": "UserProfile"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Check if an address has admin privileges.\n\nThis function is used by other contracts to verify admin status\nfor cross-contract authorization checks.\n\n# Arguments\n\n* `env` - The Soroban environment\n* `who` - The address to check for admin privileges\n\n# Returns\n\nReturns `true` if the address has admin privileges, `false` otherwise.\n\n# Examples\n\n```rust\n// Check if user is admin\nlet is_admin = contract.is_admin(env.clone(), user_address);\nif is_admin {\n// Perform admin operations\n}\n\n// Cross-contract admin check\nlet can_perform_action = contract.is_admin(env.clone(), caller_address);\n```\n\n# Edge Cases\n\n* **System not initialized**: Returns `false` if admin system hasn't been set up\n* **Non-existent user**: Returns `false` for addresses that don't exist\n* **Regular users**: Always returns `false` for non-admin users",
+    "name": "is_admin",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "who",
+        "value": {
+          "type": "address"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "bool"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Delete (deactivate) a user account\n\nPerforms a soft delete by marking the user as inactive instead of permanent deletion.\nOnly admins or the user themselves can trigger deletion.\n\n# Arguments\n* `env` - Soroban environment\n* `caller` - Address performing the deletion (must be admin or the user themselves)\n* `user_id` - Address of the user to be deactivated\n\n# Panics\n* If caller authentication fails\n* If user doesn't exist\n* If caller is neither admin nor the user themselves\n* If user is already inactive\n\n# Events\nEmits a user deactivation event upon successful deletion\n\n# Examples\n\n```rust\n// User deleting their own account\ncontract.delete_user(env.clone(), user_address, user_address);\n\n// Admin deleting another user's account\ncontract.delete_user(env.clone(), admin_address, user_to_delete);\n```\n\n# Edge Cases\n\n* **Already inactive**: Will panic if trying to delete an already inactive user\n* **Permission denied**: Non-admin users can only delete their own accounts\n* **Data preservation**: User data is preserved",
+    "name": "delete_user",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "caller",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "user_id",
+        "value": {
+          "type": "address"
+        }
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "doc": "Lists all registered users with pagination and filtering (admin-only)\n\n# Arguments\n* `env` - Soroban environment\n* `caller` - Address performing the call (must be admin)\n* `page` - Zero-based page index\n* `page_size` - Number of items per page (must be > 0)\n* `role_filter` - Optional role filter\n* `country_filter` - Optional country filter\n* `status_filter` - Optional status filter\n\n# Returns\n* `Vec<LightProfile>` - Filtered and paginated lightweight user profiles\n\n# Panics\n* If caller is not an admin\n* If page_size is 0 or exceeds maximum allowed\n* If system is not initialized\n\n# Examples\n\n```rust\n// Get first page with 10 users\nlet users = contract.list_all_users(\nenv.clone(),\nadmin_address,\n0,  // page 0\n10, // page size\nNone, None, None // no filters\n);\n\n// Filter by role and country\nlet students = contract.list_all_users(\nenv.clone(),\nadmin_address,\n0, 20,\nSome(UserRole::Student),\nSome(\"US\".try_into().unwrap()),\nNone\n);\n```\n\n# Edge Cases\n\n* **Empty results**: Returns empty vector if no users match filter",
+    "name": "list_all_users",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "caller",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "page",
+        "value": {
+          "type": "u32"
+        }
+      },
+      {
+        "doc": "",
+        "name": "page_size",
+        "value": {
+          "type": "u32"
+        }
+      },
+      {
+        "doc": "",
+        "name": "role_filter",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "custom",
+            "name": "UserRole"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "country_filter",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "status_filter",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "custom",
+            "name": "UserStatus"
+          }
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "vec",
+        "element": {
+          "type": "custom",
+          "name": "LightProfile"
+        }
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Lists all registered users with advanced filtering including text search (admin-only).\n\nThis is the new version that supports text search functionality.\n\n# Arguments\n* `env` - Soroban environment\n* `caller` - Address performing the call (must be admin)\n* `page` - Zero-based page index\n* `page_size` - Number of items per page\n* `role_filter` - Optional role filter\n* `country_filter` - Optional country filter\n* `status_filter` - Optional status filter\n* `search_text` - Optional text search in name and profession\n\n# Returns\n* `Vec<LightProfile>` - Filtered and paginated lightweight user profiles",
+    "name": "list_all_users_advanced",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "caller",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "page",
+        "value": {
+          "type": "u32"
+        }
+      },
+      {
+        "doc": "",
+        "name": "page_size",
+        "value": {
+          "type": "u32"
+        }
+      },
+      {
+        "doc": "",
+        "name": "role_filter",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "custom",
+            "name": "UserRole"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "country_filter",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "status_filter",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "custom",
+            "name": "UserStatus"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "search_text",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "vec",
+        "element": {
+          "type": "custom",
+          "name": "LightProfile"
+        }
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Lists all registered users with cursor-based pagination and filtering (admin-only)\n\nThis function implements efficient cursor-based pagination to avoid gas limit issues\nwhen dealing with large datasets. It returns a PaginatedResult with metadata for\nefficient navigation.\n\n# Arguments\n* `env` - Soroban environment\n* `caller` - Address performing the call (must be admin)\n* `pagination` - Pagination parameters including cursor and limit\n* `role_filter` - Optional filter for user role\n* `status_filter` - Optional filter for user status\n\n# Returns\n* `PaginatedLightProfiles` - Paginated results with navigation metadata",
+    "name": "list_all_users_cursor",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "caller",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "pagination",
+        "value": {
+          "type": "custom",
+          "name": "PaginationParams"
+        }
+      },
+      {
+        "doc": "",
+        "name": "role_filter",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "custom",
+            "name": "UserRole"
+          }
+        }
+      },
+      {
+        "doc": "",
+        "name": "status_filter",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "custom",
+            "name": "UserStatus"
+          }
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "custom",
+        "name": "PaginatedLightProfiles"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Initialize the admin system (one-time only)\n\n# Arguments\n* `env` - Soroban environment\n* `initializer` - Address performing the initialization\n* `super_admin` - Address that will become the super admin\n* `max_page_size` - Optional maximum page size (default: 100, max: 1000)\n\n# Returns\n* `AdminConfig` - The created admin configuration\n\n# Panics\n* If system has already been initialized\n* If max_page_size exceeds 1000\n\n# Examples\n\n```rust\n// Initialize with default settings\nlet config = contract.initialize_system(\nenv.clone(),\ndeployer_address,\nsuper_admin_address,\nNone\n);\n\n// Initialize with custom page size\nlet config = contract.initialize_system(\nenv.clone(),\ndeployer_address,\nsuper_admin_address,\nSome(500)\n);\n```\n\n# Edge Cases\n\n* **Double initialization**: Will panic if called more than once\n* **Invalid page size**: Will panic if max_page_size > 1000\n* **Super admin privileges**: Super admin cannot be removed after initialization",
+    "name": "initialize_system",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "initializer",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "super_admin",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "max_page_size",
+        "value": {
+          "type": "option",
+          "value": {
+            "type": "u32"
+          }
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "custom",
+        "name": "AdminConfig"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Add a new admin (super admin only)\n\n# Arguments\n* `env` - Soroban environment\n* `caller` - Address performing the call (must be super admin)\n* `new_admin` - Address to be added as admin\n\n# Panics\n* If caller is not the super admin\n* If system is not initialized\n* If new_admin is already an admin\n\n# Examples\n\n```rust\n// Super admin adding a new admin\ncontract.add_admin(env.clone(), super_admin_address, new_admin_address);\n```\n\n# Edge Cases\n\n* **Already admin**: Will panic if trying to add an existing admin\n* **Self-promotion**: Super admin cannot add themselves (redundant)\n* **Non-existent user**: Can add admin privileges to any address",
+    "name": "add_admin",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "caller",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "new_admin",
+        "value": {
+          "type": "address"
+        }
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "doc": "Remove an admin (super admin only)\n\n# Arguments\n* `env` - Soroban environment\n* `caller` - Address performing the call (must be super admin)\n* `admin_to_remove` - Address to be removed from admins\n\n# Panics\n* If caller is not the super admin\n* If system is not initialized\n* If admin_to_remove is not an admin\n* If trying to remove the super admin\n\n# Examples\n\n```rust\n// Super admin removing another admin\ncontract.remove_admin(env.clone(), super_admin_address, admin_to_remove);\n```\n\n# Edge Cases\n\n* **Super admin protection**: Cannot remove the super admin\n* **Non-admin**: Will panic if trying to remove a non-admin address\n* **Self-removal**: Super admin cannot remove themselves",
+    "name": "remove_admin",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "caller",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "admin_to_remove",
+        "value": {
+          "type": "address"
+        }
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "doc": "Get list of all admins (admin only)\n\n# Arguments\n* `env` - Soroban environment\n* `caller` - Address performing the call (must be admin)\n\n# Returns\n* `Vec<Address>` - List of all admin addresses including super admin\n\n# Panics\n* If caller is not an admin\n* If system is not initialized\n\n# Examples\n\n```rust\n// Get all admin addresses\nlet admins = contract.get_admins(env.clone(), admin_address);\nfor admin in admins {\n// Process each admin address\n}\n```\n\n# Edge Cases\n\n* **Empty list**: Returns vector with only super admin if no other admins exist\n* **Admin only**: Only admins can view the admin list\n* **Order**: Super admin is typically first in the list",
+    "name": "get_admins",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "caller",
+        "value": {
+          "type": "address"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "vec",
+        "element": {
+          "type": "address"
+        }
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Check if the system is initialized\n\n# Arguments\n* `env` - Soroban environment\n\n# Returns\n* `bool` - True if system is initialized\n\n# Examples\n\n```rust\n// Check if admin system is ready\nlet is_initialized = contract.is_system_initialized(env.clone());\nif !is_initialized {\n// Initialize the system first\ncontract.initialize_system(env, deployer, super_admin, None);\n}\n```\n\n# Edge Cases\n\n* **Fresh deployment**: Returns `false` for newly deployed contracts\n* **Public access**: Anyone can check initialization status\n* **One-time check**: Once initialized, always returns `true`",
+    "name": "is_system_initialized",
+    "inputs": [],
+    "outputs": [
+      {
+        "type": "bool"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Get the current contract version\n\nReturns the semantic version of the current contract deployment.\nThis is useful for tracking contract upgrades and compatibility.\n\n# Arguments\n* `_env` - The Soroban environment (unused)\n\n# Returns\n* `String` - The current contract version",
+    "name": "get_contract_version",
+    "inputs": [],
+    "outputs": [
+      {
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Export all user data for backup purposes (admin only)\n\nThis function exports all user profiles and administrative data\nfor backup and recovery purposes. Only admins can perform this operation.\n\n# Arguments\n* `env` - Soroban environment\n* `caller` - Address performing the export (must be admin)\n\n# Returns\n* `UserBackupData` - Complete backup data structure\n\n# Panics\n* If caller is not an admin\n* If system is not initialized",
+    "name": "export_user_data",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "caller",
+        "value": {
+          "type": "address"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "custom",
+        "name": "UserBackupData"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "doc": "Import user data from backup (admin only)\n\nThis function imports user data from a backup structure.\nOnly admins can perform this operation. This will overwrite existing data.\n\n# Arguments\n* `env` - Soroban environment\n* `caller` - Address performing the import (must be admin)\n* `backup_data` - Backup data structure to import\n\n# Returns\n* `u32` - Number of users imported\n\n# Panics\n* If caller is not an admin\n* If backup data is invalid\n* If import operation fails",
+    "name": "import_user_data",
+    "inputs": [
+      {
+        "doc": "",
+        "name": "caller",
+        "value": {
+          "type": "address"
+        }
+      },
+      {
+        "doc": "",
+        "name": "backup_data",
+        "value": {
+          "type": "custom",
+          "name": "UserBackupData"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "type": "u32"
+      }
+    ]
+  }
+]
