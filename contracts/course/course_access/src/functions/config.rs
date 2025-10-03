@@ -15,7 +15,19 @@ const KEY_INIT: &str = "init";
 
 const KEY_OWNER: &str = "owner";
 
-
+/// Initializes the contract, setting the owner and dependent contract addresses.
+/// This function can only be called once. It sets an initialization flag to prevent re-runs.
+///
+/// # Arguments
+///
+/// * `env` - The Soroban environment object.
+/// * `caller` - The address of the contract initializer, who will be set as the owner.
+/// * `user_mgmt_addr` - The address of the User Management contract.
+/// * `course_registry_addr` - The address of the Course Registry contract.
+///
+/// # Panics
+///
+/// * This function will call `handle_error` with `Error::Initialized` if the contract has already been initialized.
 pub fn initialize(
     env: Env,
     caller: Address,
@@ -44,7 +56,20 @@ pub fn initialize(
         .publish((INIT_EVENT,), (caller, user_mgmt_addr, course_registry_addr));
 }
 
-
+/// Updates the addresses of the User Management and Course Registry contracts.
+/// This function can only be called by the contract owner.
+///
+/// # Arguments
+///
+/// * `env` - The Soroban environment object.
+/// * `caller` - The address of the caller. Must be the current owner of the contract.
+/// * `user_mgmt_addr` - The new address for the User Management contract.
+/// * `course_registry_addr` - The new address for the Course Registry contract.
+///
+/// # Panics
+///
+/// * This function will panic with the message "not initialized" if the contract has not been initialized.
+/// * This function will panic with the message "only owner" if the caller is not the owner.
 pub fn set_contract_addrs(
     env: Env,
     caller: Address,
