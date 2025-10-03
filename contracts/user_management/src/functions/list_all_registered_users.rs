@@ -16,7 +16,19 @@ fn string_contains(haystack: &String, needle: &String) -> bool {
 /// Security constants
 const MAX_PAGE_SIZE_ABSOLUTE: u32 = 1000;
 
-
+/// Lists all registered users with pagination and filtering (admin-only).
+///
+/// # Arguments
+///
+/// * `env` - Soroban environment.
+/// * `caller` - Address of the caller (must be admin).
+/// * `page` - The page number for pagination.
+/// * `page_size` - The size of each page.
+/// * `filter` - Optional filter criteria for users.
+///
+/// # Returns
+///
+/// * `Vec<LightProfile>` - A vector of lightweight user profiles.
 pub fn list_all_users(
     env: Env,
     caller: Address,
@@ -81,7 +93,7 @@ pub fn list_all_users(
         }
     }
 
-    let total_filtered = filtered_profiles.len();
+    let total_filtered: u32 = filtered_profiles.len();
     if total_filtered == 0 {
         return Vec::new(&env);
     }
@@ -120,7 +132,15 @@ pub fn list_all_users(
     result
 }
 
-/// Checks whether the system is properly initialized
+/// Checks whether the system is properly initialized.
+///
+/// # Arguments
+///
+/// * `env` - Soroban environment.
+///
+/// # Returns
+///
+/// * `bool` - True if the system is initialized, otherwise false.
 fn is_system_initialized(env: &Env) -> bool {
     if let Some(config) = env
         .storage()
@@ -133,7 +153,15 @@ fn is_system_initialized(env: &Env) -> bool {
     }
 }
 
-/// Gets the admin configuration with defaults
+/// Gets the admin configuration with defaults.
+///
+/// # Arguments
+///
+/// * `env` - Soroban environment.
+///
+/// # Returns
+///
+/// * `AdminConfig` - The admin configuration.
 fn get_admin_config(env: &Env) -> AdminConfig {
     env.storage()
         .persistent()
@@ -141,7 +169,16 @@ fn get_admin_config(env: &Env) -> AdminConfig {
         .unwrap_or_else(|| handle_error(env, Error::SystemNotInitialized))
 }
 
-/// Checks whether the caller is an admin with enhanced security
+/// Checks whether the caller is an admin with enhanced security.
+///
+/// # Arguments
+///
+/// * `env` - Soroban environment.
+/// * `who` - Address of the caller.
+///
+/// # Returns
+///
+/// * `bool` - True if the caller is an admin, otherwise false.
 fn is_admin(env: &Env, who: &Address) -> bool {
     // First check if system is initialized
     if !is_system_initialized(env) {
@@ -166,7 +203,16 @@ fn is_admin(env: &Env, who: &Address) -> bool {
     }
 }
 
-/// Checks if a profile matches the given filter criteria
+/// Checks if a profile matches the given filter criteria.
+///
+/// # Arguments
+///
+/// * `profile` - The user profile to check.
+/// * `filter` - Optional filter criteria.
+///
+/// # Returns
+///
+/// * `bool` - True if the profile matches the filter, otherwise false.
 fn matches_filter(
     profile: &LightProfile,
     filter: &Option<UserFilter>,
@@ -213,7 +259,17 @@ fn matches_filter(
     true
 }
 
-/// Validates and sanitizes input parameters
+/// Validates and sanitizes input parameters.
+///
+/// # Arguments
+///
+/// * `page_size` - The size of the page to validate.
+/// * `filter` - Optional filter criteria.
+/// * `config` - The admin configuration to use for validation.
+///
+/// # Returns
+///
+/// * `Result<(), &'static str>` - Ok if validation passes, Err with a message otherwise.
 fn validate_input(
     page_size: u32,
     filter: &Option<UserFilter>,
@@ -279,7 +335,7 @@ pub fn list_all_users_cursor(
     }
 
     // Get admin configuration
-    let config = get_admin_config(&env);
+    let config: AdminConfig = get_admin_config(&env);
 
     // Authorization: only admins can call
     if !is_admin(&env, &caller) {
@@ -308,17 +364,17 @@ pub fn list_all_users_cursor(
     }
 
     // Find the starting index based on cursor
-    let start_index = if let Some(cursor) = &pagination.cursor {
+    let start_index: u32 = if let Some(cursor) = &pagination.cursor {
         find_address_index(&users_index, cursor).unwrap_or(0)
     } else {
         0
     };
 
     // Collect filtered profiles starting from the cursor position
-    let mut result_data = Vec::new(&env);
-    let mut processed_count = 0;
+    let mut result_data: Vec<LightProfile> = Vec::new(&env);
+    let mut processed_count: u32 = 0;
     let mut next_cursor: Option<Address> = None;
-    let mut total_matching = 0u32;
+    let mut total_matching: u32 = 0u32;
 
     for i in start_index..users_index.len() {
         if processed_count >= pagination.limit {
@@ -361,11 +417,11 @@ pub fn list_all_users_cursor(
     }
 
     // Determine if there are more pages
-    let has_more = if next_cursor.is_some() {
+    let has_more: bool = if next_cursor.is_some() {
         true
     } else {
         // Check if there are more items after the current batch
-        let mut found_more = false;
+        let mut found_more: bool = false;
         for i in (start_index + processed_count)..users_index.len() {
             if let Some(addr) = users_index.get(i) {
                 if let Some(profile) = env
@@ -399,7 +455,14 @@ pub fn list_all_users_cursor(
 
 /// Finds the index of an address in the users index vector.
 ///
-/// Returns the index if found, None otherwise.
+/// # Arguments
+///
+/// * `users_index` - A vector of user addresses.
+/// * `target` - The address to find.
+///
+/// # Returns
+///
+/// * `Option<u32>` - The index if found, None otherwise.
 fn find_address_index(users_index: &Vec<Address>, target: &Address) -> Option<u32> {
     for i in 0..users_index.len() {
         if let Some(addr) = users_index.get(i) {
@@ -412,12 +475,21 @@ fn find_address_index(users_index: &Vec<Address>, target: &Address) -> Option<u3
 }
 
 /// Validates pagination parameters for cursor-based pagination.
+///
+/// # Arguments
+///
+/// * `pagination` - Pagination parameters to validate.
+/// * `config` - The admin configuration to use for validation.
+///
+/// # Returns
+///
+/// * `Result<(), &'static str>` - Ok if validation passes, Err with a message otherwise.
 fn validate_pagination_params(
     pagination: &PaginationParams,
     config: &AdminConfig,
 ) -> Result<(), &'static str> {
     // Validate limit
-    let max_allowed = config.max_page_size.min(MAX_PAGE_SIZE_ABSOLUTE);
+    let max_allowed: u32 = config.max_page_size.min(MAX_PAGE_SIZE_ABSOLUTE);
     if pagination.limit == 0 {
         return Err("limit must be greater than 0");
     }
