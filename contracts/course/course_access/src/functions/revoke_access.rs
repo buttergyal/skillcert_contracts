@@ -8,7 +8,22 @@ use crate::error::{Error, handle_error};
 
 const COURSE_ACCESS_REVOKE_EVENT: Symbol = symbol_short!("crsAcRvk");
 
-/// Revoke access for a specific user from a course
+/// Revokes a user's access to a specific course and updates all related storage entries.
+///
+/// This function removes the course access entry for the specified user, updates the user's
+/// course list by removing the course, and updates the course's user list by removing the user.
+/// It also publishes an event to notify about the access revocation.
+///
+/// # Arguments
+///
+/// * `env` - The Soroban environment for accessing storage and publishing events.
+/// * `course_id` - The unique identifier of the course from which access is being revoked.
+/// * `user` - The address of the user whose access is being revoked.
+///
+/// # Returns
+///
+/// * `bool` - Returns `true` if the access was successfully revoked (entry existed and was removed),
+///   or `false` if no access entry was found for the user-course combination.
 pub fn course_access_revoke_access(env: Env, course_id: String, user: Address) -> bool {
     // Validate input parameters
     if course_id.is_empty() {
