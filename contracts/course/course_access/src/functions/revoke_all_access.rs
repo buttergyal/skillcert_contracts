@@ -16,6 +16,17 @@ const COURSES_KEY: Symbol = symbol_short!("courses");
 const REVOKE_ALL_EVENT: Symbol = symbol_short!("revokeAll");
 
 
+/// Description: Revokes all user access to a specific course. Only callable by an admin or the course creator.
+///
+/// # Arguments
+///
+/// * env - The contract environment.
+/// * caller - The address of the caller requesting the revoke operation.
+/// * course_id - The unique identifier of the course for which access is being revoked.
+///
+/// # Returns
+///
+/// * Result<u32, Error> - Returns the number of users whose access was revoked (Ok), or an error if the operation fails (Err).
 pub fn revoke_all_access(env: Env, caller: Address, course_id: String) -> u32 {
     caller.require_auth();
 
